@@ -1,0 +1,30 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Order.OrderListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:orderVm="clr-namespace:DongKeJi.PerformanceRecord.ViewModel.Order"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:order="clr-namespace:DongKeJi.PerformanceRecord.ViewModel.Performance.Order"
+    xmlns:order1="clr-namespace:DongKeJi.Work.UI.View.Order"
+    d:DataContext="{d:DesignInstance orderVm:OrderServiceViewModel,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <ui:ListView
+        d:ItemsSource="{d:SampleData ItemCount=5}"
+        ItemsSource="{Binding Items}"
+        SelectedItem="{Binding Selected}">
+
+        <ui:ListView.ItemTemplate>
+            <DataTemplate DataType="order:OrderViewModel">
+
+                <order1:OrderSimpleView DataContext="{Binding}" IsHitTestVisible="False" />
+
+            </DataTemplate>
+        </ui:ListView.ItemTemplate>
+
+    </ui:ListView>
+
+</UserControl>

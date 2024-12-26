@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="UI\View\Consume\**" />
+    <Compile Remove="UI\View\Customer\**" />
+    <Compile Remove="UI\View\Order\**" />
+    <Compile Remove="UI\View\StaffPosition\**" />
+    <Compile Remove="UI\View\Staff\**" />
+    <EmbeddedResource Remove="UI\View\Consume\**" />
+    <EmbeddedResource Remove="UI\View\Customer\**" />
+    <EmbeddedResource Remove="UI\View\Order\**" />
+    <EmbeddedResource Remove="UI\View\StaffPosition\**" />
+    <EmbeddedResource Remove="UI\View\Staff\**" />
+    <None Remove="UI\View\Consume\**" />
+    <None Remove="UI\View\Customer\**" />
+    <None Remove="UI\View\Order\**" />
+    <None Remove="UI\View\StaffPosition\**" />
+    <None Remove="UI\View\Staff\**" />
+    <Page Remove="UI\View\Consume\**" />
+    <Page Remove="UI\View\Customer\**" />
+    <Page Remove="UI\View\Order\**" />
+    <Page Remove="UI\View\StaffPosition\**" />
+    <Page Remove="UI\View\Staff\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DongKeJi\DongKeJi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UI\View\Common\Staff\" />
+  </ItemGroup>
+
+</Project>

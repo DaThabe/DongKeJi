@@ -1,0 +1,86 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Order.OrderSimpleView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    d:DataContext="{d:DesignInstance local:OrderSimpleView,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+
+
+    <ui:CardAction>
+
+        <ui:CardAction.Content>
+
+            <StackPanel>
+
+                <StackPanel.Resources>
+
+                    <!--  混合  -->
+                    <DataTemplate x:Key="mixing" DataType="schemeVM:MixingSchemeViewModel">
+
+                        <ui:TextBlock
+                            FontTypography="Caption"
+                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                            TextWrapping="WrapWithOverflow">
+                            <Run Text="{Binding TotalDays, StringFormat='{}{0}天'}" />
+                            <Run Text="{Binding TotalCounts, StringFormat='{}{0}张'}" />
+                        </ui:TextBlock>
+
+                    </DataTemplate>
+
+                    <!--  计时  -->
+                    <DataTemplate x:Key="timing" DataType="schemeVM:TimingSchemeViewModel">
+
+                        <ui:TextBlock
+                            FontTypography="Caption"
+                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                            TextWrapping="WrapWithOverflow">
+                            <Run Text="{Binding TotalDays, StringFormat='{}{0}天'}" />
+                        </ui:TextBlock>
+
+                    </DataTemplate>
+
+                    <!--  计数  -->
+                    <DataTemplate x:Key="counting" DataType="schemeVM:CountingSchemeViewModel">
+
+                        <ui:TextBlock
+                            FontTypography="Caption"
+                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                            TextWrapping="WrapWithOverflow">
+                            <Run d:Text="张数" Text="{Binding TotalCounts, StringFormat='{}{0}张'}" />
+                        </ui:TextBlock>
+
+                    </DataTemplate>
+
+
+                    <templateSelector:OrderDataTemplateSelector
+                        x:Key="OrderDataTemplateSelector"
+                        Couting="{StaticResource counting}"
+                        Mixing="{StaticResource mixing}"
+                        Timing="{StaticResource timing}" />
+
+                </StackPanel.Resources>
+
+
+                <ui:TextBlock
+                    d:Text="机构名称"
+                    FontTypography="BodyStrong"
+                    Text="{Binding Name}" />
+
+                <ContentControl
+                    d:Content="{d:SampleData ItemCount=1}"
+                    Content="{Binding}"
+                    ContentTemplateSelector="{StaticResource OrderDataTemplateSelector}" />
+
+            </StackPanel>
+
+        </ui:CardAction.Content>
+
+    </ui:CardAction>
+
+</UserControl>

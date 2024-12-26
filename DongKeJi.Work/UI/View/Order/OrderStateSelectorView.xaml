@@ -1,0 +1,36 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Order.OrderStateSelectorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:order1="clr-namespace:DongKeJi.PerformanceRecord.ViewModel.Performance.Order"
+    xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
+    xmlns:order="clr-namespace:DongKeJi.Work.Model.Entity.Order"
+    d:DataContext="{d:DesignInstance order1:OrderStateSelectorViewModel}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converter:OrderStateToSymbolConverter x:Key="OrderStateToSymbolConverter" />
+        <converter:OrderStateToNameConverter x:Key="OrderStateToNameConverter" />
+    </UserControl.Resources>
+
+
+    <ComboBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}">
+
+        <ComboBox.ItemTemplate>
+            <DataTemplate DataType="{x:Type order:OrderState}">
+
+                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+
+                    <ui:SymbolIcon Symbol="{Binding Converter={StaticResource OrderStateToSymbolConverter}}" />
+                    <ui:TextBlock Text="{Binding Converter={StaticResource OrderStateToNameConverter}}" />
+
+                </StackPanel>
+
+            </DataTemplate>
+        </ComboBox.ItemTemplate>
+    </ComboBox>
+
+</UserControl>

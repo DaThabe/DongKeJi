@@ -1,0 +1,32 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Staff.UserStaffSimpleView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:DongKeJi.PerformanceRecord.ViewModel.Staff"
+    d:DataContext="{d:DesignInstance vm:UserStaffViewModel,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <ui:CardAction Icon="{ui:SymbolIcon Symbol=People24}">
+
+        <ui:CardAction.Content>
+
+            <StackPanel Orientation="Vertical">
+
+                <ui:TextBlock d:Text="用户名" Text="{Binding User.Name}" />
+                <ui:TextBlock
+                    d:Text="员工id"
+                    Appearance="Disabled"
+                    FontSize="8"
+                    Text="{Binding Staff.Id}" />
+
+            </StackPanel>
+
+        </ui:CardAction.Content>
+
+    </ui:CardAction>
+
+</UserControl>
