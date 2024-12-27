@@ -1,12 +1,12 @@
 ﻿namespace DongKeJi.Common.ViewModel;
 
 /// <summary>
-/// 实体 VM
+///     实体 VM
 /// </summary>
 public class IdentifiableViewModel : ViewModelBase, IIdentifiable
 {
     /// <summary>
-    /// id
+    ///     id
     /// </summary>
     public Guid Id { get; init; } = Guid.NewGuid();
 

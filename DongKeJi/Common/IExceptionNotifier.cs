@@ -1,13 +1,12 @@
 ﻿namespace DongKeJi.Common;
 
-
 /// <summary>
-/// 提供异常通知功能
+///     提供异常通知功能
 /// </summary>
 public interface IExceptionCallback
 {
     /// <summary>
-    /// 异常回调
+    ///     异常回调
     /// </summary>
     event Action<Exception>? ExceptionCallback;
 }

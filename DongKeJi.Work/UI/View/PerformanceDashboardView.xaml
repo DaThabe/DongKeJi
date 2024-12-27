@@ -12,9 +12,7 @@
     xmlns:dkjui="clr-namespace:DongKeJi.Common.UI;assembly=DongKeJi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Common.Order"
-    xmlns:orderEntity="clr-namespace:DongKeJi.Work.Model.Entity.Order"
     xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Common.Order"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:view="clr-namespace:DongKeJi.Common.UI.View;assembly=DongKeJi"
@@ -26,8 +24,6 @@
 
     <view:AutoViewModelView.Resources>
 
-        <converter:OrderStateToSymbolConverter x:Key="OrderStateToSymbolConverter" />
-        <converter:OrderStateToNameConverter x:Key="OrderStateToNameConverter" />
         <converter:OrderTypeToSymbolConverter x:Key="OrderTypeToSymbolConverter" />
         <converter1:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
 
@@ -109,7 +105,7 @@
 
                             <templateSelector:OrderDataTemplateSelector
                                 x:Key="OrderDataTemplateSelector"
-                                Couting="{StaticResource Counting}"
+                                Counting="{StaticResource Counting}"
                                 Mixing="{StaticResource MixingOrder}"
                                 Timing="{StaticResource Timing}" />
 
@@ -207,7 +203,7 @@
                     <!--  划扣模板选择器  -->
                     <templateSelector:ConsumeDataTemplateSelector
                         x:Key="ConsumeTemplateSelector"
-                        Couting="{StaticResource CountingConsume}"
+                        Counting="{StaticResource CountingConsume}"
                         Mixing="{StaticResource MixingConsume}"
                         Timing="{StaticResource TimingConsume}" />
 
@@ -303,13 +299,13 @@
 
                         <ui:CardControl Header="类型">
                             <ui:CardControl.Content>
-                                <order:OrderStateSelectorView DataContext="{Binding Order}" />
+                                <order:OrderStateComboBox DataContext="{Binding Order}" />
                             </ui:CardControl.Content>
                         </ui:CardControl>
 
                         <ui:CardControl Header="状态">
                             <ui:CardControl.Content>
-                                <order:OrderStateSelectorView DataContext="{Binding Order}" />
+                                <order:OrderStateComboBox DataContext="{Binding Order}" />
                             </ui:CardControl.Content>
                         </ui:CardControl>
 
@@ -343,7 +339,8 @@
         <!--  分界线  -->
         <GridSplitter
             Grid.Column="1"
-            Width="5"
+            Width="2"
+            Margin="3"
             HorizontalAlignment="Stretch"
             Background="{DynamicResource StripedBackgroundBrush}"
             DockPanel.Dock="Left" />
@@ -377,7 +374,7 @@
                     <StackPanel Orientation="Horizontal">
 
                         <!--  状态选择  -->
-                        <order:OrderStateSelectorView DataContext="{Binding Order}" />
+                        <order:OrderStateComboBox DataContext="{Binding Order}" />
 
                         <!--  新增任务  -->
                         <ui:Button

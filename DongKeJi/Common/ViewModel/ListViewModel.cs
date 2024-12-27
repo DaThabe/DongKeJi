@@ -4,33 +4,25 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace DongKeJi.Common.ViewModel;
 
 /// <summary>
-/// 列表VM
+///     列表VM
 /// </summary>
 public partial class ListViewModel<TViewModel> : ViewModelBase
 {
     /// <summary>
-    /// 选中了新的元素
+    ///     是否是空的
     /// </summary>
-    public event Action<TViewModel?>? SelectedChanged;
+    [ObservableProperty] private bool _isEmpty = true;
 
-    
-    /// <summary>
-    /// 所有元素
-    /// </summary>
-    [ObservableProperty]
-    private ObservableCollection<TViewModel> _items;
 
     /// <summary>
-    /// 是否是空的
+    ///     所有元素
     /// </summary>
-    [ObservableProperty]
-    private bool _isEmpty = true;
+    [ObservableProperty] private ObservableCollection<TViewModel> _items;
 
     /// <summary>
-    /// 当前选中的
+    ///     当前选中的
     /// </summary>
-    [ObservableProperty]
-    private TViewModel? _selected;
+    [ObservableProperty] private TViewModel? _selected;
 
 
     /// <inheritdoc />
@@ -50,6 +42,11 @@ public partial class ListViewModel<TViewModel> : ViewModelBase
         Selected = Items.FirstOrDefault();
     }
 
+    /// <summary>
+    ///     选中了新的元素
+    /// </summary>
+    public event Action<TViewModel?>? SelectedChanged;
+
     public void Clear()
     {
         Items.Clear();
@@ -63,10 +60,7 @@ public partial class ListViewModel<TViewModel> : ViewModelBase
         IsEmpty = value.Count <= 0;
         Selected = value.FirstOrDefault();
 
-        value.CollectionChanged += (sender, e) =>
-        {
-            IsEmpty = Items.Count <= 0;
-        };
+        value.CollectionChanged += (sender, e) => { IsEmpty = Items.Count <= 0; };
     }
 
     partial void OnSelectedChanged(TViewModel? value)

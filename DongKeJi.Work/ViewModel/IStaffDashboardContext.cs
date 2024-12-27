@@ -8,5 +8,5 @@ namespace DongKeJi.Work.ViewModel;
 /// </summary>
 public interface IStaffDashboardContext :
     IUserContext,
-    IStaffContext, 
+    IStaffContext,
     IStaffPositionContext;

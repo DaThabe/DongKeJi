@@ -8,8 +8,6 @@ namespace DongKeJi.Work.ViewModel.Common.Order;
 /// </summary>
 public partial class CountingOrderViewModel : OrderViewModel
 {
-    public override OrderType Type => OrderType.Counting;
-
     /// <summary>
     ///     初始张数
     /// </summary>
@@ -19,4 +17,6 @@ public partial class CountingOrderViewModel : OrderViewModel
     ///     总张数
     /// </summary>
     [ObservableProperty] private double _totalCounts;
+
+    public override OrderType Type => OrderType.Counting;
 }

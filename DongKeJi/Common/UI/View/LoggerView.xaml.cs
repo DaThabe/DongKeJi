@@ -3,7 +3,7 @@
 namespace DongKeJi.Common.UI.View;
 
 /// <summary>
-/// LoggerView.xaml 的交互逻辑
+///     LoggerView.xaml 的交互逻辑
 /// </summary>
 public partial class LoggerView : UserControl
 {

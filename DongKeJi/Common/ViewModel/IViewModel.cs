@@ -3,17 +3,16 @@
 namespace DongKeJi.Common.ViewModel;
 
 /// <summary>
-/// 视图模型接口
+///     视图模型接口
 /// </summary>
-public interface IViewModel : INotifyPropertyChanged, INotifyPropertyChanging
-{
-
-}
+public interface IViewModel :
+    INotifyPropertyChanged,
+    INotifyPropertyChanging;
 
 public static class ViewModelExtensions
 {
     /// <summary>
-    /// 注册回调, 仅匹配指定名称
+    ///     注册回调, 仅匹配指定名称
     /// </summary>
     /// <typeparam name="TViewModel"></typeparam>
     /// <param name="vm"></param>
@@ -28,7 +27,7 @@ public static class ViewModelExtensions
     }
 
     /// <summary>
-    /// 注册回调, 仅匹配指定名称
+    ///     注册回调, 仅匹配指定名称
     /// </summary>
     /// <typeparam name="TViewModel"></typeparam>
     /// <param name="vm"></param>
@@ -44,7 +43,7 @@ public static class ViewModelExtensions
 
 
     /// <summary>
-    /// 注册回调, 自定义过滤器
+    ///     注册回调, 自定义过滤器
     /// </summary>
     /// <typeparam name="TViewModel"></typeparam>
     /// <param name="vm"></param>
@@ -65,7 +64,7 @@ public static class ViewModelExtensions
     }
 
     /// <summary>
-    /// 注册回调, 自定义过滤器
+    ///     注册回调, 自定义过滤器
     /// </summary>
     /// <typeparam name="TViewModel"></typeparam>
     /// <param name="vm"></param>
@@ -87,7 +86,7 @@ public static class ViewModelExtensions
 
 
     /// <summary>
-    /// 注册回调
+    ///     注册回调
     /// </summary>
     /// <typeparam name="TViewModel"></typeparam>
     /// <param name="vm"></param>
@@ -96,16 +95,13 @@ public static class ViewModelExtensions
         Action<TViewModel, PropertyChangedEventArgs> callback)
         where TViewModel : IViewModel
     {
-        vm.PropertyChanged += (_, e) =>
-        {
-            callback.Invoke(vm, e);
-        };
+        vm.PropertyChanged += (_, e) => { callback.Invoke(vm, e); };
 
         return vm;
     }
 
     /// <summary>
-    /// 注册回调
+    ///     注册回调
     /// </summary>
     /// <typeparam name="TViewModel"></typeparam>
     /// <param name="vm"></param>
@@ -114,10 +110,7 @@ public static class ViewModelExtensions
         Action<TViewModel> callback)
         where TViewModel : IViewModel
     {
-        vm.PropertyChanged += (_, _) =>
-        {
-            callback.Invoke(vm);
-        };
+        vm.PropertyChanged += (_, _) => { callback.Invoke(vm); };
 
         return vm;
     }

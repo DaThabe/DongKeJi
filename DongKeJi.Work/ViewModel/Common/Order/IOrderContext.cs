@@ -1,7 +1,7 @@
 ﻿namespace DongKeJi.Work.ViewModel.Common.Order;
 
 /// <summary>
-/// 订单上下文
+///     订单上下文
 /// </summary>
 public interface IOrderContext
 {

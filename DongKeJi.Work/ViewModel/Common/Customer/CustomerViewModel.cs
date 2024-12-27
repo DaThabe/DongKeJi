@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DongKeJi.Common;
 using DongKeJi.Common.ViewModel;
 
 namespace DongKeJi.Work.ViewModel.Common.Customer;
@@ -9,15 +10,14 @@ namespace DongKeJi.Work.ViewModel.Common.Customer;
 public partial class CustomerViewModel : IdentifiableViewModel, IEmptyable<CustomerViewModel>
 {
     /// <summary>
-    ///     名称
-    /// </summary>
-    [ObservableProperty] private string _name = string.Empty;
-
-
-    /// <summary>
     ///     区域
     /// </summary>
     [ObservableProperty] private string? _area;
+
+    /// <summary>
+    ///     名称
+    /// </summary>
+    [ObservableProperty] private string _name = string.Empty;
 
 
     public bool IsEmpty => this == Empty;

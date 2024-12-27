@@ -6,7 +6,7 @@ namespace DongKeJi.Common.UI.View;
 public static class ContentControlExtensions
 {
     /// <summary>
-    /// 异步加载DataContext  (传入异步过程
+    ///     异步加载DataContext  (传入异步过程
     /// </summary>
     /// <param name="control"></param>
     /// <param name="dataContextGetterAsync"></param>
@@ -14,11 +14,11 @@ public static class ContentControlExtensions
     /// <param name="cancellation"></param>
     /// <returns></returns>
     public static async ValueTask<bool> LoadDataContextAsync(
-        this ContentControl control, 
+        this ContentControl control,
         Func<CancellationToken, Task<object>> dataContextGetterAsync,
         Action<Exception>? exceptionCallback = null,
         CancellationToken cancellation = default
-        )
+    )
     {
         //原始内容是否是框架元素   
         var tmpContent = control.Content;
@@ -45,7 +45,7 @@ public static class ContentControlExtensions
     }
 
     /// <summary>
-    /// 释放DataContext
+    ///     释放DataContext
     /// </summary>
     /// <param name="element"></param>
     public static object? ReleaseDataContext(this FrameworkElement element)

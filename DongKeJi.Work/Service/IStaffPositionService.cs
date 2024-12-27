@@ -82,7 +82,7 @@ public interface IStaffPositionService
 
 [Inject(ServiceLifetime.Transient, typeof(IStaffPositionService))]
 internal class StaffPositionService(
-    PerformanceRecordDbContext dbContext,
+    WorkDbContext dbContext,
     ILogger<StaffPositionService> logger,
     IMapper mapper
 ) : IStaffPositionService

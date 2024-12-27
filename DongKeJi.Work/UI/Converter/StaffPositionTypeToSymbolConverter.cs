@@ -12,11 +12,11 @@ namespace DongKeJi.Work.UI.Converter;
 /// </summary>
 internal class StaffPositionTypeToSymbolConverter : IValueConverter
 {
-    private static SymbolRegular Default { get; } = SymbolRegular.Empty;
+    private static SymbolRegular Default => SymbolRegular.Empty;
 
-    private static SymbolRegular Designer { get; } = SymbolRegular.DesignIdeas16;
+    private static SymbolRegular Designer => SymbolRegular.DesignIdeas16;
 
-    private static SymbolRegular Salesperson { get; } = SymbolRegular.BookmarkAdd24;
+    private static SymbolRegular Salesperson => SymbolRegular.BookmarkAdd24;
 
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -27,7 +27,7 @@ internal class StaffPositionTypeToSymbolConverter : IValueConverter
         {
             StaffPositionType.Designer => Designer,
             StaffPositionType.Salesperson => Salesperson,
-            _ => Default
+            _ => DependencyProperty.UnsetValue
         };
     }
 

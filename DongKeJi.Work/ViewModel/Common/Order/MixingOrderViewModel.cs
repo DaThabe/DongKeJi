@@ -8,8 +8,6 @@ namespace DongKeJi.Work.ViewModel.Common.Order;
 /// </summary>
 public partial class MixingOrderViewModel : OrderViewModel
 {
-    public override OrderType Type => OrderType.Mixing;
-
     /// <summary>
     ///     初始张数
     /// </summary>
@@ -30,4 +28,6 @@ public partial class MixingOrderViewModel : OrderViewModel
     ///     总天数
     /// </summary>
     [ObservableProperty] private double _totalDays;
+
+    public override OrderType Type => OrderType.Mixing;
 }

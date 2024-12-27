@@ -8,8 +8,6 @@ namespace DongKeJi.Work.ViewModel.Common.Order;
 /// </summary>
 public partial class TimingOrderViewModel : OrderViewModel
 {
-    public override OrderType Type => OrderType.Timing;
-
     /// <summary>
     ///     初始天数
     /// </summary>
@@ -20,4 +18,6 @@ public partial class TimingOrderViewModel : OrderViewModel
     ///     总天数
     /// </summary>
     [ObservableProperty] private double _totalDays;
+
+    public override OrderType Type => OrderType.Timing;
 }

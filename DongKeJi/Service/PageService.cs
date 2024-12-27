@@ -1,14 +1,13 @@
-using Microsoft.Extensions.Logging;
 using System.Windows;
 using DongKeJi.Common.Inject;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Wpf.Ui;
 
 namespace DongKeJi.Service;
 
-
 /// <summary>
-/// 页面服务实现
+///     页面服务实现
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IPageService))]
 internal class PageService(IServiceProvider services, ILogger<PageService> logger) : IPageService

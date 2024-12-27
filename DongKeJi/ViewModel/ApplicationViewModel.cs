@@ -6,32 +6,28 @@ using Wpf.Ui.Appearance;
 
 namespace DongKeJi.ViewModel;
 
-
 public partial class ApplicationViewModel : ObservableObject
 {
     private readonly IThemeService _themeService;
 
+    /// <summary>
+    ///     主题
+    /// </summary>
+    [ObservableProperty] private ApplicationTheme _theme;
+
 
     /// <summary>
-    /// 标题
+    ///     标题
     /// </summary>
-    [ObservableProperty] 
-    private string _title;
+    [ObservableProperty] private string _title;
 
     /// <summary>
-    /// 版本
+    ///     版本
     /// </summary>
-    [ObservableProperty] 
-    private Version _version;
-
-    /// <summary>
-    /// 主题
-    /// </summary>
-    [ObservableProperty] 
-    private ApplicationTheme _theme;
+    [ObservableProperty] private Version _version;
 
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public ApplicationViewModel(IThemeService themeService)
     {
         _themeService = themeService;

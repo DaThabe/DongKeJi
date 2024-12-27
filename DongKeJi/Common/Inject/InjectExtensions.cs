@@ -1,33 +1,29 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DongKeJi.Common.Inject;
 
-
 /// <summary>
-/// 注入
+///     注入
 /// </summary>
 public static class InjectExtensions
 {
     /// <summary>
-    /// 添加指定类型所在程序集的所有自动注入内容
+    ///     添加指定类型所在程序集的所有自动注入内容
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
     public static IServiceCollection AddAutoInject<T>(this IServiceCollection services)
     {
         var injectDescriptors = typeof(T).Assembly.GetInjectDescriptors();
-        
-        foreach (var i in injectDescriptors)
-        {
-            services.Add(i);
-        }
+
+        foreach (var i in injectDescriptors) services.Add(i);
 
         return services;
     }
 
     /// <summary>
-    /// 获取指定程序集的所有注入信息
+    ///     获取指定程序集的所有注入信息
     /// </summary>
     /// <param name="assembly"></param>
     /// <returns></returns>
@@ -62,7 +58,7 @@ public static class InjectExtensions
     }
 
     /// <summary>
-    /// 转为<see cref="ServiceDescriptor"/>
+    ///     转为<see cref="ServiceDescriptor" />
     /// </summary>
     /// <param name="inject"></param>
     /// <returns></returns>
@@ -72,19 +68,18 @@ public static class InjectExtensions
         if (inject.ServiceType is null)
         {
             if (inject.ServiceKey is null)
-            {
-                return new(inject.ImplementationType, inject.ImplementationType, inject.ServiceLifetime);
-            }
+                return new ServiceDescriptor(inject.ImplementationType, inject.ImplementationType,
+                    inject.ServiceLifetime);
 
-            return new(inject.ImplementationType, inject.ServiceKey, inject.ImplementationType, inject.ServiceLifetime);
+            return new ServiceDescriptor(inject.ImplementationType, inject.ServiceKey, inject.ImplementationType,
+                inject.ServiceLifetime);
         }
 
         //有业务类型
         if (inject.ServiceKey is null)
-        {
-            return new(inject.ServiceType, inject.ImplementationType, inject.ServiceLifetime);
-        }
+            return new ServiceDescriptor(inject.ServiceType, inject.ImplementationType, inject.ServiceLifetime);
 
-        return new(inject.ServiceType, inject.ServiceKey, inject.ImplementationType, inject.ServiceLifetime);
+        return new ServiceDescriptor(inject.ServiceType, inject.ServiceKey, inject.ImplementationType,
+            inject.ServiceLifetime);
     }
 }

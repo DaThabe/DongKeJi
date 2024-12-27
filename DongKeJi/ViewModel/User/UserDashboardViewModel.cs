@@ -1,48 +1,46 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.UI;
 using DongKeJi.Common.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
-using Wpf.Ui.Controls;
-using Wpf.Ui;
-using Microsoft.Extensions.Logging;
-using Wpf.Ui.Extensions;
-using DongKeJi.Common.Extensions;
 using DongKeJi.Service;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
+using Wpf.Ui.Extensions;
 
 namespace DongKeJi.ViewModel.User;
 
-
 /// <summary>
-/// 用户页面
+///     用户页面
 /// </summary>
 [Inject(ServiceLifetime.Transient)]
 public partial class UserDashboardViewModel(IServiceProvider services) : LazyInitializeViewModel
 {
-    private readonly IUserService _userService = 
-        services.GetRequiredService<IUserService>();
-
-    private readonly ISnackbarService _snackbarService = 
-        services.GetRequiredService<ISnackbarService>();
-    
-    private readonly IContentDialogService _contentDialogService = 
+    private readonly IContentDialogService _contentDialogService =
         services.GetRequiredService<IContentDialogService>();
-    
-    private readonly ILogger<UserDashboardViewModel> _logger = 
+
+    private readonly ILogger<UserDashboardViewModel> _logger =
         services.GetRequiredService<ILogger<UserDashboardViewModel>>();
 
-    /// <summary>
-    /// 程序上下文
-    /// </summary>
-    public IApplicationContext ApplicationContext { get; } = 
-        services.GetRequiredService<IApplicationContext>();
+    private readonly ISnackbarService _snackbarService =
+        services.GetRequiredService<ISnackbarService>();
+
+    private readonly IUserRepository _userRepository =
+        services.GetRequiredService<IUserRepository>();
 
     /// <summary>
-    /// 所有用户
+    ///     所有用户
     /// </summary>
-    [ObservableProperty] 
-    private UserListViewModel _users = new();
+    [ObservableProperty] private UserListViewModel _users = new();
+
+    /// <summary>
+    ///     程序上下文
+    /// </summary>
+    public IApplicationContext ApplicationContext { get; } =
+        services.GetRequiredService<IApplicationContext>();
 
 
     protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
@@ -52,7 +50,7 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
 
 
     /// <summary>
-    /// 刷新
+    ///     刷新
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
@@ -60,7 +58,7 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
     {
         try
         {
-            var users = await _userService.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
             Users.Items = users.ToObservableCollection();
             Users.Selected = Users.Items.FirstOrDefault();
         }
@@ -73,7 +71,7 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
 
 
     /// <summary>
-    /// 注销
+    ///     注销
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
@@ -87,7 +85,7 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
                 Title = "是否注销用户",
                 Content = $"用户名称: {user.Name}",
                 PrimaryButtonText = "确认",
-                CloseButtonText = "取消",
+                CloseButtonText = "取消"
             };
 
             //弹窗
@@ -109,7 +107,7 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
     }
 
     /// <summary>
-    /// 登录 
+    ///     登录
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>

@@ -1,18 +1,18 @@
-﻿using Microsoft.Extensions.Hosting;
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.Extensions.Hosting;
 
 namespace DongKeJi.Common.Module;
 
 public static class ModuleExtensions
 {
     /// <summary>
-    /// 所有已加载模块
+    ///     所有已加载模块
     /// </summary>
     private static Dictionary<AssemblyName, IModule> Modules { get; } = new();
 
-    
+
     /// <summary>
-    /// 注册模块信息
+    ///     注册模块信息
     /// </summary>
     /// <typeparam name="TModule"></typeparam>
     /// <param name="builder"></param>
@@ -32,7 +32,7 @@ public static class ModuleExtensions
     }
 
     /// <summary>
-    /// 获取模块
+    ///     获取模块
     /// </summary>
     /// <typeparam name="TModule"></typeparam>
     /// <param name="context"></param>

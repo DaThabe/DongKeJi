@@ -2,13 +2,10 @@
     x:Class="DongKeJi.Work.UI.View.Common.Order.OrderEditView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DongKeJi.Work.UI.View.Common.Order"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:order="clr-namespace:DongKeJi.Work.ViewModel.Common.Order"
-    xmlns:orderEntity="clr-namespace:DongKeJi.Work.Model.Entity.Order"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     d:DataContext="{d:DesignInstance order:OrderViewModel,
@@ -16,10 +13,6 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <converter:OrderStateToNameConverter x:Key="OrderStateToNameConverter" />
-        <converter:OrderStateToSymbolConverter x:Key="OrderStateToSymbolConverter" />
-
 
         <!--  混合  -->
         <DataTemplate x:Key="MixingOrder" DataType="{x:Type order:MixingOrderViewModel}">
@@ -140,20 +133,9 @@
 
         <templateSelector:OrderDataTemplateSelector
             x:Key="OrderDataTemplateSelector"
-            Couting="{StaticResource CountingOrder}"
+            Counting="{StaticResource CountingOrder}"
             Mixing="{StaticResource MixingOrder}"
             Timing="{StaticResource TimingOrder}" />
-
-
-        <!--  订单状态  -->
-        <ObjectDataProvider
-            x:Key="OrderStateProvider"
-            MethodName="GetValues"
-            ObjectType="{x:Type sys:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type Type="orderEntity:OrderState" />
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
 
     </UserControl.Resources>
 
@@ -197,7 +179,7 @@
                 Header="状态">
                 <ui:CardControl.Content>
 
-                    <local:OrderStateSelectorView DataContext="{Binding}" />
+                    <local:OrderStateComboBox DataContext="{Binding}" />
 
                 </ui:CardControl.Content>
             </ui:CardControl>

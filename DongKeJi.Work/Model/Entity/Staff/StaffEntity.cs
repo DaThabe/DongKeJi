@@ -33,7 +33,7 @@ internal class StaffEntity : EntityBase
     /// </summary>
     [Required]
     [Column("IsPrimaryAccount")]
-    public required bool IsPrimaryAccount { get; set; } = false;
+    public required bool IsPrimaryAccount { get; set; }
 
 
     /// <summary>

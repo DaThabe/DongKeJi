@@ -1,58 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Wpf.Ui;
 using Wpf.Ui.Controls;
-using Wpf.Ui;
-using Wpf.Ui.Extensions;
 
 namespace DongKeJi.Common.UI;
 
-
 public static class SnackbarServiceExtensions
 {
-    #region --resource--
-
-    /// <summary>
-    /// 错误图标符号
-    /// </summary>
-    public static string ErrorTitle { get; set; } = "ヽ(*。>Д<)o゜";
-
-    /// <summary>
-    /// 成功
-    /// </summary>
-    public static string SuccessTitle { get; set; } = "o(*￣▽￣*)ブ";
-
-    /// <summary>
-    /// 正常消息
-    /// </summary>
-    public static string InfoTitle { get; set; } = "=￣ω￣=";
-
-    /// <summary>
-    /// 正常消息
-    /// </summary>
-    public static string WarningTitle { get; set; } = "(・∀・(・∀・(・∀・*)";
-
-
-    /// <summary>
-    /// 错误图标符号
-    /// </summary>
-    public static SymbolRegular ErrorSymbol { get; set; } = SymbolRegular.EmojiAngry24;
-
-    /// <summary>
-    /// 成功
-    /// </summary>
-    public static SymbolRegular SuccessSymbol { get; set; } = SymbolRegular.EmojiSparkle24;
-
-    /// <summary>
-    /// 正常消息
-    /// </summary>
-    public static SymbolRegular InfoSymbol { get; set; } = SymbolRegular.EmojiHand24;
-
-    #endregion
-
-   
     public static void Show(this ISnackbarService snackbar, Action<SnackbarConfig> configAction)
     {
         SnackbarConfig config = new();
@@ -61,7 +13,8 @@ public static class SnackbarServiceExtensions
     }
 
 
-    public static void ShowWarning(this ISnackbarService snackbar, string message, Action<SnackbarConfig>? configAction = null)
+    public static void ShowWarning(this ISnackbarService snackbar, string message,
+        Action<SnackbarConfig>? configAction = null)
     {
         snackbar.Show(x =>
         {
@@ -73,7 +26,8 @@ public static class SnackbarServiceExtensions
         });
     }
 
-    public static void ShowSuccess(this ISnackbarService snackbar, string message, Action<SnackbarConfig>? configAction = null)
+    public static void ShowSuccess(this ISnackbarService snackbar, string message,
+        Action<SnackbarConfig>? configAction = null)
     {
         snackbar.Show(x =>
         {
@@ -85,7 +39,8 @@ public static class SnackbarServiceExtensions
         });
     }
 
-    public static void ShowError(this ISnackbarService snackbar, string message, Action<SnackbarConfig>? configAction = null)
+    public static void ShowError(this ISnackbarService snackbar, string message,
+        Action<SnackbarConfig>? configAction = null)
     {
         snackbar.Show(x =>
         {
@@ -97,7 +52,8 @@ public static class SnackbarServiceExtensions
         });
     }
 
-    public static void ShowError(this ISnackbarService snackbar, Exception exception, Action<SnackbarConfig>? configAction = null)
+    public static void ShowError(this ISnackbarService snackbar, Exception exception,
+        Action<SnackbarConfig>? configAction = null)
     {
         snackbar.Show(x =>
         {
@@ -110,7 +66,8 @@ public static class SnackbarServiceExtensions
         });
     }
 
-    public static void ShowInfo(this ISnackbarService snackbar, string message, Action<SnackbarConfig>? configAction = null)
+    public static void ShowInfo(this ISnackbarService snackbar, string message,
+        Action<SnackbarConfig>? configAction = null)
     {
         snackbar.Show(x =>
         {
@@ -120,6 +77,46 @@ public static class SnackbarServiceExtensions
             configAction?.Invoke(x);
         });
     }
+
+    #region --resource--
+
+    /// <summary>
+    ///     错误图标符号
+    /// </summary>
+    public static string ErrorTitle { get; set; } = "ヽ(*。>Д<)o゜";
+
+    /// <summary>
+    ///     成功
+    /// </summary>
+    public static string SuccessTitle { get; set; } = "o(*￣▽￣*)ブ";
+
+    /// <summary>
+    ///     正常消息
+    /// </summary>
+    public static string InfoTitle { get; set; } = "=￣ω￣=";
+
+    /// <summary>
+    ///     正常消息
+    /// </summary>
+    public static string WarningTitle { get; set; } = "(・∀・(・∀・(・∀・*)";
+
+
+    /// <summary>
+    ///     错误图标符号
+    /// </summary>
+    public static SymbolRegular ErrorSymbol { get; set; } = SymbolRegular.EmojiAngry24;
+
+    /// <summary>
+    ///     成功
+    /// </summary>
+    public static SymbolRegular SuccessSymbol { get; set; } = SymbolRegular.EmojiSparkle24;
+
+    /// <summary>
+    ///     正常消息
+    /// </summary>
+    public static SymbolRegular InfoSymbol { get; set; } = SymbolRegular.EmojiHand24;
+
+    #endregion
 }
 
 public class SnackbarConfig

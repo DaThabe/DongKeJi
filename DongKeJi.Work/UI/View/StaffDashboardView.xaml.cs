@@ -26,14 +26,8 @@ public partial class StaffDashboardView
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
-        if (DataContext is not UserDashboardViewModel vm)
-        {
-            return;
-        }
+        if (DataContext is not UserDashboardViewModel vm) return;
 
-        if (args.SelectedItem is UserViewModel customer)
-        {
-            vm.Users.Selected = customer;
-        }
+        if (args.SelectedItem is UserViewModel customer) vm.Users.Selected = customer;
     }
 }

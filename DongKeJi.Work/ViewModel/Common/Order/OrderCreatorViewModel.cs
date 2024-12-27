@@ -11,11 +11,6 @@ namespace DongKeJi.Work.ViewModel.Common.Order;
 public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
 {
     /// <summary>
-    /// 订单类型
-    /// </summary>
-    [ObservableProperty] private OrderType _type;
-
-    /// <summary>
     ///     订单信息
     /// </summary>
     [ObservableProperty] private OrderViewModel _order = OrderViewModel.Empty;
@@ -25,14 +20,19 @@ public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
     /// </summary>
     [ObservableProperty] private ListViewModel<StaffViewModel> _salesperson;
 
+    /// <summary>
+    ///     当前订单类型
+    /// </summary>
+    [ObservableProperty] private OrderType _currentType;
+
 
     public OrderCreatorViewModel(IEnumerable<StaffViewModel> salespersonViewModels)
     {
         Salesperson = new ListViewModel<StaffViewModel>(salespersonViewModels);
-        Type = OrderType.Timing;
+        CurrentType = OrderType.Timing;
     }
 
-    partial void OnTypeChanged(OrderType value)
+    partial void OnCurrentTypeChanged(OrderType value)
     {
         Order = value switch
         {

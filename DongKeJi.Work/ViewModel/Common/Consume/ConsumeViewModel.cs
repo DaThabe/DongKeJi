@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DongKeJi.Common;
 using DongKeJi.Common.ViewModel;
-using DongKeJi.Work.ViewModel.Common.Customer;
-using DongKeJi.Work.ViewModel.Common.Staff;
 
 namespace DongKeJi.Work.ViewModel.Common.Consume;
 

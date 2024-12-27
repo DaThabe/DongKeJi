@@ -8,42 +8,37 @@ using Wpf.Ui;
 
 namespace DongKeJi.ViewModel;
 
-
 /// <summary>
-/// 主程序上下文
+///     主程序上下文
 /// </summary>
 public interface IApplicationContext : IUserContext
 {
     /// <summary>
-    /// 主程序
+    ///     主程序
     /// </summary>
     ApplicationViewModel Application { get; internal set; }
 
     /// <summary>
-    /// 窗口
+    ///     窗口
     /// </summary>
     MainFrameViewModel MainFrame { get; internal set; }
 }
-
 
 [Inject(ServiceLifetime.Singleton, typeof(IApplicationContext))]
 public partial class ApplicationContext(IThemeService themeService) : ViewModelBase, IApplicationContext
 {
     /// <summary>
-    /// 程序
+    ///     程序
     /// </summary>
-    [ObservableProperty] 
-    private ApplicationViewModel _application = new(themeService);
-    
-    /// <summary>
-    /// 主窗口
-    /// </summary>
-    [ObservableProperty]
-    private MainFrameViewModel _mainFrame = new();
+    [ObservableProperty] private ApplicationViewModel _application = new(themeService);
 
     /// <summary>
-    /// 当前用户
+    ///     主窗口
     /// </summary>
-    [ObservableProperty]
-    private UserViewModel _user = new();
+    [ObservableProperty] private MainFrameViewModel _mainFrame = new();
+
+    /// <summary>
+    ///     当前用户
+    /// </summary>
+    [ObservableProperty] private UserViewModel _user = new();
 }

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Model;
 
-
 public class DongKeJiDbContext() : DatabaseContext("Core")
 {
     public DbSet<UserEntity> Users { get; set; }

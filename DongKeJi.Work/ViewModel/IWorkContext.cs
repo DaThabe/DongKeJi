@@ -17,16 +17,14 @@ public interface IWorkContext : IUserContext, IStaffContext
 
 [Inject(ServiceLifetime.Singleton, typeof(IWorkContext))]
 public partial class WorkContext(
-
     IApplicationContext applicationContext
-    
-    ) : LazyInitializeViewModel, IWorkContext
+) : LazyInitializeViewModel, IWorkContext
 {
+    [ObservableProperty] private StaffViewModel _staff = StaffViewModel.Empty;
+
     public UserViewModel User
     {
         get => applicationContext.User;
         set => applicationContext.User = value;
     }
-
-    [ObservableProperty] private StaffViewModel _staff = StaffViewModel.Empty;
 }

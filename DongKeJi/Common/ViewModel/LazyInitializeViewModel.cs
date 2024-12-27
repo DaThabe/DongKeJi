@@ -1,7 +1,7 @@
 ﻿namespace DongKeJi.Common.ViewModel;
 
 /// <summary>
-/// 延迟初始化视图模型
+///     延迟初始化视图模型
 /// </summary>
 public abstract class LazyInitializeViewModel : ViewModelBase, ILazyInitializer
 {
@@ -21,7 +21,7 @@ public abstract class LazyInitializeViewModel : ViewModelBase, ILazyInitializer
     }
 
     /// <summary>
-    /// 开始初始化
+    ///     开始初始化
     /// </summary>
     /// <param name="cancellation"></param>
     /// <returns></returns>

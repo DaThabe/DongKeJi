@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using DongKeJi.Common;
 using DongKeJi.Common.Inject;
 using DongKeJi.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,14 +8,9 @@ using Wpf.Ui.Controls;
 
 namespace DongKeJi.UI.View;
 
-
-
 [Inject(ServiceLifetime.Singleton)]
 public partial class MainFrame : INavigationWindow
 {
-    private IServiceProvider Services { get; set; }
-
-
     public MainFrame(IServiceProvider services, IApplicationContext context)
     {
         InitializeComponent();
@@ -43,6 +37,8 @@ public partial class MainFrame : INavigationWindow
         contentDialogService.SetDialogHost(ContentPresenterForDialogs);
     }
 
+    private IServiceProvider Services { get; set; }
+
     #region --事件--
 
     private bool _isUserClosedPane;
@@ -51,10 +47,7 @@ public partial class MainFrame : INavigationWindow
 
     private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_isUserClosedPane)
-        {
-            return;
-        }
+        if (_isUserClosedPane) return;
 
         _isPaneOpenedOrClosedFromCode = true;
         RootNavigation.IsPaneOpen = e.NewSize.Width > 800;
@@ -63,20 +56,14 @@ public partial class MainFrame : INavigationWindow
 
     private void NavigationView_OnPaneOpened(NavigationView sender, RoutedEventArgs args)
     {
-        if (_isPaneOpenedOrClosedFromCode)
-        {
-            return;
-        }
+        if (_isPaneOpenedOrClosedFromCode) return;
 
         _isUserClosedPane = false;
     }
 
     private void NavigationView_OnPaneClosed(NavigationView sender, RoutedEventArgs args)
     {
-        if (_isPaneOpenedOrClosedFromCode)
-        {
-            return;
-        }
+        if (_isPaneOpenedOrClosedFromCode) return;
 
         _isUserClosedPane = true;
     }
@@ -85,21 +72,32 @@ public partial class MainFrame : INavigationWindow
 
     #region --导航--
 
-    public INavigationView GetNavigation() => RootNavigation;
+    public INavigationView GetNavigation()
+    {
+        return RootNavigation;
+    }
 
-    public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
+    public bool Navigate(Type pageType)
+    {
+        return RootNavigation.Navigate(pageType);
+    }
 
-    INavigationView INavigationWindow.GetNavigation() => RootNavigation;
+    INavigationView INavigationWindow.GetNavigation()
+    {
+        return RootNavigation;
+    }
 
-    public void SetPageService(IPageService pageService) => RootNavigation.SetPageService(pageService);
-
+    public void SetPageService(IPageService pageService)
+    {
+        RootNavigation.SetPageService(pageService);
+    }
 
     #endregion INavigationWindow methods
 
     #region --窗体--
 
     /// <summary>
-    /// Raises the closed event.
+    ///     Raises the closed event.
     /// </summary>
     protected override void OnClosed(EventArgs e)
     {
@@ -109,15 +107,20 @@ public partial class MainFrame : INavigationWindow
         Services.GetRequiredService<Application>().Shutdown();
     }
 
-    public void ShowWindow() => Show();
+    public void ShowWindow()
+    {
+        Show();
+    }
 
-    public void CloseWindow() => Close();
+    public void CloseWindow()
+    {
+        Close();
+    }
 
     public void SetServiceProvider(IServiceProvider serviceProvider)
     {
         Services = serviceProvider;
     }
-
 
     #endregion
 }

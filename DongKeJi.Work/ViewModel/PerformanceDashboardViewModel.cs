@@ -5,7 +5,6 @@ using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.UI;
 using DongKeJi.Common.ViewModel;
-using DongKeJi.ViewModel;
 using DongKeJi.ViewModel.User;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
@@ -28,44 +27,40 @@ namespace DongKeJi.Work.ViewModel;
 /// </summary>
 [Inject(ServiceLifetime.Transient)]
 public partial class PerformanceDashboardViewModel(
-
     ILogger<PerformanceDashboardViewModel> logger,
     IContentDialogService contentDialogService,
     ISnackbarService snackbarService,
-
     IWorkContext workContext,
-
-    IStaffService staffService,
-    ICustomerService customerService,
-    IOrderService orderService,
-    IConsumeService consumeService
-
-    ) : LazyInitializeViewModel, IPerformanceDashboardContext
+    IStaffRepository staffRepository,
+    ICustomerRepository customerRepository,
+    IOrderRepository orderRepository,
+    IConsumeRepository consumeRepository
+) : LazyInitializeViewModel, IPerformanceDashboardContext
 {
     #region --上下文属性--
 
     /// <summary>
-    /// 用户
+    ///     用户
     /// </summary>
     [ObservableProperty] private UserViewModel _user = workContext.User;
 
     /// <summary>
-    /// 员工
+    ///     员工
     /// </summary>
     [ObservableProperty] private StaffViewModel _staff = StaffViewModel.Empty;
 
     /// <summary>
-    /// 机构
+    ///     机构
     /// </summary>
     [ObservableProperty] private CustomerViewModel _customer = CustomerViewModel.Empty;
 
     /// <summary>
-    /// 订单
+    ///     订单
     /// </summary>
     [ObservableProperty] private OrderViewModel _order = OrderViewModel.Empty;
 
     /// <summary>
-    /// 划扣
+    ///     划扣
     /// </summary>
     [ObservableProperty] private ConsumeViewModel _consume = ConsumeViewModel.Empty;
 
@@ -93,24 +88,18 @@ public partial class PerformanceDashboardViewModel(
     {
         if (User == UserViewModel.Empty) throw new Exception("未登录用户, 无法初始化明细页面");
 
-        var result = await staffService.FindAllByUserAsync(User, cancellation);
+        var result = await staffRepository.FindAllByUserAsync(User, cancellation);
         var staffs = result.ToList();
 
         if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
         {
             var staff = new StaffViewModel { Name = User.Name, IsPrimaryAccount = true };
-
-            if (await staffService.AddAsync(staff, User, cancellation))
-            {
-                staffs.Add(staff);
-            }
+            await staffRepository.AddAsync(staff, User, cancellation);
+            staffs.Add(staff);
         }
 
         Staff = staffs.Find(x => x.IsPrimaryAccount) ?? StaffViewModel.Empty;
-        if (Staff == StaffViewModel.Empty)
-        {
-            throw new Exception("未能创建或加载用户");
-        }
+        if (Staff == StaffViewModel.Empty) throw new Exception("未能创建或加载用户");
 
         await ReloadCustomerCommand.ExecuteAsync(null);
     }
@@ -204,7 +193,7 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            var customers = await customerService.GetAllByStaffIdAsync(Staff);
+            var customers = await customerRepository.GetAllByStaffIdAsync(Staff);
 
             CustomerList = customers.ToObservableCollection();
             Customer = CustomerList.FirstOrDefault() ?? CustomerViewModel.Empty;
@@ -229,7 +218,7 @@ public partial class PerformanceDashboardViewModel(
             if (customerVm is null) return;
 
             //更新数据库
-            await customerService.AddAsync(customerVm, Staff);
+            await customerRepository.AddAsync(customerVm, Staff);
 
             //更新界面
             CustomerList.Add(customerVm);
@@ -269,7 +258,7 @@ public partial class PerformanceDashboardViewModel(
             if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await customerService.RemoveAsync(customer);
+            await customerRepository.RemoveAsync(customer);
 
             //删除
             var index = CustomerList.RemoveAtMatchedIndex(x => x.Id == customer.Id);
@@ -294,7 +283,7 @@ public partial class PerformanceDashboardViewModel(
     /// <returns></returns>
     public async ValueTask<OrderViewModel?> CreateOrderAsync()
     {
-        var salespersonList = await staffService.FindAllByUserAndPositionTypeAsync(User, StaffPositionType.Salesperson);
+        var salespersonList = await staffRepository.FindAllByUserAndPositionTypeAsync(User, StaffPositionType.Salesperson);
         var orderCreatorVm = new OrderCreatorViewModel(salespersonList);
 
         var content = new SimpleContentDialogCreateOptions
@@ -324,7 +313,7 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            var orderVMs = await orderService.GetAllByCustomerIdAsync(Customer);
+            var orderVMs = await orderRepository.GetAllByCustomerIdAsync(Customer);
 
             OrderList = orderVMs.ToObservableCollection();
             Order = OrderList.FirstOrDefault() ?? OrderViewModel.Empty;
@@ -349,7 +338,7 @@ public partial class PerformanceDashboardViewModel(
             if (orderVm is null) return;
 
             //更新数据库
-            await orderService.AddAsync(orderVm, Staff, Customer);
+            await orderRepository.AddAsync(orderVm, Staff, Customer);
 
             //更新界面
             OrderList.Add(orderVm);
@@ -389,7 +378,7 @@ public partial class PerformanceDashboardViewModel(
             if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await orderService.RemoveAsync(order);
+            await orderRepository.RemoveAsync(order);
 
             //删除
             var index = OrderList.RemoveAtMatchedIndex(x => x.Id == order.Id);
@@ -438,13 +427,13 @@ public partial class PerformanceDashboardViewModel(
             switch (Order)
             {
                 case TimingOrderViewModel:
-                    consumes.AddRange(await consumeService.GetAllByTimingOrderAsync(Order)); break;
+                    consumes.AddRange(await consumeRepository.GetAllByTimingOrderAsync(Order)); break;
 
                 case CountingOrderViewModel:
-                    consumes.AddRange(await consumeService.GetAllByCountingOrderAsync(Order)); break;
+                    consumes.AddRange(await consumeRepository.GetAllByCountingOrderAsync(Order)); break;
 
                 case MixingOrderViewModel:
-                    consumes.AddRange(await consumeService.GetAllByMixingOrderAsync(Order)); break;
+                    consumes.AddRange(await consumeRepository.GetAllByMixingOrderAsync(Order)); break;
             }
 
             ConsumeList = consumes.ToObservableCollection();
@@ -468,7 +457,7 @@ public partial class PerformanceDashboardViewModel(
             var consumeVm = CreateConsume();
             if (consumeVm is null) throw new Exception($"划扣创建失败, 订单类型不明确, 订单类型: {Order.GetType()}");
 
-            await consumeService.AddAsync(consumeVm, Order, Staff);
+            await consumeRepository.AddAsync(consumeVm, Order, Staff);
 
             //更新界面
             ConsumeList.Add(consumeVm);
@@ -494,7 +483,7 @@ public partial class PerformanceDashboardViewModel(
         try
         {
             //更新数据库
-            await consumeService.RemoveAsync(consume);
+            await consumeRepository.RemoveAsync(consume);
 
             //删除
             var index = ConsumeList.RemoveAtMatchedIndex(x => x.Id == consume.Id);

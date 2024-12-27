@@ -36,6 +36,7 @@
 
         </DataTemplate>
 
+
     </UserControl.Resources>
 
     <StackPanel>
@@ -50,7 +51,7 @@
                     <ComboBox
                         x:Name="OrderTypeComboBox"
                         ItemTemplate="{StaticResource OrderTypeSelectorItem}"
-                        SelectedItem="{Binding Type}"
+                        SelectedItem="{Binding CurrentType}"
                         ToolTip="订单类型" />
 
                     <!--  销售选择器  -->
@@ -67,7 +68,10 @@
         </ui:CardControl>
 
         <!--  分界线  -->
-        <Rectangle Height="3" Fill="{DynamicResource StripedBackgroundBrush}" />
+        <Rectangle
+            Height="3"
+            Margin="3"
+            Fill="{DynamicResource StripedBackgroundBrush}" />
 
         <!--  订单信息  -->
         <lcoal:OrderEditView DataContext="{Binding Order}" />

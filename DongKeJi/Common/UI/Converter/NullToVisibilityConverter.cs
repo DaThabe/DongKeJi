@@ -4,9 +4,8 @@ using System.Windows.Data;
 
 namespace DongKeJi.Common.UI.Converter;
 
-
 /// <summary>
-/// 空值转为可见性  空则隐藏 相反显示
+///     空值转为可见性  空则隐藏 相反显示
 /// </summary>
 public class NullToVisibilityConverter : IValueConverter
 {

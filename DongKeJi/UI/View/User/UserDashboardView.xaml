@@ -85,7 +85,8 @@
                         <ui:CardAction IsHitTestVisible="False">
 
                             <ui:CardAction.Icon>
-                                <ui:SymbolIcon Symbol="{Binding IsLogged, Converter={StaticResource LoggedStateToSymbolConverter}}" />
+                                <ui:SymbolIcon
+                                    Symbol="{Binding IsLogged, Converter={StaticResource LoggedStateToSymbolConverter}}" />
                             </ui:CardAction.Icon>
 
                             <ui:CardAction.Content>
@@ -130,7 +131,8 @@
             Background="{DynamicResource StripedBackgroundBrush}" />
 
         <!--  右侧布局  -->
-        <Grid Grid.Column="2" Visibility="{Binding Users.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+        <Grid Grid.Column="2"
+              Visibility="{Binding Users.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
 
             <!--  分栏  -->
             <Grid.RowDefinitions>

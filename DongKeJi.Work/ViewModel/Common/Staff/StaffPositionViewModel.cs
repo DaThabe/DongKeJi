@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DongKeJi.Common;
 using DongKeJi.Common.ViewModel;
 using DongKeJi.Work.Model.Entity.Staff;
 
@@ -7,7 +8,7 @@ namespace DongKeJi.Work.ViewModel.Common.Staff;
 /// <summary>
 ///     员工职位
 /// </summary>
-public partial class StaffPositionViewModel : IdentifiableViewModel
+public partial class StaffPositionViewModel : IdentifiableViewModel, IEmptyable<StaffPositionViewModel>
 {
     /// <summary>
     ///     描述
@@ -25,8 +26,8 @@ public partial class StaffPositionViewModel : IdentifiableViewModel
     /// </summary>
     [ObservableProperty] private StaffPositionType _type = StaffPositionType.None;
 
-    public static StaffPositionViewModel Empty { get; } = new()
-    {
-        Id = Guid.Empty
-    };
+
+    public bool IsEmpty => this == Empty;
+
+    public static StaffPositionViewModel Empty { get; } = new() { Id = Guid.Empty };
 }

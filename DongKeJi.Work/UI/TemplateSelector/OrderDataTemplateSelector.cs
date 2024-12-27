@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using CountingOrderViewModel = DongKeJi.Work.ViewModel.Common.Order.CountingOrderViewModel;
-using MixingOrderViewModel = DongKeJi.Work.ViewModel.Common.Order.MixingOrderViewModel;
-using TimingOrderViewModel = DongKeJi.Work.ViewModel.Common.Order.TimingOrderViewModel;
+using DongKeJi.Work.ViewModel.Common.Order;
 
 namespace DongKeJi.Work.UI.TemplateSelector;
 
@@ -12,7 +10,7 @@ namespace DongKeJi.Work.UI.TemplateSelector;
 internal class OrderDataTemplateSelector : DataTemplateSelector
 {
     public required DataTemplate Timing { get; set; }
-    public required DataTemplate Couting { get; set; }
+    public required DataTemplate Counting { get; set; }
     public required DataTemplate Mixing { get; set; }
 
 
@@ -20,7 +18,7 @@ internal class OrderDataTemplateSelector : DataTemplateSelector
     {
         if (item is TimingOrderViewModel) return Timing;
 
-        if (item is CountingOrderViewModel) return Couting;
+        if (item is CountingOrderViewModel) return Counting;
 
         if (item is MixingOrderViewModel) return Mixing;
 

@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:setting="clr-namespace:DongKeJi.ViewModel.Setting"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:user="clr-namespace:DongKeJi.UI.View.User"
     xmlns:view="clr-namespace:DongKeJi.Common.UI.View"
     d:DataContext="{d:DesignInstance setting:SettingDashboardViewModel,
                                      IsDesignTimeCreatable=False}"

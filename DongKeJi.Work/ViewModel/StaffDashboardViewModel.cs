@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Common.Extensions;
@@ -9,9 +8,7 @@ using DongKeJi.Common.ViewModel;
 using DongKeJi.ViewModel.User;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
-using DongKeJi.Work.ViewModel.Common.Consume;
-using DongKeJi.Work.ViewModel.Common.Customer;
-using DongKeJi.Work.ViewModel.Common.Order;
+using DongKeJi.Work.UI.View.Common.Staff;
 using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -26,17 +23,13 @@ namespace DongKeJi.Work.ViewModel;
 /// </summary>
 [Inject(ServiceLifetime.Transient)]
 public partial class StaffDashboardViewModel(
-
     ILogger<StaffDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IContentDialogService contentDialogService,
-
     IWorkContext workContext,
-
-    IStaffService staffService,
+    IStaffRepository staffRepository,
     IStaffPositionService staffPositionService
-
-    ) : LazyInitializeViewModel, IStaffDashboardContext
+) : LazyInitializeViewModel, IStaffDashboardContext
 {
     #region --上下文属性--
 
@@ -76,11 +69,16 @@ public partial class StaffDashboardViewModel(
 
     partial void OnStaffChanged(StaffViewModel? value)
     {
-        _position = StaffPositionViewModel.Empty;
+        Staff = value ?? StaffViewModel.Empty;
+
+        Position = StaffPositionViewModel.Empty;
         PositionList.Clear();
 
-        Staff = value ?? StaffViewModel.Empty;
-        ReloadPositionCommand.ExecuteAsync(null);
+
+        if (Staff != StaffViewModel.Empty)
+        {
+            ReloadPositionCommand.ExecuteAsync(null);
+        }
     }
 
     #endregion
@@ -88,18 +86,40 @@ public partial class StaffDashboardViewModel(
     #region --员工--
 
     /// <summary>
-    /// 创建员工
+    ///     创建员工
     /// </summary>
     /// <returns></returns>
-    private StaffViewModel CreateStaff()
+    private async Task<StaffViewModel?> CreateStaffAsync()
     {
-        StaffViewModel staff = new()
+        var staffCreatorViewModel = new StaffCreatorViewModel();
+
+        var content = new SimpleContentDialogCreateOptions
         {
-            Name = User.Name,
-            IsPrimaryAccount = false
+            Title = "新增员工",
+            Content = new StaffPositionCreatorView { DataContext = staffCreatorViewModel },
+            PrimaryButtonText = "创建",
+            CloseButtonText = "取消"
         };
 
-        return staff;
+        //弹窗
+
+        while (true)
+        {
+            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
+
+            if (dialogResult != ContentDialogResult.Primary) return null;
+
+            if (string.IsNullOrWhiteSpace(staffCreatorViewModel.Staff.Name))
+            {
+                snackbarService.ShowWarning("名称不可为空");
+                continue;
+            }
+
+            break;
+        }
+
+        //等待确认
+        return staffCreatorViewModel.Staff;
     }
 
     /// <summary>
@@ -111,7 +131,7 @@ public partial class StaffDashboardViewModel(
     {
         try
         {
-            var result = await staffService.FindAllByUserAsync(User);
+            var result = await staffRepository.FindAllByUserAsync(User);
 
             StaffList = result.ToObservableCollection();
             Staff = StaffList.FirstOrDefault() ?? StaffViewModel.Empty;
@@ -170,18 +190,15 @@ public partial class StaffDashboardViewModel(
     [RelayCommand]
     private async Task AddStaffAsync()
     {
-        var staff = CreateStaff();
+        var staff = await CreateStaffAsync();
+        if (staff is null) return;
 
         try
         {
             //更新数据库
-            var result = await staffService.AddAsync(staff, User);
-
-            if (result)
-            {
-                StaffList.Add(staff, x => x.Id != staff.Id);
-                Staff = staff;
-            }
+            await staffRepository.AddAsync(staff, User);
+            StaffList.Add(staff, x => x.Id != staff.Id);
+            Staff = staff;
         }
         catch (Exception ex)
         {
@@ -195,23 +212,7 @@ public partial class StaffDashboardViewModel(
     #region --职位--
 
     /// <summary>
-    /// 创建职位
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    private static StaffPositionType CreatePosition(string name)
-    {
-        name = name.ToLower();
-
-        if (nameof(StaffPositionType.Designer).ToLower() == name) return StaffPositionType.Designer;
-
-        if (nameof(StaffPositionType.Salesperson).ToLower() == name) return StaffPositionType.Salesperson;
-
-        return StaffPositionType.None;
-    }
-
-    /// <summary>
-    ///     刷新
+    ///     加载已绑定的职位
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
@@ -231,13 +232,14 @@ public partial class StaffDashboardViewModel(
         }
     }
 
+
     /// <summary>
-    ///     删除
+    ///     取消绑定职位
     /// </summary>
     /// <param name="position"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemovePositionAsync(StaffPositionViewModel position)
+    private async Task UnbindingPositionAsync(StaffPositionViewModel position)
     {
         try
         {
@@ -272,15 +274,13 @@ public partial class StaffDashboardViewModel(
     }
 
     /// <summary>
-    ///     添加
+    ///     绑定职位
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task AddPositionAsync(string name)
+    private async Task BindingPositionAsync(StaffPositionType type)
     {
-        var type = CreatePosition(name);
-
         try
         {
             //更新数据库

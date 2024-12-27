@@ -1,7 +1,7 @@
 ﻿namespace DongKeJi.Work.ViewModel.Common.Staff;
 
 /// <summary>
-/// 员工职位上下文
+///     员工职位上下文
 /// </summary>
 public interface IStaffPositionContext
 {

@@ -1,7 +1,7 @@
 ﻿namespace DongKeJi.Work.ViewModel.Common.Consume;
 
 /// <summary>
-/// 订单上下文
+///     订单上下文
 /// </summary>
 public interface IConsumeContext
 {

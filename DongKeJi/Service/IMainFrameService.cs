@@ -1,33 +1,31 @@
-﻿using DongKeJi.Common.Inject;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using DongKeJi.Common.Inject;
 using DongKeJi.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.Service;
 
-
 /// <summary>
-/// 主窗口服务
+///     主窗口服务
 /// </summary>
 public interface IMainFrameService
 {
     /// <summary>
-    /// 标题
+    ///     标题
     /// </summary>
     string Title { get; set; }
 
     /// <summary>
-    /// 菜单
+    ///     菜单
     /// </summary>
     ObservableCollection<NavigationViewItem> MenuItems { get; }
 
     /// <summary>
-    /// 页脚菜单
+    ///     页脚菜单
     /// </summary>
     ObservableCollection<NavigationViewItem> FooterMenuItems { get; }
 }
-
 
 [Inject(ServiceLifetime.Singleton, typeof(IMainFrameService))]
 internal class MainFrameService(IApplicationContext applicationContext) : IMainFrameService
@@ -40,7 +38,7 @@ internal class MainFrameService(IApplicationContext applicationContext) : IMainF
 
     public ObservableCollection<NavigationViewItem> MenuItems
     {
-        get =>  applicationContext.MainFrame.MenuItems;
+        get => applicationContext.MainFrame.MenuItems;
         set => applicationContext.MainFrame.MenuItems = value;
     }
 
@@ -51,11 +49,10 @@ internal class MainFrameService(IApplicationContext applicationContext) : IMainF
     }
 }
 
-
 public static class MainFrameServiceExtensions
 {
     /// <summary>
-    /// 添加菜单
+    ///     添加菜单
     /// </summary>
     /// <typeparam name="TPage"></typeparam>
     /// <param name="vm"></param>
@@ -71,7 +68,7 @@ public static class MainFrameServiceExtensions
     }
 
     /// <summary>
-    /// 添加页脚菜单
+    ///     添加页脚菜单
     /// </summary>
     /// <typeparam name="TPage"></typeparam>
     /// <param name="vm"></param>
@@ -87,7 +84,7 @@ public static class MainFrameServiceExtensions
     }
 
     /// <summary>
-    /// 添加子菜单 (但是好像最多只能一层子菜单
+    ///     添加子菜单 (但是好像最多只能一层子菜单
     /// </summary>
     /// <typeparam name="TPage"></typeparam>
     /// <param name="menu"></param>
@@ -104,7 +101,7 @@ public static class MainFrameServiceExtensions
 
 
     /// <summary>
-    /// 根据标题查询菜单
+    ///     根据标题查询菜单
     /// </summary>
     /// <param name="vm"></param>
     /// <param name="title"></param>
@@ -115,7 +112,7 @@ public static class MainFrameServiceExtensions
     }
 
     /// <summary>
-    /// 根据标题查询页脚菜单
+    ///     根据标题查询页脚菜单
     /// </summary>
     /// <param name="vm"></param>
     /// <param name="title"></param>

@@ -5,26 +5,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DongKeJi.ViewModel.User;
 
-
 [Inject(ServiceLifetime.Transient)]
 public partial class UserViewModel : IdentifiableViewModel
 {
+    /// <summary>
+    ///     是否已登录
+    /// </summary>
+    [ObservableProperty] private bool _isLogged;
+
+    /// <summary>
+    ///     用户名
+    /// </summary>
+    [ObservableProperty] private string _name = string.Empty;
+
     public static UserViewModel Empty { get; } = new()
     {
         Id = Guid.Empty
     };
-
-    /// <summary>
-    /// 用户名
-    /// </summary>
-    [ObservableProperty]
-    private string _name = string.Empty;
-
-    /// <summary>
-    /// 是否已登录
-    /// </summary>
-    [ObservableProperty] 
-    private bool _isLogged = false;
 
 
     public override string ToString()

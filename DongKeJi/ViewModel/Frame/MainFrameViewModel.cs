@@ -4,28 +4,23 @@ using Wpf.Ui.Controls;
 
 namespace DongKeJi.ViewModel.Frame;
 
-
-
 /// <summary>
-/// 主窗口
+///     主窗口
 /// </summary>
 public partial class MainFrameViewModel : ObservableObject
 {
     /// <summary>
-    /// 标题
+    ///     页脚菜单
     /// </summary>
-    [ObservableProperty] 
-    private string _title = string.Empty;
+    [ObservableProperty] private ObservableCollection<NavigationViewItem> _footerMenuItems = [];
 
     /// <summary>
-    /// 菜单元素
+    ///     菜单元素
     /// </summary>
-    [ObservableProperty] 
-    private ObservableCollection<NavigationViewItem> _menuItems = [];
+    [ObservableProperty] private ObservableCollection<NavigationViewItem> _menuItems = [];
 
     /// <summary>
-    /// 页脚菜单
+    ///     标题
     /// </summary>
-    [ObservableProperty] 
-    private ObservableCollection<NavigationViewItem> _footerMenuItems = [];
+    [ObservableProperty] private string _title = string.Empty;
 }

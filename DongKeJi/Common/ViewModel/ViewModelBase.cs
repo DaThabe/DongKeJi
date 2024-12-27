@@ -3,7 +3,7 @@
 namespace DongKeJi.Common.ViewModel;
 
 /// <summary>
-/// 视图模型基类
+///     视图模型基类
 /// </summary>
 public abstract class ViewModelBase : ObservableObject, IViewModel
 {

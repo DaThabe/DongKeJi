@@ -4,10 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converter1="clr-namespace:DongKeJi.Work.UI.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dkjui="clr-namespace:DongKeJi.Common.UI;assembly=DongKeJi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
+    xmlns:staff1="clr-namespace:DongKeJi.Work.Model.Entity.Staff"
+    xmlns:staffView="clr-namespace:DongKeJi.Work.UI.View.Common.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:ui1="clr-namespace:DongKeJi.Common.UI;assembly=DongKeJi"
     xmlns:view="clr-namespace:DongKeJi.Common.UI.View;assembly=DongKeJi"
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance vm:StaffDashboardViewModel,
@@ -18,101 +20,45 @@
     <view:AutoViewModelView.Resources>
 
         <converter1:StaffPositionTypeToSymbolConverter x:Key="StaffPositionTypeToSymbolConverter" />
-        <ui1:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
+        <dkjui:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
 
         <!--  员工列表元素  -->
         <DataTemplate x:Key="StaffListItem" DataType="{x:Type staff:StaffViewModel}">
 
-            <ui:CardAction Icon="{ui:SymbolIcon Symbol=People24}" IsHitTestVisible="False">
-
-                <ui:CardAction.Content>
-
-                    <StackPanel Orientation="Vertical">
-
-                        <ui:TextBlock d:Text="名称" Text="{Binding Name}" />
-                        <ui:TextBlock
-                            d:Text="id"
-                            Appearance="Disabled"
-                            FontSize="8"
-                            Text="{Binding Id}" />
-
-                    </StackPanel>
-
-                </ui:CardAction.Content>
-
-            </ui:CardAction>
+            <ui:CardAction
+                Content="{Binding Name}"
+                Icon="{ui:SymbolIcon Symbol=People24}"
+                IsHitTestVisible="False" />
 
         </DataTemplate>
 
         <!--  职位列表元素  -->
         <DataTemplate x:Key="PositionListItem" DataType="{x:Type staff:StaffPositionViewModel}">
 
-            <ui:CardControl Margin="3">
+            <ui:CardControl d:Icon="{ui:SymbolIcon Symbol=Bug24}">
 
                 <ui:CardControl.Icon>
                     <ui:SymbolIcon Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
                 </ui:CardControl.Icon>
 
                 <ui:CardControl.Header>
+                    <StackPanel>
 
-                    <Grid>
-
-                        <Grid.ColumnDefinitions>
-
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="5" />
-                            <ColumnDefinition Width="Auto" />
-
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-
-                            <RowDefinition />
-                            <RowDefinition Height="5" />
-                            <RowDefinition />
-
-                        </Grid.RowDefinitions>
+                        <ui:TextBlock Appearance="Primary" Text="{Binding Title}" />
 
                         <ui:TextBlock
-                            Grid.Row="0"
-                            Grid.Column="0"
                             Appearance="Disabled"
-                            Text="标题"
-                            TextAlignment="Center" />
+                            FontSize="8"
+                            Text="{Binding Describe}" />
 
-                        <ui:TextBlock
-                            Grid.Row="0"
-                            Grid.Column="2"
-                            Appearance="Disabled"
-                            Text="描述"
-                            TextAlignment="Center" />
-
-
-                        <ui:TextBox
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            d:Text="职位标题"
-                            PlaceholderText="标题..."
-                            Text="{Binding Title}"
-                            TextAlignment="Center" />
-
-                        <ui:TextBox
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            d:Text="职位描述"
-                            PlaceholderText="备注..."
-                            Text="{Binding Describe}"
-                            TextAlignment="Center" />
-
-                    </Grid>
-
+                    </StackPanel>
                 </ui:CardControl.Header>
 
                 <ui:CardControl.Content>
 
                     <ui:Button
                         Appearance="Danger"
-                        Command="{Binding Data.RemovePositionCommand, Source={StaticResource BindingProxy}}"
+                        Command="{Binding Data.UnbindingPositionCommand, Source={StaticResource BindingProxy}}"
                         CommandParameter="{Binding}"
                         Foreground="#fff"
                         Icon="{ui:SymbolIcon Symbol=Delete24}" />
@@ -186,6 +132,8 @@
                 d:ItemsSource="{d:SampleData ItemCount=5}"
                 ItemTemplate="{StaticResource StaffListItem}"
                 ItemsSource="{Binding StaffList}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
                 SelectedItem="{Binding Staff}">
 
                 <ui:ListView.ItemsPanel>
@@ -203,7 +151,8 @@
         <!--  分界线  -->
         <GridSplitter
             Grid.Column="1"
-            Width="5"
+            Width="2"
+            Margin="3"
             HorizontalAlignment="Stretch"
             Background="{DynamicResource StripedBackgroundBrush}" />
 
@@ -246,13 +195,13 @@
                                 <ContextMenu>
 
                                     <MenuItem
-                                        Command="{Binding AddPositionCommand}"
-                                        CommandParameter="Designer"
+                                        Command="{Binding BindingPositionCommand}"
+                                        CommandParameter="{x:Static staff1:StaffPositionType.Designer}"
                                         Header="设计师" />
 
                                     <MenuItem
-                                        Command="{Binding AddPositionCommand}"
-                                        CommandParameter="Salesperson"
+                                        Command="{Binding BindingPositionCommand}"
+                                        CommandParameter="{x:Static staff1:StaffPositionType.Salesperson}"
                                         Header="销售" />
 
                                 </ContextMenu>
@@ -268,13 +217,6 @@
             <!--  底部  -->
             <Grid Grid.Row="1">
 
-                <Grid.RowDefinitions>
-
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition />
-
-                </Grid.RowDefinitions>
-
                 <Grid.ColumnDefinitions>
 
                     <ColumnDefinition Width="*" MinWidth="200" />
@@ -282,68 +224,48 @@
 
                 </Grid.ColumnDefinitions>
 
-                <ui:TextBlock
-                    Grid.Column="0"
-                    Margin="0,10"
-                    FontTypography="BodyStrong"
-                    Text="职位信息" />
 
-                <ui:TextBlock
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Margin="0,10"
-                    FontTypography="BodyStrong"
-                    Text="用户信息" />
+                <!--  员工信息  -->
+                <StackPanel Grid.Column="0">
 
-                <!--  左栏  -->
-                <ItemsControl
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="5,0"
-                    d:ItemsSource="{d:SampleData ItemCount=5}"
-                    ItemTemplate="{StaticResource PositionListItem}"
-                    ItemsSource="{Binding PositionList}">
+                    <!--  左栏  -->
+                    <ui:TextBlock
+                        Margin="0,10"
+                        FontTypography="BodyStrong"
+                        Text="员工信息" />
+
+                    <!--  右栏  -->
+                    <staffView:StaffEditView DataContext="{Binding Staff}" />
+
+                </StackPanel>
+
+                <!--  职位信息  -->
+                <StackPanel Grid.Column="1">
+
+                    <ui:TextBlock
+                        Margin="0,10"
+                        FontTypography="BodyStrong"
+                        Text="职位信息" />
+
+                    <ItemsControl
+                        Margin="5,0"
+                        d:ItemsSource="{d:SampleData ItemCount=3}"
+                        ItemTemplate="{StaticResource PositionListItem}"
+                        ItemsSource="{Binding PositionList}">
 
 
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
 
-                            <StackPanel />
+                                <StackPanel />
 
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                </ItemsControl>
+                    </ItemsControl>
 
-                <!--  右栏  -->
-                <DockPanel Grid.Row="1" Grid.Column="1">
 
-                    <!--  底部  -->
-                    <StackPanel Margin="0,0,0,10" DockPanel.Dock="Bottom">
-
-                        <ui:Button
-                            HorizontalAlignment="Stretch"
-                            Appearance="Danger"
-                            Command="{Binding RemoveStaffCommand}"
-                            CommandParameter="{Binding Staff}"
-                            Content="删除员工" />
-
-                    </StackPanel>
-
-                    <!--  顶部  -->
-                    <StackPanel>
-
-                        <ui:CardControl Header="用户名">
-
-                            <ui:CardControl.Content>
-                                <ui:TextBox PlaceholderText="请输入用户名..." Text="{Binding Staff.Name}" />
-                            </ui:CardControl.Content>
-
-                        </ui:CardControl>
-
-                    </StackPanel>
-
-                </DockPanel>
+                </StackPanel>
 
             </Grid>
 

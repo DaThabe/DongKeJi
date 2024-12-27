@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DongKeJi.Common;
 using DongKeJi.Common.ViewModel;
-using DongKeJi.Work.ViewModel.Common.Customer;
 
 namespace DongKeJi.Work.ViewModel.Common.Staff;
 
@@ -19,7 +19,6 @@ public partial class StaffViewModel : IdentifiableViewModel, IEmptyable<StaffVie
     ///     用户名
     /// </summary>
     [ObservableProperty] private string _name = string.Empty;
-
 
 
     public bool IsEmpty => this == Empty;

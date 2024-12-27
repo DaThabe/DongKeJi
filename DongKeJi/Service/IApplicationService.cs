@@ -6,26 +6,25 @@ using Wpf.Ui.Appearance;
 namespace DongKeJi.Service;
 
 /// <summary>
-/// 程序服务
+///     程序服务
 /// </summary>
 public interface IApplicationService
 {
     /// <summary>
-    /// 标题
+    ///     标题
     /// </summary>
     string Title { get; set; }
 
     /// <summary>
-    /// 版本
+    ///     版本
     /// </summary>
     Version Version { get; set; }
 
     /// <summary>
-    /// 主题
+    ///     主题
     /// </summary>
     ApplicationTheme Theme { get; set; }
 }
-
 
 [Inject(ServiceLifetime.Singleton, typeof(IApplicationService))]
 public class ApplicationService(IApplicationContext applicationContext) : IApplicationService
