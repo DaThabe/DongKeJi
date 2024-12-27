@@ -73,23 +73,24 @@ file class DongKeJiHostedService(
     {
         try
         {
-            UserViewModel user;
-
             try
             {
-                user = await userRepository.FindByNameAsync("DaThabe", cancellationToken);
+                var users = await userRepository.GetAllAsync(cancellation: cancellationToken);
+                var currentUser = users.FirstOrDefault();
+
+                if (currentUser is null)
+                {
+                    throw new RepositoryException(RepositoryActionType.Get, RepositoryExceptionType.NotResult);
+                }
+
+                applicationContext.LoginUser = currentUser;
             }
-            catch (RepositoryException ex)
+            catch (RepositoryException)
             {
-                var msg = ex.Message;
-                var str = ex.ToString();
-
-                user = new UserViewModel { Name = "DaThabe" };
+                var user = new UserViewModel { Name = "Admin" };
                 await userRepository.AddAsync(user, cancellationToken);
+                applicationContext.LoginUser = user;
             }
-
-            applicationContext.User = user;
-            applicationContext.User.IsLogged = true;
         }
         catch (Exception e)
         {

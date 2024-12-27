@@ -10,7 +10,7 @@ namespace DongKeJi.Work.ViewModel;
 ///     明细管理上下文
 /// </summary>
 public interface IPerformanceDashboardContext :
-    IUserContext,
+    ILoginUserContext,
     IStaffContext,
     ICustomerContext,
     IOrderContext,

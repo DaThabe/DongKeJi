@@ -11,20 +11,15 @@ namespace DongKeJi.Work.ViewModel;
 /// <summary>
 ///     办公上下文
 /// </summary>
-public interface IWorkContext : IUserContext, IStaffContext
-{
-}
+public interface IWorkContext : ILoginUserContext, IPrimaryStaffContext;
+
 
 [Inject(ServiceLifetime.Singleton, typeof(IWorkContext))]
 public partial class WorkContext(
     IApplicationContext applicationContext
 ) : LazyInitializeViewModel, IWorkContext
 {
-    [ObservableProperty] private StaffViewModel _staff = StaffViewModel.Empty;
+    [ObservableProperty] private StaffViewModel _primaryStaff = StaffViewModel.Empty;
 
-    public UserViewModel User
-    {
-        get => applicationContext.User;
-        set => applicationContext.User = value;
-    }
+    public UserViewModel LoginUser => applicationContext.LoginUser;
 }

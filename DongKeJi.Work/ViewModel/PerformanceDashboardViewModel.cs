@@ -42,7 +42,7 @@ public partial class PerformanceDashboardViewModel(
     /// <summary>
     ///     用户
     /// </summary>
-    [ObservableProperty] private UserViewModel _user = workContext.User;
+    public UserViewModel LoginUser => workContext.LoginUser;
 
     /// <summary>
     ///     员工
@@ -86,15 +86,15 @@ public partial class PerformanceDashboardViewModel(
 
     protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
     {
-        if (User == UserViewModel.Empty) throw new Exception("未登录用户, 无法初始化明细页面");
+        if (LoginUser == UserViewModel.Empty) throw new Exception("未登录用户, 无法初始化明细页面");
 
-        var result = await staffRepository.FindAllByUserAsync(User, cancellation);
+        var result = await staffRepository.FindAllByUserAsync(LoginUser, cancellation);
         var staffs = result.ToList();
 
         if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
         {
-            var staff = new StaffViewModel { Name = User.Name, IsPrimaryAccount = true };
-            await staffRepository.AddAsync(staff, User, cancellation);
+            var staff = new StaffViewModel { Name = LoginUser.Name, IsPrimaryAccount = true };
+            await staffRepository.AddAsync(staff, LoginUser, cancellation);
             staffs.Add(staff);
         }
 
@@ -283,7 +283,7 @@ public partial class PerformanceDashboardViewModel(
     /// <returns></returns>
     public async ValueTask<OrderViewModel?> CreateOrderAsync()
     {
-        var salespersonList = await staffRepository.FindAllByUserAndPositionTypeAsync(User, StaffPositionType.Salesperson);
+        var salespersonList = await staffRepository.FindAllByUserAndPositionTypeAsync(LoginUser, StaffPositionType.Salesperson);
         var orderCreatorVm = new OrderCreatorViewModel(salespersonList);
 
         var content = new SimpleContentDialogCreateOptions

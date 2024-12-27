@@ -28,6 +28,6 @@ public partial class StaffDashboardView
     {
         if (DataContext is not UserDashboardViewModel vm) return;
 
-        if (args.SelectedItem is UserViewModel customer) vm.Users.Selected = customer;
+        if (args.SelectedItem is UserViewModel customer) vm.User = customer;
     }
 }

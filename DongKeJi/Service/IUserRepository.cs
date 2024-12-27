@@ -79,12 +79,12 @@ internal class UserRepository(
 {
     public void Login(UserViewModel user, CancellationToken cancellation = default)
     {
-        applicationContext.User = user;
+        applicationContext.LoginUser = user;
     }
 
     public void Logout(UserViewModel user, CancellationToken cancellation = default)
     {
-        applicationContext.User = UserViewModel.Empty;
+        applicationContext.LoginUser = UserViewModel.Empty;
     }
 
     public ValueTask AddAsync(UserViewModel user, CancellationToken cancellation = default)

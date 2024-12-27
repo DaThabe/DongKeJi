@@ -28,7 +28,7 @@ public partial class PerformanceDashboardView
     {
         if (DataContext is not UserDashboardViewModel vm) return;
 
-        if (args.SelectedItem is UserViewModel customer) vm.Users.Selected = customer;
+        if (args.SelectedItem is UserViewModel customer) vm.User = customer;
     }
 
     private void AddOrderButtonClick(object sender, RoutedEventArgs e)

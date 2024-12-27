@@ -9,11 +9,6 @@ namespace DongKeJi.ViewModel.User;
 public partial class UserViewModel : IdentifiableViewModel
 {
     /// <summary>
-    ///     是否已登录
-    /// </summary>
-    [ObservableProperty] private bool _isLogged;
-
-    /// <summary>
     ///     用户名
     /// </summary>
     [ObservableProperty] private string _name = string.Empty;

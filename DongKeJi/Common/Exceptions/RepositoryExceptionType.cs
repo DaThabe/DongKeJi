@@ -23,5 +23,10 @@ public enum RepositoryExceptionType
     /// <summary>
     /// 保存失败
     /// </summary>
-    SaveFailed
+    SaveFailed,
+
+    /// <summary>
+    /// 没有结果
+    /// </summary>
+    NotResult
 }

@@ -65,6 +65,7 @@ public class RepositoryException : Exception
         RepositoryExceptionType.SaveFailed => "保存未成功",
         RepositoryExceptionType.PrimaryKeyConflict => "数据已存在",
         RepositoryExceptionType.PrimaryKeyMissing => "数据不存在",
+        RepositoryExceptionType.NotResult => "没有结果",
         _ => "未知原因"
     };
 }

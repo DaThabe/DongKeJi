@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
@@ -17,30 +18,33 @@ namespace DongKeJi.ViewModel.User;
 ///     用户页面
 /// </summary>
 [Inject(ServiceLifetime.Transient)]
-public partial class UserDashboardViewModel(IServiceProvider services) : LazyInitializeViewModel
+public partial class UserDashboardViewModel(
+    IContentDialogService contentDialogService,
+    ILogger<UserDashboardViewModel> logger,
+    ISnackbarService snackbarService,
+    IUserRepository userRepository,
+    IApplicationContext applicationContext
+) : 
+    LazyInitializeViewModel, IUserDashboardContext
 {
-    private readonly IContentDialogService _contentDialogService =
-        services.GetRequiredService<IContentDialogService>();
+    /// <summary>
+    ///     当前登录用户
+    /// </summary>
+    public UserViewModel LoginUser
+    {
+        get => applicationContext.LoginUser;
+        set => applicationContext.LoginUser = value;
+    }
 
-    private readonly ILogger<UserDashboardViewModel> _logger =
-        services.GetRequiredService<ILogger<UserDashboardViewModel>>();
-
-    private readonly ISnackbarService _snackbarService =
-        services.GetRequiredService<ISnackbarService>();
-
-    private readonly IUserRepository _userRepository =
-        services.GetRequiredService<IUserRepository>();
+    /// <summary>
+    ///     选中用户
+    /// </summary>
+    [ObservableProperty] private UserViewModel _user = new();
 
     /// <summary>
     ///     所有用户
     /// </summary>
-    [ObservableProperty] private UserListViewModel _users = new();
-
-    /// <summary>
-    ///     程序上下文
-    /// </summary>
-    public IApplicationContext ApplicationContext { get; } =
-        services.GetRequiredService<IApplicationContext>();
+    [ObservableProperty] private ObservableCollection<UserViewModel> _userList = [];
 
 
     protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
@@ -58,14 +62,14 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
     {
         try
         {
-            var users = await _userRepository.GetAllAsync();
-            Users.Items = users.ToObservableCollection();
-            Users.Selected = Users.Items.FirstOrDefault();
+            var users = await userRepository.GetAllAsync();
+            UserList = users.ToObservableCollection();
+            User = UserList.FirstOrDefault() ?? UserViewModel.Empty;
         }
         catch (Exception ex)
         {
-            _snackbarService.ShowError(ex);
-            _logger.LogError(ex, "加载用户时发生错误");
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "加载用户时发生错误");
         }
     }
 
@@ -89,20 +93,18 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
             };
 
             //弹窗
-            var dialogResult = await _contentDialogService.ShowSimpleDialogAsync(dialog);
+            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(dialog);
 
             //等待确认
             if (dialogResult != ContentDialogResult.Primary) return;
 
-            ApplicationContext.User.IsLogged = false;
-            ApplicationContext.User = UserViewModel.Empty;
-
-            _snackbarService.ShowSuccess($"用户已注销: {user.Name}");
+            LoginUser = UserViewModel.Empty;
+            snackbarService.ShowSuccess($"用户已注销: {user.Name}");
         }
         catch (Exception ex)
         {
-            _snackbarService.ShowError(ex);
-            _logger.LogError(ex, "注销用户时发生错误");
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "注销用户时发生错误");
         }
     }
 
@@ -116,16 +118,13 @@ public partial class UserDashboardViewModel(IServiceProvider services) : LazyIni
     {
         try
         {
-            ApplicationContext.User.IsLogged = false;
-            ApplicationContext.User = user;
-            ApplicationContext.User.IsLogged = true;
-
-            _snackbarService.ShowSuccess($"用户已登录: {user.Name}");
+            LoginUser = user;
+            snackbarService.ShowSuccess($"用户已登录: {user.Name}");
         }
         catch (Exception ex)
         {
-            _snackbarService.ShowError(ex);
-            _logger.LogError(ex, "登录用户时发生错误");
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "登录用户时发生错误");
         }
     }
 }

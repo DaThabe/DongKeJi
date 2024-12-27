@@ -7,6 +7,6 @@ namespace DongKeJi.Work.ViewModel;
 ///     员工面板上下文
 /// </summary>
 public interface IStaffDashboardContext :
-    IUserContext,
+    ILoginUserContext,
     IStaffContext,
     IStaffPositionContext;

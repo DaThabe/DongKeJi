@@ -11,7 +11,7 @@ namespace DongKeJi.ViewModel;
 /// <summary>
 ///     主程序上下文
 /// </summary>
-public interface IApplicationContext : IUserContext
+public interface IApplicationContext
 {
     /// <summary>
     ///     主程序
@@ -22,6 +22,11 @@ public interface IApplicationContext : IUserContext
     ///     窗口
     /// </summary>
     MainFrameViewModel MainFrame { get; internal set; }
+
+    /// <summary>
+    /// 当前登录用户
+    /// </summary>
+    UserViewModel LoginUser { get; internal set; }
 }
 
 [Inject(ServiceLifetime.Singleton, typeof(IApplicationContext))]
@@ -40,5 +45,5 @@ public partial class ApplicationContext(IThemeService themeService) : ViewModelB
     /// <summary>
     ///     当前用户
     /// </summary>
-    [ObservableProperty] private UserViewModel _user = new();
+    [ObservableProperty] private UserViewModel _loginUser = new();
 }

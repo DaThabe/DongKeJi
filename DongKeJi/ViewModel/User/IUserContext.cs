@@ -1,12 +1,12 @@
 ﻿namespace DongKeJi.ViewModel.User;
 
 /// <summary>
-///     用户上下文
+/// 登录用户上下文
 /// </summary>
-public interface IUserContext
+public interface ILoginUserContext
 {
     /// <summary>
-    ///     用户
+    ///     登录用户
     /// </summary>
-    UserViewModel User { get; set; }
+    UserViewModel LoginUser { get; }
 }

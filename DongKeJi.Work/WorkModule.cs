@@ -78,21 +78,21 @@ file class HostedService(
     /// <exception cref="Exception"></exception>
     private async Task InitStaffAccount(CancellationToken cancellation = default)
     {
-        if (workContext.User == UserViewModel.Empty) throw new Exception("未登录用户, 无法初始化明细页面");
+        if (workContext.LoginUser == UserViewModel.Empty) throw new Exception("未登录用户, 无法初始化明细页面");
 
-        var result = await staffRepository.FindAllByUserAsync(workContext.User, cancellation);
+        var result = await staffRepository.FindAllByUserAsync(workContext.LoginUser, cancellation);
         var staffs = result.ToList();
 
         if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
         {
-            var staff = new StaffViewModel { Name = workContext.User.Name, IsPrimaryAccount = true };
-            await staffRepository.AddAsync(staff, workContext.User, cancellation);
+            var staff = new StaffViewModel { Name = workContext.LoginUser.Name, IsPrimaryAccount = true };
+            await staffRepository.AddAsync(staff, workContext.LoginUser, cancellation);
             staffs.Add(staff);
         }
 
-        workContext.Staff = staffs.Find(x => x.IsPrimaryAccount) ?? StaffViewModel.Empty;
+        workContext.PrimaryStaff = staffs.Find(x => x.IsPrimaryAccount) ?? StaffViewModel.Empty;
 
-        if (workContext.Staff == StaffViewModel.Empty) throw new Exception("未能创建或加载用户");
+        if (workContext.PrimaryStaff == StaffViewModel.Empty) throw new Exception("未能创建或加载用户");
     }
 
     /// <summary>

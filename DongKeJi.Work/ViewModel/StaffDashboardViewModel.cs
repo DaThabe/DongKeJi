@@ -36,12 +36,12 @@ public partial class StaffDashboardViewModel(
     /// <summary>
     ///     用户
     /// </summary>
-    [ObservableProperty] private UserViewModel _user = workContext.User;
+    public UserViewModel LoginUser => workContext.LoginUser;
 
     /// <summary>
     ///     员工
     /// </summary>
-    [ObservableProperty] private StaffViewModel _staff = workContext.Staff;
+    [ObservableProperty] private StaffViewModel _staff = workContext.PrimaryStaff;
 
     /// <summary>
     ///     员工列表
@@ -132,7 +132,7 @@ public partial class StaffDashboardViewModel(
     {
         try
         {
-            var result = await staffRepository.FindAllByUserAsync(User);
+            var result = await staffRepository.FindAllByUserAsync(LoginUser);
 
             StaffList = result.ToObservableCollection();
             Staff = StaffList.FirstOrDefault() ?? StaffViewModel.Empty;
@@ -197,7 +197,7 @@ public partial class StaffDashboardViewModel(
         try
         {
             //更新数据库
-            await staffRepository.AddAsync(staff, User);
+            await staffRepository.AddAsync(staff, LoginUser);
             StaffList.Add(staff, x => x.Id != staff.Id);
             Staff = staff;
         }
