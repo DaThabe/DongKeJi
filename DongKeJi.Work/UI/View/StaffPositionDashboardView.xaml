@@ -8,6 +8,7 @@
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
     xmlns:staff1="clr-namespace:DongKeJi.Work.UI.View.Common.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:ui1="clr-namespace:DongKeJi.Common.UI;assembly=DongKeJi"
     xmlns:view="clr-namespace:DongKeJi.Common.UI.View;assembly=DongKeJi"
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance vm:StaffPositionDashboardViewModel,
@@ -17,6 +18,7 @@
 
     <view:AutoViewModelView.Resources>
 
+        <ui1:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
         <converter:StaffPositionTypeToSymbolConverter x:Key="StaffPositionTypeToSymbolConverter" />
 
         <!--  职位列表元素  -->
@@ -32,6 +34,26 @@
                 </ui:CardAction.Icon>
 
             </ui:CardAction>
+
+        </DataTemplate>
+
+        <!--  员工列表元素  -->
+        <DataTemplate x:Key="StaffListItem" DataType="{x:Type staff:StaffViewModel}">
+
+            <ui:CardControl d:Icon="{ui:SymbolIcon Symbol=Bug24}" Header="{Binding Name}">
+
+                <ui:CardControl.Content>
+
+                    <ui:Button
+                        Appearance="Danger"
+                        Command="{Binding Data.UnbindingStaffCommand, Source={StaticResource BindingProxy}}"
+                        CommandParameter="{Binding}"
+                        Foreground="#fff"
+                        Icon="{ui:SymbolIcon Symbol=Delete24}" />
+
+                </ui:CardControl.Content>
+
+            </ui:CardControl>
 
         </DataTemplate>
 
@@ -157,17 +179,58 @@
             </ui:CardControl>
 
             <!--  底部  -->
-            <StackPanel Grid.Row="1">
+            <Grid Grid.Row="1">
 
-                <ui:TextBlock
-                    Margin="0,10"
-                    FontTypography="BodyStrong"
-                    Text="职位信息" />
+                <Grid.ColumnDefinitions>
 
-                <!--  职位信息编辑  -->
-                <staff1:StaffPositionEditView DataContext="{Binding Position}" />
+                    <ColumnDefinition Width="*" MinWidth="200" />
+                    <ColumnDefinition Width="Auto" />
 
-            </StackPanel>
+                </Grid.ColumnDefinitions>
+
+                <!--  关联员工  -->
+                <StackPanel Grid.Column="0">
+
+                    <ui:TextBlock
+                        Margin="0,10"
+                        FontTypography="BodyStrong"
+                        Text="职位信息" />
+
+                    <!--  员工信息  -->
+                    <ItemsControl
+                        Margin="5,0"
+                        d:ItemsSource="{d:SampleData ItemCount=3}"
+                        ItemTemplate="{StaticResource StaffListItem}"
+                        ItemsSource="{Binding StaffList}">
+
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+
+                                <StackPanel />
+
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                    </ItemsControl>
+
+                </StackPanel>
+
+
+                <!--  职位信息  -->
+                <StackPanel Grid.Column="1">
+
+                    <ui:TextBlock
+                        Margin="0,10"
+                        FontTypography="BodyStrong"
+                        Text="职位信息" />
+
+                    <!--  职位信息编辑  -->
+                    <staff1:StaffPositionEditView DataContext="{Binding Position}" />
+
+                </StackPanel>
+
+            </Grid>
 
         </Grid>
 

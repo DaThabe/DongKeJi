@@ -6,6 +6,7 @@ using DongKeJi.Common.Inject;
 using DongKeJi.Common.UI;
 using DongKeJi.Common.ViewModel;
 using DongKeJi.ViewModel.User;
+using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
 using DongKeJi.Work.UI.View.Common.Staff;
 using DongKeJi.Work.ViewModel.Common.Staff;
@@ -25,7 +26,6 @@ public partial class StaffPositionDashboardViewModel(
     ILogger<StaffDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IContentDialogService contentDialogService,
-    IWorkContext workContext,
     IStaffRepository staffRepository,
     IStaffPositionService staffPositionService
 ) : LazyInitializeViewModel, IStaffPositionDashboardContext
@@ -33,9 +33,15 @@ public partial class StaffPositionDashboardViewModel(
     #region --上下文属性--
 
     /// <summary>
-    ///     用户
+    ///     员工
     /// </summary>
-    [ObservableProperty] private UserViewModel _user = workContext.User;
+    [ObservableProperty] private StaffViewModel _staff  = StaffViewModel.Empty;
+
+    /// <summary>
+    ///     员工列表
+    /// </summary>
+    [ObservableProperty] private ObservableCollection<StaffViewModel> _staffList = [];
+
 
     /// <summary>
     ///     职位
@@ -59,6 +65,14 @@ public partial class StaffPositionDashboardViewModel(
     partial void OnPositionChanged(StaffPositionViewModel? value)
     {
         Position = value ?? StaffPositionViewModel.Empty;
+
+        Staff = StaffViewModel.Empty;
+        StaffList.Clear();
+
+        if (Position != StaffPositionViewModel.Empty)
+        {
+            ReloadStaffCommand.ExecuteAsync(null);
+        }
     }
 
     #endregion
@@ -68,7 +82,6 @@ public partial class StaffPositionDashboardViewModel(
     /// <summary>
     ///     创建职位
     /// </summary>
-    /// <param name="name"></param>
     /// <returns></returns>
     private async ValueTask<StaffPositionViewModel?> CreatePositionAsync()
     {
@@ -193,6 +206,73 @@ public partial class StaffPositionDashboardViewModel(
             logger.LogError(ex, "职位添加失败, 类型:{type}", position);
         }
     }
+
+    #endregion
+
+    #region --员工--
+
+    /// <summary>
+    ///     刷新员工
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task ReloadStaffAsync()
+    {
+        try
+        {
+            var staffs = await staffRepository.FindAllByPositionTypeAsync(Position.Type);
+
+            StaffList = staffs.ToObservableCollection();
+            Staff = StaffList.FirstOrDefault() ?? StaffViewModel.Empty;
+        }
+        catch (Exception ex)
+        {
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "加载员工时发生错误");
+        }
+    }
+
+
+    /// <summary>
+    ///     取消绑定员工
+    /// </summary>
+    /// <param name="staff"></param>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task UnbindingStaffAsync(StaffViewModel staff)
+    {
+        try
+        {
+            SimpleContentDialogCreateOptions dialog = new()
+            {
+                Title = "是否移除员工",
+                Content = $"员工名称:{staff.Name}",
+                PrimaryButtonText = "确认",
+                CloseButtonText = "取消"
+            };
+
+            //弹窗
+            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(dialog);
+
+            //等待确认
+            if (dialogResult != ContentDialogResult.Primary) return;
+
+            //更新数据库
+            await staffPositionService.UnbindingAsync(Position.Type, Staff);
+
+            //删除
+            var index = StaffList.RemoveAtMatchedIndex(x => x.Id == staff.Id);
+            Staff = StaffList.TryGetElementWithOffset(index, -1) ?? StaffViewModel.Empty;
+
+            snackbarService.ShowSuccess($"已移除员工, 名称:{staff.Name}");
+        }
+        catch (Exception ex)
+        {
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "移除员工失败, 名称:{name}", staff.Name);
+        }
+    }
+
 
     #endregion
 }

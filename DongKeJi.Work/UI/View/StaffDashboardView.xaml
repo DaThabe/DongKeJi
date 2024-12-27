@@ -224,23 +224,8 @@
 
                 </Grid.ColumnDefinitions>
 
-
-                <!--  员工信息  -->
-                <StackPanel Grid.Column="0">
-
-                    <!--  左栏  -->
-                    <ui:TextBlock
-                        Margin="0,10"
-                        FontTypography="BodyStrong"
-                        Text="员工信息" />
-
-                    <!--  右栏  -->
-                    <staffView:StaffEditView DataContext="{Binding Staff}" />
-
-                </StackPanel>
-
                 <!--  职位信息  -->
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="0">
 
                     <ui:TextBlock
                         Margin="0,10"
@@ -264,6 +249,19 @@
 
                     </ItemsControl>
 
+                </StackPanel>
+
+                <!--  员工信息  -->
+                <StackPanel Grid.Column="1">
+
+                    <!--  左栏  -->
+                    <ui:TextBlock
+                        Margin="0,10"
+                        FontTypography="BodyStrong"
+                        Text="员工信息" />
+
+                    <!--  右栏  -->
+                    <staffView:StaffEditView DataContext="{Binding Staff}" />
 
                 </StackPanel>
 

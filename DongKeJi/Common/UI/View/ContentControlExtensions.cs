@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace DongKeJi.Common.UI.View;
 
@@ -20,14 +21,12 @@ public static class ContentControlExtensions
         CancellationToken cancellation = default
     )
     {
-        //原始内容是否是框架元素   
-        var tmpContent = control.Content;
-
-        //替换为加载中
-        control.Content = new LoadingStateView("正在加载页面");
-
         try
         {
+            //原始内容
+            var tmpContent = (FrameworkElement)control.Content;
+
+            control.Content = new LoadingStateView("正在加载页面");
             control.DataContext = await dataContextGetterAsync(cancellation);
             control.Content = tmpContent;
 

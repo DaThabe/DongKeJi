@@ -44,14 +44,15 @@ public partial class StaffDashboardViewModel(
     [ObservableProperty] private StaffViewModel _staff = workContext.Staff;
 
     /// <summary>
-    ///     职位
-    /// </summary>
-    [ObservableProperty] private StaffPositionViewModel _position = StaffPositionViewModel.Empty;
-
-    /// <summary>
     ///     员工列表
     /// </summary>
     [ObservableProperty] private ObservableCollection<StaffViewModel> _staffList = [];
+
+
+    /// <summary>
+    ///     职位
+    /// </summary>
+    [ObservableProperty] private StaffPositionViewModel _position = StaffPositionViewModel.Empty;
 
     /// <summary>
     ///     职位列表
@@ -96,7 +97,7 @@ public partial class StaffDashboardViewModel(
         var content = new SimpleContentDialogCreateOptions
         {
             Title = "新增员工",
-            Content = new StaffPositionCreatorView { DataContext = staffCreatorViewModel },
+            Content = new StaffCreatorView { DataContext = staffCreatorViewModel },
             PrimaryButtonText = "创建",
             CloseButtonText = "取消"
         };
@@ -258,7 +259,7 @@ public partial class StaffDashboardViewModel(
             if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await staffPositionService.RemoveAsync(position.Type);
+            await staffPositionService.UnbindingAsync(position.Type, Staff);
 
             //删除
             var index = PositionList.RemoveAtMatchedIndex(x => x.Type == position.Type);

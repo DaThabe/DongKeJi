@@ -1,4 +1,4 @@
-﻿using DongKeJi.ViewModel.User;
+﻿using DongKeJi.Work.ViewModel.Common.Staff;
 
 namespace DongKeJi.Work.ViewModel;
 
@@ -6,4 +6,5 @@ namespace DongKeJi.Work.ViewModel;
 ///     员工职位面板上下文
 /// </summary>
 public interface IStaffPositionDashboardContext :
-    IUserContext;
+    IStaffPositionContext,
+    IStaffContext;
