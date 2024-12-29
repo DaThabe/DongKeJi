@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using DongKeJi.Common;
+﻿using DongKeJi.Common;
 using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
@@ -12,7 +11,6 @@ using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace DongKeJi.Work.Service;
 
@@ -27,7 +25,9 @@ public interface IStaffRepository
     /// <param name="staff"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<UserViewModel> FindUserByStaffAsync(IIdentifiable staff, CancellationToken cancellation = default);
+    ValueTask<UserViewModel> FindUserByStaffAsync(
+        IIdentifiable staff, 
+        CancellationToken cancellation = default);
 
     /// <summary>
     ///     添加员工
@@ -36,7 +36,10 @@ public interface IStaffRepository
     /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask AddAsync(StaffViewModel staff, IIdentifiable user, CancellationToken cancellation = default);
+    ValueTask AddAsync(
+        StaffViewModel staff, 
+        IIdentifiable user, 
+        CancellationToken cancellation = default);
 
     /// <summary>
     ///     根据用户查询所有员工
@@ -44,7 +47,8 @@ public interface IStaffRepository
     /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(IIdentifiable user,
+    ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
+        IIdentifiable user,
         CancellationToken cancellation = default);
 
     /// <summary>
@@ -55,8 +59,11 @@ public interface IStaffRepository
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(StaffPositionType type, int? skip = null,
-        int? take = null, CancellationToken cancellation = default);
+    ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(
+        StaffPositionType type, 
+        int? skip = null,
+        int? take = null, 
+        CancellationToken cancellation = default);
 
     /// <summary>
     ///     查询符合职位和用户的所有员工
@@ -67,9 +74,12 @@ public interface IStaffRepository
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(IIdentifiable user, StaffPositionType type,
+    ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(
+        IIdentifiable user, 
+        StaffPositionType type,
         int? skip = null,
-        int? take = null, CancellationToken cancellation = default);
+        int? take = null, 
+        CancellationToken cancellation = default);
 
     /// <summary>
     ///     获取所有员工
@@ -78,7 +88,9 @@ public interface IStaffRepository
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> GetAllAsync(int? skip = null, int? take = null,
+    ValueTask<IEnumerable<StaffViewModel>> GetAllAsync(
+        int? skip = null, 
+        int? take = null,
         CancellationToken cancellation = default);
 }
 
@@ -92,7 +104,8 @@ internal class StaffRepository(
     DongKeJiDbContext coreDbContext
 ) : Repository<WorkDbContext, StaffEntity, StaffViewModel>(services), IStaffRepository
 {
-    public ValueTask<UserViewModel> FindUserByStaffAsync(IIdentifiable staff,
+    public ValueTask<UserViewModel> FindUserByStaffAsync(
+        IIdentifiable staff,
         CancellationToken cancellation = default)
     {
         return UnitOfWorkAsync(async _ =>
@@ -100,11 +113,14 @@ internal class StaffRepository(
             var staffEntity = await DbContext.Staffs
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
 
-            staffEntity = staffEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Find, staff);
+            if (staffEntity is null || staffEntity.IsEmpty())
+            {
+                throw new RepositoryException($"员工关联用户查询失败, 没有查询到数据\n员工Id: {staff.Id}");
+            }
 
             if (staffEntity.UserId is null)
             {
-                staffEntity.IfThrowForeignKeyMissing(RepositoryActionType.Find, staffEntity, nameof(staffEntity.UserId));
+                throw new RepositoryException($"员工关联用户查询失败, 关联用户为空\n员工Id: {staff.Id}");
             }
 
             return await userRepository.FindByIdAsync(Identifiable.Create(staffEntity.UserId!.Value), cancellation);
@@ -112,8 +128,9 @@ internal class StaffRepository(
         }, cancellation);
     }
 
-
-    public ValueTask AddAsync(StaffViewModel staff, IIdentifiable user,
+    public ValueTask AddAsync(
+        StaffViewModel staff, 
+        IIdentifiable user,
         CancellationToken cancellation = default)
     {
         return UnitOfWorkAsync(async _ =>
@@ -121,11 +138,18 @@ internal class StaffRepository(
             var staffEntity = await DbContext.Staffs
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
 
-            staffEntity.IfThrowPrimaryKeyConflict(RepositoryActionType.Add, staff);
+            if (staffEntity is not null)
+            {
+                throw new RepositoryException($"员工添加失败, 员工已存在\n员工信息: {staff}\n用户Id: {user.Id}");
+            }
 
             var userEntity = await coreDbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
-            userEntity = userEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Add, user);
+            
+            if (userEntity is null || userEntity.IsEmpty())
+            {
+                throw new RepositoryException($"员工添加失败, 关联用户不存在\n员工信息: {staff}\n用户Id: {user.Id}");
+            }
 
             //修改
             staffEntity = Mapper.Map<StaffEntity>(staff);
@@ -133,14 +157,17 @@ internal class StaffRepository(
 
             //保存
             await DbContext.AddAsync(staffEntity, cancellation);
-            await DbContext.IfThrowSaveFailedAsync(RepositoryActionType.Add, cancellation, staff, user);
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"员工添加失败, 未写入数据库\n员工信息: {staff}\n用户Id: {user.Id}");
+            }
+
             RegisterAutoUpdate(staff);
 
         }, cancellation);
     }
-
-
-    public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(IIdentifiable user,
+    public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
+        IIdentifiable user,
         CancellationToken cancellation = default)
     {
         return UnitOfWorkAsync(async _ =>
@@ -154,8 +181,11 @@ internal class StaffRepository(
         }, cancellation);
     }
 
-    public ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(StaffPositionType type,
-        int? skip = null, int? take = null, CancellationToken cancellation = default)
+    public ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(
+        StaffPositionType type,
+        int? skip = null, 
+        int? take = null, 
+        CancellationToken cancellation = default)
     {
         return UnitOfWorkAsync(async _ =>
         {
@@ -173,9 +203,12 @@ internal class StaffRepository(
         }, cancellation);
     }
 
-    public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(IIdentifiable user,
-        StaffPositionType type, int? skip = null,
-        int? take = null, CancellationToken cancellation = default)
+    public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(
+        IIdentifiable user,
+        StaffPositionType type, 
+        int? skip = null,
+        int? take = null, 
+        CancellationToken cancellation = default)
     {
         return UnitOfWorkAsync(async _ =>
         {
@@ -184,7 +217,7 @@ internal class StaffRepository(
                 .Where(x => x.Type == type)
                 .FirstOrDefaultAsync(cancellation);
 
-            positionEntity = positionEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Find, user, type, skip, take);
+            if (positionEntity is null || positionEntity.IsEmpty()) return [];
 
             var staffEntityList = await DbContext.Staffs
                 .Include(x => x.Positions)
@@ -199,8 +232,9 @@ internal class StaffRepository(
         }, cancellation);
     }
 
-
-    public ValueTask<IEnumerable<StaffViewModel>> GetAllAsync(int? skip = null, int? take = null,
+    public ValueTask<IEnumerable<StaffViewModel>> GetAllAsync(
+        int? skip = null, 
+        int? take = null,
         CancellationToken cancellation = default)
     {
         return UnitOfWorkAsync(async _ =>
@@ -213,5 +247,4 @@ internal class StaffRepository(
 
         }, cancellation);
     }
-
 }

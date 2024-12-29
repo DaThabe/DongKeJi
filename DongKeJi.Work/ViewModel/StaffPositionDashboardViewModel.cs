@@ -191,14 +191,9 @@ public partial class StaffPositionDashboardViewModel(
 
         try
         {
-            //更新数据库
-            var result = await staffPositionService.SetAsync(position);
-
-            if (result)
-            {
-                PositionList.Add(position, x => x.Type != position.Type);
-                Position = position;
-            }
+            await staffPositionService.SetAsync(position);
+            PositionList.Add(position, x => x.Type != position.Type);
+            Position = position;
         }
         catch (Exception ex)
         {

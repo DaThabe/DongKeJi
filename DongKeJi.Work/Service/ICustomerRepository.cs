@@ -1,14 +1,13 @@
-﻿using AutoMapper;
-using DongKeJi.Common;
-using DongKeJi.Common.Database;
+﻿using DongKeJi.Common;
+using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
+using DongKeJi.Common.Service;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.ViewModel.Common.Customer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace DongKeJi.Work.Service;
 
@@ -51,112 +50,92 @@ public interface ICustomerRepository
 }
 
 [Inject(ServiceLifetime.Singleton, typeof(ICustomerRepository))]
-internal class CustomerRepository(
-    WorkDbContext dbContext,
-    ILogger<CustomerRepository> logger,
-    IMapper mapper
-) : ICustomerRepository
+internal class CustomerRepository(IServiceProvider services) : 
+    Repository<WorkDbContext, CustomerEntity, CustomerViewModel>(services)
 {
-    public async ValueTask<bool> AddAsync(
+    public ValueTask AddAsync(
         CustomerViewModel customer,
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return await dbContext.UnitOfWorkAsync(async _ =>
+        return UnitOfWorkAsync(async _ =>
         {
-            var customerEntity = await dbContext.Customers
+            var customerEntity = await DbContext.Customers
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
 
-            if (customerEntity is not null) throw new Exception("机构已存在");
+            if (customerEntity is not null)
+            {
+                throw new RepositoryException($"机构添加失败, 相同Id已存在\n机构信息: {customer}");
+            }
 
-            var staffEntity = await dbContext.Staffs
-                                  .Include(x => x.Customers)
-                                  .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation)
-                              ?? throw new Exception($"未查询到员工: {staff.Id}");
-
+            var staffEntity = await DbContext.Staffs
+                .Include(x => x.Customers)
+                .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+            
+            if (staffEntity is null || staffEntity.IsEmpty())
+            {
+                throw new RepositoryException($"机构添加失败, 关联员工不存在\n机构信息: {customer}\n员工Id: {staff.Id}");
+            }
 
             //编辑
-            customerEntity = mapper.Map<CustomerEntity>(customer);
-            await dbContext.AddAsync(customerEntity, cancellation);
+            customerEntity = Mapper.Map<CustomerEntity>(customer);
+            await DbContext.AddAsync(customerEntity, cancellation);
 
             //关联
             customerEntity.Staffs.Add(staffEntity, x => x.Id == staff.Id);
             staffEntity.Customers.Add(customerEntity, x => x.Id == customer.Id);
 
             //保存
-            var result = await dbContext.SaveChangesAsync(cancellation);
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"机构添加失败, 未写入数据库\n机构信息: {customer}\n员工Id: {staff.Id}");
+            }
             RegisterAutoUpdate(customer);
-            return result > 0;
-        }, ex => logger.LogError(ex, "添加机构且关联员工时发生错误, 机构Id:{customer}, 员工Id:{staff}", customer.Id, staff.Id));
+
+        }, cancellation);
     }
 
-    public async ValueTask<bool> RemoveAsync(
+    public ValueTask RemoveAsync(
         IIdentifiable customer,
         CancellationToken cancellation = default)
     {
-        return await dbContext.UnitOfWorkAsync(async transaction =>
+        return UnitOfWorkAsync(async _ =>
         {
-            var orderEntity = await dbContext.Customers
-                                  .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation)
-                              ?? throw new Exception("机构不存在");
+            var orderEntity = await DbContext.Customers
+                .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
 
-            dbContext.Remove(orderEntity);
-            var result = await dbContext.SaveChangesAsync(cancellation);
-            return result > 0;
-        }, ex => logger.LogError(ex, "删除机构时发生错误, 机构Id:{customer}", customer.Id));
+            if (orderEntity is null || orderEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣删除失败, 数据不存在\n机构Id: {customer.Id}");
+            }
+
+            DbContext.Remove(orderEntity);
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"机构删除失败, 未写入数据库\n机构Id: {customer.Id}");
+            }
+        }, cancellation);
     }
 
 
-    public async ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffIdAsync(
+    public ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffIdAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return await dbContext.UnitOfWorkAsync(async _ =>
+        return UnitOfWorkAsync(async _ =>
         {
-            var customerEntityList = await dbContext.Staffs
-                                         .Include(x => x.Customers)
-                                         .Where(x => x.Id == staff.Id)
-                                         .Select(x => x.Customers
-                                             .SkipAndTake(skip, take)
-                                             .ToList())
-                                         .FirstOrDefaultAsync(cancellation)
-                                     ?? throw new Exception("员工不存在");
+            var customerEntityList = await DbContext.Staffs
+                .Include(x => x.Customers)
+                .Where(x => x.Id == staff.Id)
+                .Select(x => x.Customers
+                    .SkipAndTake(skip, take)
+                    .ToList())
+                .FirstOrDefaultAsync(cancellation);
 
-            return customerEntityList.Select(RegisterAutoUpdate);
-        }, ex => logger.LogError(ex, "查询指定员工关联的所有机构时发生错误, 员工Id:{staff}", staff.Id)) ?? [];
-    }
+            return customerEntityList?.Select(RegisterAutoUpdate) ?? [];
 
-
-    protected CustomerViewModel RegisterAutoUpdate(CustomerViewModel vm)
-    {
-        vm.PropertyChanged += async (sender, e) =>
-        {
-            var existEntity = await dbContext.Customers
-                .FirstOrDefaultAsync(x => x.Id == vm.Id);
-
-            if (existEntity is null)
-            {
-                logger.LogError("自动更新失败, 数据不存在, 类型:{type} Id:{id}", vm.GetType(), vm.Id);
-                return;
-            }
-
-            //修改
-            mapper.Map(vm, existEntity);
-
-            //保存
-            var result = await dbContext.SaveChangesAsync();
-            if (result <= 0) logger.LogWarning("自动更新失败, 未写入内容, 类型:{type} Id:{id}", vm.GetType(), vm.Id);
-        };
-
-        return vm;
-    }
-
-
-    protected CustomerViewModel RegisterAutoUpdate(CustomerEntity entity)
-    {
-        var vm = mapper.Map<CustomerViewModel>(entity);
-        return RegisterAutoUpdate(vm);
+        }, cancellation);
     }
 }

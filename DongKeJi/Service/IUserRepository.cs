@@ -94,12 +94,19 @@ internal class UserRepository(
             var userEntity = await DbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
 
-            userEntity.IfThrowPrimaryKeyConflict(RepositoryActionType.Add, user);
+            if (userEntity is null || userEntity.IsEmpty())
+            {
+                throw new RepositoryException($"用户添加失败, 相同Id已存在\n用户信息: {user}");
+            }
 
             //保存
             userEntity = Mapper.Map<UserEntity>(user);
             await DbContext.AddAsync(userEntity, cancellation);
-            await DbContext.IfThrowSaveFailedAsync(RepositoryActionType.Add, cancellation, user); 
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"用户添加失败, 未写入数据库\n用户信息: {user}");
+            }
+
             RegisterAutoUpdate(user);
 
         }, cancellation);
@@ -113,7 +120,11 @@ internal class UserRepository(
             var userEntity = await DbContext.Users
                 .FirstOrDefaultAsync(x => x.Name.ToLower() == name, cancellation);
 
-            userEntity = userEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Find, name);
+            if (userEntity is null || userEntity.IsEmpty())
+            {
+                throw new RepositoryException($"用户查询失败, 数据不存在\n用户名称: {name}");
+            }
+
             return RegisterAutoUpdate(userEntity);
 
         }, cancellation);
@@ -126,7 +137,11 @@ internal class UserRepository(
             var userEntity = await DbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
 
-            userEntity = userEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Find, user);
+            if (userEntity is null || userEntity.IsEmpty())
+            {
+                throw new RepositoryException($"用户查询失败, 数据不存在\n用户Id: {user.Id}");
+            }
+
             return RegisterAutoUpdate(userEntity);
 
         }, cancellation);

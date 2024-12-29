@@ -78,9 +78,9 @@ file class DongKeJiHostedService(
                 var users = await userRepository.GetAllAsync(cancellation: cancellationToken);
                 var currentUser = users.FirstOrDefault();
 
-                if (currentUser is null)
+                if (currentUser is null || currentUser.IsEmpty())
                 {
-                    throw new RepositoryException(RepositoryActionType.Get, RepositoryExceptionType.NotResult);
+                    throw new RepositoryException("用户获取失败, 没有用户数据");
                 }
 
                 applicationContext.LoginUser = currentUser;

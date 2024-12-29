@@ -103,14 +103,20 @@ internal class ConsumeRepository(IServiceProvider services
             var consumeEntity = await DbContext.Consumes
                 .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
 
-            consumeEntity.IfThrowPrimaryKeyConflict(RepositoryActionType.Add, consume);
+            if (consumeEntity != null && !consumeEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣添加失败, 相同Id已存在\n划扣信息: {staff}");
+            }
 
             var staffEntity = await DbContext.Staffs
                 .Include(x => x.Customers)
                 .Include(x => x.Orders)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
 
-            staffEntity = staffEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Add, staff);
+            if (staffEntity == null || staffEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣添加失败, 关联员工不存在\n员工Id: {staff.Id}");
+            }
 
             //创建实体
             consumeEntity = Mapper.Map<ConsumeEntity>(consume);
@@ -118,7 +124,10 @@ internal class ConsumeRepository(IServiceProvider services
 
             //保存
             await DbContext.AddAsync(consumeEntity, cancellation);
-            await DbContext.IfThrowSaveFailedAsync(RepositoryActionType.Add, cancellation, consume);
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"划扣添加失败, 未写入数据库\n划扣信息: {consume}\n订单Id: {order.Id}\n员工Id: {staff.Id}");
+            }
             RegisterAutoUpdate(consume);
 
         }, cancellation);
@@ -138,8 +147,7 @@ internal class ConsumeRepository(IServiceProvider services
                     await Mixing(staffEntity, m);
                     return;
                 default:
-                    consumeEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Add, consume);
-                    break;
+                    throw new RepositoryException($"添加划扣失败, 数据无法解析, 类型:{consumeEntity.GetType().Name}");
             }
         }
 
@@ -151,7 +159,10 @@ internal class ConsumeRepository(IServiceProvider services
                 .Where(x => x.Id == order.Id)
                 .FirstOrDefaultAsync(cancellation);
 
-            orderEntity = orderEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Add, order);
+            if (orderEntity is null || orderEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣添加失败, 关联订单不存在, 订单Id: {order.Id}");
+            }
 
             //员工-划扣 多对多
             staffEntity.Consumes.Add(timingConsumeEntity);
@@ -173,8 +184,11 @@ internal class ConsumeRepository(IServiceProvider services
                 .Include(x => x.Consumes)
                 .Where(x => x.Id == order.Id)
                 .FirstOrDefaultAsync(cancellation);
-            
-            orderEntity = orderEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Add, order);
+
+            if (orderEntity is null || orderEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣添加失败, 关联订单不存在, 订单Id: {order.Id}");
+            }
 
             //员工-划扣 多对多
             staffEntity.Consumes.Add(countingConsumeEntity);
@@ -197,7 +211,10 @@ internal class ConsumeRepository(IServiceProvider services
                 .Where(x => x.Id == order.Id)
                 .FirstOrDefaultAsync(cancellation);
 
-            orderEntity = orderEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Add, order);
+            if (orderEntity is null || orderEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣添加失败, 关联订单不存在, 订单Id: {order.Id}");
+            }
 
             //员工-划扣 多对多
             staffEntity.Consumes.Add(mixingConsumeEntity);
@@ -220,12 +237,18 @@ internal class ConsumeRepository(IServiceProvider services
         return UnitOfWorkAsync(async _ =>
         {
             var consumeEntity = await DbContext.Consumes
-                .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
+            .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
 
-            consumeEntity.IfThrowPrimaryKeyConflict(RepositoryActionType.Add, consume);
+            if (consumeEntity is null || consumeEntity.IsEmpty())
+            {
+                throw new RepositoryException($"划扣删除失败, 数据不存在, 划扣Id: {consume.Id}");
+            }
 
-            DbContext.Remove(consumeEntity!);
-            await DbContext.IfThrowSaveFailedAsync(RepositoryActionType.Add, cancellation, consume);
+            DbContext.Remove(consumeEntity);
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"划扣删除失败, 未写入数据库\n划扣Id: {consume.Id}");
+            }
 
         }, cancellation);
     }
@@ -285,30 +308,5 @@ internal class ConsumeRepository(IServiceProvider services
             return entityList.Select(RegisterAutoUpdate<MixingConsumeViewModel>);
 
         }, cancellation);
-    }
-
-    protected TConsumeViewModel RegisterAutoUpdate<TConsumeViewModel>(TConsumeViewModel vm)
-        where TConsumeViewModel : ConsumeViewModel
-    {
-        var entity = Mapper.Map<ConsumeEntity>(vm);
-        return RegisterAutoUpdate<TConsumeViewModel>(entity);
-    }
-
-    protected TConsumeViewModel RegisterAutoUpdate<TConsumeViewModel>(ConsumeEntity entity)
-        where TConsumeViewModel : ConsumeViewModel
-    {
-        var vm = Mapper.Map<TConsumeViewModel>(entity);
-
-        vm.PropertyChanged += async (_, _) =>
-        {
-            var existEntity = await DbContext.Consumes
-                .FirstOrDefaultAsync(x => x.Id == vm.Id);
-
-            existEntity.IfThrowPrimaryKeyMissing(RepositoryActionType.Update, vm);
-            Mapper.Map(vm, existEntity);
-            await DbContext.IfThrowSaveFailedAsync(RepositoryActionType.Update, vm);
-        };
-
-        return vm;
     }
 }
