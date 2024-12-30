@@ -50,6 +50,11 @@ public partial class PerformanceDashboardViewModel(
     [ObservableProperty] private StaffViewModel _staff = StaffViewModel.Empty;
 
     /// <summary>
+    ///     员工
+    /// </summary>
+    [ObservableProperty] private StaffViewModel _salesperson = StaffViewModel.Empty;
+
+    /// <summary>
     ///     机构
     /// </summary>
     [ObservableProperty] private CustomerViewModel _customer = CustomerViewModel.Empty;
@@ -64,6 +69,11 @@ public partial class PerformanceDashboardViewModel(
     /// </summary>
     [ObservableProperty] private ConsumeViewModel _consume = ConsumeViewModel.Empty;
 
+
+    /// <summary>
+    /// 销售列表
+    /// </summary>
+    [ObservableProperty] private ObservableCollection<StaffViewModel> _salespersonList = [];
 
     /// <summary>
     ///     机构列表
@@ -102,6 +112,7 @@ public partial class PerformanceDashboardViewModel(
         if (Staff == StaffViewModel.Empty) throw new Exception("未能创建或加载用户");
 
         await ReloadCustomerCommand.ExecuteAsync(null);
+        await ReloadSalespersonCommand.ExecuteAsync(null);
     }
 
     partial void OnStaffChanged(StaffViewModel? value)
@@ -132,17 +143,54 @@ public partial class PerformanceDashboardViewModel(
         _ = ReloadOrderCommand.ExecuteAsync(null);
     }
 
-    partial void OnOrderChanged(OrderViewModel? value)
+    async partial void OnOrderChanged(OrderViewModel? value)
     {
         _consume = ConsumeViewModel.Empty;
         ConsumeList.Clear();
 
         _order = value ?? OrderViewModel.Empty;
+
+        if (!Order.IsEmpty)
+        {
+            _salesperson = await orderRepository.FindSalespersonAsync(Order);
+        }
+
         _ = ReloadConsumeCommand.ExecuteAsync(null);
+    }
+
+    partial void OnSalespersonChanged(StaffViewModel? value)
+    {
+        if (value == null || value.IsEmpty || Order.IsEmpty) return;
+        orderRepository.ChangeSalespersonAsync(Order, value);
     }
 
     #endregion
 
+    #region --销售--
+
+    /// <summary>
+    ///     刷新销售
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task ReloadSalespersonAsync()
+    {
+        try
+        {
+            var salespersonList = await staffRepository.FindAllByPositionTypeAsync(StaffPositionType.Salesperson);
+
+            SalespersonList = salespersonList.ToObservableCollection();
+            Salesperson = SalespersonList.FirstOrDefault() ?? StaffViewModel.Empty;
+        }
+        catch (Exception ex)
+        {
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "加载机构时发生错误");
+        }
+    }
+
+
+    #endregion
 
     #region --机构--
 
@@ -269,7 +317,7 @@ public partial class PerformanceDashboardViewModel(
         catch (Exception ex)
         {
             snackbarService.ShowError(ex);
-            logger.LogError(ex, "删除机构时发生错误");
+            logger.LogError(ex, "删除机构时发生错误\n机构信息: {customer}", customer);
         }
     }
 
@@ -389,7 +437,7 @@ public partial class PerformanceDashboardViewModel(
         catch (Exception ex)
         {
             snackbarService.ShowError(ex);
-            logger.LogError(ex, "删除订单时发生错误");
+            logger.LogError(ex, "删除订单时发生错误\n订单信息: {order}", order);
         }
     }
 

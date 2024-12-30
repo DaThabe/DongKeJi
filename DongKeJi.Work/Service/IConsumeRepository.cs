@@ -267,7 +267,7 @@ internal class ConsumeRepository(IServiceProvider services
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(RegisterAutoUpdate<TimingConsumeViewModel>);
+            return entityList.Select(x => RegisterAutoUpdate<TimingConsumeViewModel>(x));
 
         }, cancellation);
     }
@@ -286,7 +286,7 @@ internal class ConsumeRepository(IServiceProvider services
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(RegisterAutoUpdate<CountingConsumeViewModel>);
+            return entityList.Select(x => RegisterAutoUpdate<CountingConsumeViewModel>(x));
 
         }, cancellation);
     }
@@ -305,7 +305,7 @@ internal class ConsumeRepository(IServiceProvider services
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(RegisterAutoUpdate<MixingConsumeViewModel>);
+            return entityList.Select(x => RegisterAutoUpdate<MixingConsumeViewModel>(x));
 
         }, cancellation);
     }

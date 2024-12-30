@@ -13,6 +13,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Common.Order"
     xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Common.Order"
+    xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:view="clr-namespace:DongKeJi.Common.UI.View;assembly=DongKeJi"
@@ -230,6 +231,12 @@
 
         </DataTemplate>
 
+        <!--  销售选择器元素  -->
+        <DataTemplate x:Key="SalespersonSelectorItem" DataType="{x:Type staff:StaffViewModel}">
+
+            <ui:TextBlock Appearance="Primary" Text="{Binding Name}" />
+
+        </DataTemplate>
 
     </view:AutoViewModelView.Resources>
 
@@ -474,7 +481,39 @@
                     <!--  订单  -->
                     <TabItem Header="订单信息">
 
-                        <order:OrderEditView DataContext="{Binding Order}" />
+                        <StackPanel>
+
+                            <order:OrderEditView DataContext="{Binding Order}" />
+
+                            <ui:CardControl Header="销售">
+
+                                <ui:CardControl.Content>
+
+                                    <ComboBox
+                                        Margin="5,0,0,0"
+                                        ItemTemplate="{StaticResource SalespersonSelectorItem}"
+                                        ItemsSource="{Binding SalespersonList}"
+                                        SelectedItem="{Binding Salesperson}"
+                                        ToolTip="订单销售" />
+
+                                </ui:CardControl.Content>
+
+                            </ui:CardControl>
+
+                            <Rectangle
+                                Height="2"
+                                Margin="3"
+                                Fill="{DynamicResource StripedBackgroundBrush}" />
+
+
+                            <ui:Button
+                                HorizontalAlignment="Stretch"
+                                Appearance="Caution"
+                                Command="{Binding RemoveCustomerCommand}"
+                                CommandParameter="{Binding Customer}"
+                                Content="删除订单" />
+
+                        </StackPanel>
 
                     </TabItem>
 

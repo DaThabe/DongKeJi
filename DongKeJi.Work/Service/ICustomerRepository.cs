@@ -20,7 +20,7 @@ public interface ICustomerRepository
     /// <param name="staff"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<bool> AddAsync(
+    ValueTask AddAsync(
         CustomerViewModel customer,
         IIdentifiable staff,
         CancellationToken cancellation = default);
@@ -31,7 +31,7 @@ public interface ICustomerRepository
     /// <param name="customer"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<bool> RemoveAsync(
+    ValueTask RemoveAsync(
         IIdentifiable customer,
         CancellationToken cancellation = default);
 
@@ -51,7 +51,7 @@ public interface ICustomerRepository
 
 [Inject(ServiceLifetime.Singleton, typeof(ICustomerRepository))]
 internal class CustomerRepository(IServiceProvider services) : 
-    Repository<WorkDbContext, CustomerEntity, CustomerViewModel>(services)
+    Repository<WorkDbContext, CustomerEntity, CustomerViewModel>(services), ICustomerRepository
 {
     public ValueTask AddAsync(
         CustomerViewModel customer,
@@ -134,7 +134,7 @@ internal class CustomerRepository(IServiceProvider services) :
                     .ToList())
                 .FirstOrDefaultAsync(cancellation);
 
-            return customerEntityList?.Select(RegisterAutoUpdate) ?? [];
+            return customerEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
 
         }, cancellation);
     }

@@ -155,7 +155,7 @@ internal class UserRepository(
             var userEntityList = await DbContext.Users
                 .ToListAsync(cancellation);
 
-            return userEntityList.Select(RegisterAutoUpdate);
+            return userEntityList.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }
@@ -169,7 +169,7 @@ internal class UserRepository(
                 .Where(queryable)
                 .ToListAsync(cancellation);
 
-            return userEntityList.Select(RegisterAutoUpdate);
+            return userEntityList.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }

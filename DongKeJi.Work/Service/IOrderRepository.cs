@@ -5,7 +5,9 @@ using DongKeJi.Common.Inject;
 using DongKeJi.Common.Service;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Order;
+using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.ViewModel.Common.Order;
+using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,6 +40,28 @@ public interface IOrderRepository
     /// <returns></returns>
     ValueTask RemoveAsync(
         IIdentifiable order,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 查询订单的销售
+    /// </summary>
+    /// <param name="order"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<StaffViewModel> FindSalespersonAsync(
+        IIdentifiable order,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     更换销售
+    /// </summary>
+    /// <param name="order"></param>
+    /// <param name="salesperson"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask ChangeSalespersonAsync(
+        IIdentifiable order,
+        IIdentifiable salesperson,
         CancellationToken cancellation = default);
 
     /// <summary>
@@ -163,6 +187,80 @@ internal class OrderRepository(IServiceProvider services) :
         }, cancellation);
     }
 
+    public ValueTask<StaffViewModel> FindSalespersonAsync(
+        IIdentifiable order, 
+        CancellationToken cancellation = default)
+    {
+        return UnitOfWorkAsync(async _ =>
+        {
+            var orderEntity = await DbContext.Orders
+                .Include(x => x.Staffs)
+                .ThenInclude(x => x.Positions)
+                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+
+            if (orderEntity is null || orderEntity.IsEmpty())
+            {
+                throw new RepositoryException($"订单销售查询除失败, 数据不存在\n订单Id: {order.Id}");
+            }
+
+            var salespersonStaff = orderEntity.Staffs.FirstOrDefault(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
+
+            if (salespersonStaff is null || salespersonStaff.IsEmpty())
+            {
+                throw new RepositoryException("订单销售查询失败, 销售不存在");
+            }
+
+            var salespersonVm = Mapper.Map<StaffViewModel>(salespersonStaff);
+            DbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(salespersonVm, Mapper);
+
+            return salespersonVm;
+
+        }, cancellation);
+    }
+
+    public ValueTask ChangeSalespersonAsync(
+        IIdentifiable order, 
+        IIdentifiable salesperson,
+        CancellationToken cancellation = default)
+    {
+        return UnitOfWorkAsync(async _ =>
+        {
+            var orderEntity = await DbContext.Orders
+                .Include(x=>x.Staffs)
+                .ThenInclude(x=>x.Positions)
+                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+
+            if (orderEntity is null || orderEntity.IsEmpty())
+            {
+                throw new RepositoryException($"订单更换销售除失败, 数据不存在\n机构Id: {order.Id}");
+            }
+
+            var salespersonEntity = await DbContext.Staffs
+                .Include(staffEntity => staffEntity.Orders)
+                .FirstOrDefaultAsync(x => x.Id == salesperson.Id, cancellation);
+
+            if (salespersonEntity is null || salespersonEntity.IsEmpty())
+            {
+                throw new RepositoryException($"订单更换销售除失败, 销售不存在\n员工Id: {salesperson.Id}");
+            }
+
+            var salespersonStaffList = orderEntity.Staffs.Where(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
+            foreach (var salespersonItem in salespersonStaffList)
+            {
+                orderEntity.Staffs.Remove(salespersonItem);
+            }
+
+            orderEntity.Staffs.Add(salespersonEntity, x=>x.Id != salespersonEntity.Id);
+            salespersonEntity.Orders.Add(orderEntity, x => x.Id != orderEntity.Id);
+
+            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
+            {
+                throw new RepositoryException($"机构删除失败, 未写入数据库\n订单Id: {orderEntity.Id}");
+            }
+
+        }, cancellation);
+    }
+
     public ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerIdAsync(
         IIdentifiable customer,
         int? skip = null,
@@ -179,7 +277,7 @@ internal class OrderRepository(IServiceProvider services) :
                     .ToList())
                 .FirstOrDefaultAsync(cancellation);
 
-            return orderEntityList?.Select(RegisterAutoUpdate<OrderViewModel>) ?? [];
+            return orderEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
 
         }, cancellation);
     }
@@ -200,7 +298,7 @@ internal class OrderRepository(IServiceProvider services) :
                     .ToList())
                 .FirstOrDefaultAsync(cancellation);
 
-            return orderEntityList?.Select(RegisterAutoUpdate<OrderViewModel>) ?? [];
+            return orderEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
 
         }, cancellation);
     }

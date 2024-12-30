@@ -285,7 +285,7 @@ internal class StaffPositionService(IServiceProvider services) :
                 .Select(x => x.Positions.SkipAndTake(skip, take).ToList())
                 .FirstOrDefaultAsync(cancellation);
 
-            return positionEntityList?.Select(RegisterAutoUpdate) ?? [];
+            return positionEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
 
         }, cancellation);
     }
@@ -301,7 +301,7 @@ internal class StaffPositionService(IServiceProvider services) :
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return positionEntityList.Select(RegisterAutoUpdate);
+            return positionEntityList.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }

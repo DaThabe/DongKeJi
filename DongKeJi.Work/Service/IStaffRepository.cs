@@ -42,6 +42,16 @@ public interface IStaffRepository
         CancellationToken cancellation = default);
 
     /// <summary>
+    ///     根据Id查询员工
+    /// </summary>
+    /// <param name="staff"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<StaffViewModel> FindByIdAsync(
+        IIdentifiable staff,
+        CancellationToken cancellation = default);
+
+    /// <summary>
     ///     根据用户查询所有员工
     /// </summary>
     /// <param name="user"></param>
@@ -166,6 +176,26 @@ internal class StaffRepository(
 
         }, cancellation);
     }
+
+    public ValueTask<StaffViewModel> FindByIdAsync(
+        IIdentifiable staff, 
+        CancellationToken cancellation = default)
+    {
+        return UnitOfWorkAsync(async _ =>
+        {
+            var staffEntity = await DbContext.Staffs
+                .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+
+            if (staffEntity is null || staffEntity.IsEmpty())
+            {
+                throw new RepositoryException($"员工查询失败, 数据不存在\n员工Id: {staff}");
+            }
+
+            return RegisterAutoUpdate(staffEntity);
+
+        }, cancellation);
+    }
+
     public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
         IIdentifiable user,
         CancellationToken cancellation = default)
@@ -176,7 +206,7 @@ internal class StaffRepository(
                 .Where(x => x.UserId == user.Id)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(RegisterAutoUpdate);
+            return staffEntityList.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }
@@ -198,7 +228,7 @@ internal class StaffRepository(
                     .ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return staffPositionEntity.Select(RegisterAutoUpdate);
+            return staffPositionEntity.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }
@@ -227,7 +257,7 @@ internal class StaffRepository(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(RegisterAutoUpdate);
+            return staffEntityList.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }
@@ -243,7 +273,7 @@ internal class StaffRepository(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(RegisterAutoUpdate);
+            return staffEntityList.Select(x => RegisterAutoUpdate(x));
 
         }, cancellation);
     }
