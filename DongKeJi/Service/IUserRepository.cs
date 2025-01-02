@@ -94,7 +94,7 @@ internal class UserRepository(
             var userEntity = await DbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
 
-            if (userEntity is null || userEntity.IsEmpty())
+            if (userEntity is not null)
             {
                 throw new RepositoryException($"用户添加失败, 相同Id已存在\n用户信息: {user}");
             }

@@ -12,5 +12,5 @@ public partial class StaffCreatorViewModel : ViewModelBase, IStaffContext
     /// <summary>
     ///     职位信息
     /// </summary>
-    [ObservableProperty] private StaffViewModel _staff = StaffViewModel.Empty;
+    [ObservableProperty] private StaffViewModel _staff = new();
 }

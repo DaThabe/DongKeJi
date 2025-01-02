@@ -509,8 +509,8 @@
                             <ui:Button
                                 HorizontalAlignment="Stretch"
                                 Appearance="Caution"
-                                Command="{Binding RemoveCustomerCommand}"
-                                CommandParameter="{Binding Customer}"
+                                Command="{Binding RemoveOrderCommand}"
+                                CommandParameter="{Binding Order}"
                                 Content="删除订单" />
 
                         </StackPanel>

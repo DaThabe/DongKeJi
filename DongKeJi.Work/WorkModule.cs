@@ -104,29 +104,32 @@ file class HostedService(
     private async Task InitStaffPosition(CancellationToken cancellation = default)
     {
         //创建销售职位 (如果没有
-        var salesperson = await staffPositionService.FindByTypeAsync(StaffPositionType.Salesperson, cancellation);
-        if (salesperson is null)
+        try
         {
-            salesperson = new StaffPositionViewModel
+            await staffPositionService.FindByTypeAsync(StaffPositionType.Salesperson, cancellation);
+        }
+        catch (Exception e)
+        {
+            await staffPositionService.SetAsync(new StaffPositionViewModel
             {
                 Title = "销售",
                 Type = StaffPositionType.Salesperson
-            };
 
-            await staffPositionService.SetAsync(salesperson, cancellation);
+            }, cancellation);
         }
 
-        //创建设计职位 (如果没有
-        var designer = await staffPositionService.FindByTypeAsync(StaffPositionType.Designer, cancellation);
-        if (designer is null)
+        try
         {
-            salesperson = new StaffPositionViewModel
+            await staffPositionService.FindByTypeAsync(StaffPositionType.Designer, cancellation);
+        }
+        catch (Exception e)
+        {
+            await staffPositionService.SetAsync(new StaffPositionViewModel
             {
                 Title = "设计",
                 Type = StaffPositionType.Designer
-            };
 
-            await staffPositionService.SetAsync(salesperson, cancellation);
+            }, cancellation);
         }
     }
 
