@@ -17,7 +17,7 @@ using Wpf.Ui.Controls;
 
 namespace DongKeJi;
 
-public class DongKeJiModule : IModule
+public class CoreModule : IModule
 {
     public string Title => "懂科技核心模块";
     public string Describe => "提供核心功能";
@@ -27,7 +27,7 @@ public class DongKeJiModule : IModule
     {
         builder.ConfigureServices(services =>
         {
-            services.AddAutoInject<DongKeJiModule>();
+            services.AddAutoInject<CoreModule>();
             services.AddHostedService<DongKeJiHostedService>();
 
             //导航服务
@@ -43,9 +43,9 @@ public class DongKeJiModule : IModule
 
 
             //数据库
-            services.AddDbContext<DongKeJiDbContext>();
+            services.AddDbContext<CoreDbContext>();
             //AutoMapper
-            services.AddAutoMapper(typeof(DongKeJiMapperProfile));
+            services.AddAutoMapper(typeof(CoreMapperProfile));
         });
     }
 }

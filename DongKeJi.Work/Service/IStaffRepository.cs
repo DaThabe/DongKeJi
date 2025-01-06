@@ -111,7 +111,7 @@ public interface IStaffRepository
 internal class StaffRepository(
     IServiceProvider services,
     IUserRepository userRepository,
-    DongKeJiDbContext coreDbContext
+    CoreDbContext coreDbContext
 ) : Repository<WorkDbContext, StaffEntity, StaffViewModel>(services), IStaffRepository
 {
     public ValueTask<UserViewModel> FindUserByStaffAsync(

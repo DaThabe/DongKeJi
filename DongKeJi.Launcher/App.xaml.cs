@@ -19,7 +19,7 @@ public partial class App : Application
     public App()
     {
         var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-            .RegisterModule<DongKeJiModule>()
+            .RegisterModule<CoreModule>()
             .RegisterModule<WorkModule>()
             .ConfigureLogging(x => x.SetMinimumLevel(LogLevel.Trace))
             .ConfigureServices(services =>

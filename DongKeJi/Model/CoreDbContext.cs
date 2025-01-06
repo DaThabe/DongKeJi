@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Model;
 
-public class DongKeJiDbContext() : DatabaseContext("Core")
+public class CoreDbContext() : DatabaseContext("Core")
 {
     public DbSet<UserEntity> Users { get; set; }
 
@@ -12,6 +12,6 @@ public class DongKeJiDbContext() : DatabaseContext("Core")
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(DongKeJiDbContext).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(CoreDbContext).Assembly);
     }
 }

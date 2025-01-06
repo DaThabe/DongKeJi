@@ -4,9 +4,9 @@ using DongKeJi.ViewModel.User;
 
 namespace DongKeJi.Model;
 
-internal class DongKeJiMapperProfile : Profile
+internal class CoreMapperProfile : Profile
 {
-    public DongKeJiMapperProfile()
+    public CoreMapperProfile()
     {
         CreateMap<UserEntity, UserViewModel>().ReverseMap();
     }

@@ -75,7 +75,7 @@ public interface IUserRepository
 internal class UserRepository(
     IServiceProvider services,
     IApplicationContext applicationContext
-) :  Repository<DongKeJiDbContext, UserEntity, UserViewModel>(services), IUserRepository
+) :  Repository<CoreDbContext, UserEntity, UserViewModel>(services), IUserRepository
 {
     public void Login(UserViewModel user, CancellationToken cancellation = default)
     {
