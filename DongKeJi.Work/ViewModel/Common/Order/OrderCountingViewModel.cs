@@ -4,9 +4,9 @@ using DongKeJi.Work.Model.Entity.Order;
 namespace DongKeJi.Work.ViewModel.Common.Order;
 
 /// <summary>
-///     计数订阅订单
+///     计数订单
 /// </summary>
-public partial class MixingOrderViewModel : OrderViewModel
+public partial class OrderCountingViewModel : OrderViewModel
 {
     /// <summary>
     ///     初始张数
@@ -14,20 +14,9 @@ public partial class MixingOrderViewModel : OrderViewModel
     [ObservableProperty] private double _initCounts;
 
     /// <summary>
-    ///     初始天数
-    /// </summary>
-    [ObservableProperty] private double _initDays;
-
-
-    /// <summary>
     ///     总张数
     /// </summary>
     [ObservableProperty] private double _totalCounts;
 
-    /// <summary>
-    ///     总天数
-    /// </summary>
-    [ObservableProperty] private double _totalDays;
-
-    public override OrderType Type => OrderType.Mixing;
+    public override OrderType Type => OrderType.Counting;
 }

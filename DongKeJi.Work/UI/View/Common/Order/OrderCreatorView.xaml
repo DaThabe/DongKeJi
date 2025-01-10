@@ -51,6 +51,7 @@
                     <ComboBox
                         x:Name="OrderTypeComboBox"
                         ItemTemplate="{StaticResource OrderTypeSelectorItem}"
+                        SelectedIndex="0"
                         SelectedItem="{Binding CurrentType}"
                         ToolTip="订单类型" />
 
@@ -58,8 +59,9 @@
                     <ComboBox
                         Margin="5,0,0,0"
                         ItemTemplate="{StaticResource StaffSelectorItem}"
-                        ItemsSource="{Binding Salesperson.Items}"
-                        SelectedItem="{Binding Salesperson.Selected}"
+                        ItemsSource="{Binding SalespersonSet}"
+                        SelectedIndex="0"
+                        SelectedItem="{Binding Salesperson}"
                         ToolTip="订单销售" />
 
                 </StackPanel>

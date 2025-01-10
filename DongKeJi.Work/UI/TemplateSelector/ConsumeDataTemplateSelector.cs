@@ -16,11 +16,11 @@ internal class ConsumeDataTemplateSelector : DataTemplateSelector
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-        if (item is TimingConsumeViewModel) return Timing;
+        if (item is ConsumeTimingViewModel) return Timing;
 
-        if (item is CountingConsumeViewModel) return Counting;
+        if (item is ConsumeCountingViewModel) return Counting;
 
-        if (item is MixingConsumeViewModel) return Mixing;
+        if (item is ConsumeMixingViewModel) return Mixing;
 
         return base.SelectTemplate(item, container);
     }

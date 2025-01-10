@@ -9,6 +9,8 @@ public interface IViewModel :
     INotifyPropertyChanged,
     INotifyPropertyChanging;
 
+
+[Obsolete]
 public static class ViewModelExtensions
 {
     /// <summary>

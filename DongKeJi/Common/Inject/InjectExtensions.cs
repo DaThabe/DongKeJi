@@ -38,20 +38,23 @@ public static class InjectExtensions
             if (type.IsInterface) continue;
 
             //获取注入信息
-            var injectAttribute = type.GetCustomAttributes().OfType<IInjectDescriptor>().FirstOrDefault();
-            if (injectAttribute is null) continue;
+            var injectAttributeArray = type.GetCustomAttributes().OfType<IInjectDescriptor>().ToArray();
+            if (injectAttributeArray.Length <= 0) continue;
 
-            //设置具体类型
-            injectAttribute.ImplementationType = type;
+            foreach (var injectAttribute in injectAttributeArray)
+            {
+                //设置具体类型
+                injectAttribute.ImplementationType = type;
 
-            ////如果没有设置业务类型, 但是有一个接口, 那就设置为业务类型
-            //var serviceTypes = type.GetInterfaces();
-            //if (injectAttribute.ServiceType is null && serviceTypes.Length == 1)
-            //{
-            //    injectAttribute.ServiceType = serviceTypes.FirstOrDefault();
-            //}
+                ////如果没有设置业务类型, 但是有一个接口, 那就设置为业务类型
+                //var serviceTypes = type.GetInterfaces();
+                //if (injectAttribute.ServiceType is null && serviceTypes.Length == 1)
+                //{
+                //    injectAttribute.ServiceType = serviceTypes.FirstOrDefault();
+                //}
 
-            injectDescriptors.Add(injectAttribute);
+                injectDescriptors.Add(injectAttribute);
+            }
         }
 
         return injectDescriptors.Select(ToServiceDescriptor);

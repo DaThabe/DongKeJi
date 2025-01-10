@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:validation="clr-namespace:DongKeJi.Work.Model.Validation"
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
     d:DataContext="{d:DesignInstance vm:StaffViewModel,
                                      IsDesignTimeCreatable=False}"
@@ -13,14 +14,13 @@
     <StackPanel>
 
         <!--  名称  -->
-        <ui:CardControl Header="名称">
+        <ui:CardControl Header="名称" ToolTip="Error">
             <ui:CardControl.Content>
 
-                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name}" />
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
             </ui:CardControl.Content>
         </ui:CardControl>
-
 
     </StackPanel>
 

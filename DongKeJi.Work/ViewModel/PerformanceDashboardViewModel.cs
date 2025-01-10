@@ -195,44 +195,6 @@ public partial class PerformanceDashboardViewModel(
     #region --机构--
 
     /// <summary>
-    ///     创建机构
-    /// </summary>
-    /// <returns></returns>
-    public async Task<CustomerViewModel?> CreateCustomerAsync()
-    {
-        var customerCreatorVm = new CustomerCreatorViewModel();
-
-        var content = new SimpleContentDialogCreateOptions
-        {
-            Title = "新增机构",
-            Content = new CustomerCreatorView { DataContext = customerCreatorVm },
-            PrimaryButtonText = "创建",
-            CloseButtonText = "取消"
-        };
-
-        //弹窗
-
-        while (true)
-        {
-            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
-
-            if (dialogResult != ContentDialogResult.Primary) return null;
-
-            if (string.IsNullOrWhiteSpace(customerCreatorVm.Customer.Name))
-            {
-                snackbarService.ShowWarning("名称不可为空");
-                continue;
-            }
-
-            break;
-        }
-
-        //等待确认
-        return customerCreatorVm.Customer;
-    }
-
-
-    /// <summary>
     ///     刷新
     /// </summary>
     /// <returns></returns>
@@ -262,17 +224,29 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            var customerVm = await CreateCustomerAsync();
-            if (customerVm is null) return;
+            var customerCreatorVm = new CustomerCreatorViewModel();
+            var dialogContent = new SimpleContentDialogCreateOptions
+            {
+                Title = "新增机构",
+                Content = new CustomerCreatorView { DataContext = customerCreatorVm },
+                PrimaryButtonText = "创建",
+                CloseButtonText = "取消"
+            };
+
+            //弹窗
+            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(dialogContent);
+
+            //等待确认
+            if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await customerRepository.AddAsync(customerVm, Staff);
+            await customerRepository.AddAsync(customerCreatorVm.Customer, Staff);
 
             //更新界面
-            CustomerList.Add(customerVm);
-            Customer = customerVm;
+            CustomerList.Add(customerCreatorVm.Customer);
+            Customer = customerCreatorVm.Customer;
 
-            snackbarService.ShowSuccess($"已创建机构: {customerVm.Name} - {customerVm.Id}");
+            snackbarService.ShowSuccess($"已创建机构: {customerCreatorVm.Customer.Name} - {customerCreatorVm.Customer.Id}");
         }
         catch (Exception ex)
         {
@@ -326,33 +300,6 @@ public partial class PerformanceDashboardViewModel(
     #region --订单--
 
     /// <summary>
-    ///     创建订单
-    /// </summary>
-    /// <returns></returns>
-    public async ValueTask<OrderViewModel?> CreateOrderAsync()
-    {
-        var salespersonList = await staffRepository.FindAllByUserAndPositionTypeAsync(LoginUser, StaffPositionType.Salesperson);
-        var orderCreatorVm = new OrderCreatorViewModel(salespersonList);
-
-        var content = new SimpleContentDialogCreateOptions
-        {
-            Title = "新增订单",
-            Content = new OrderCreatorView { DataContext = orderCreatorVm },
-            PrimaryButtonText = "创建",
-            CloseButtonText = "取消"
-        };
-
-        //弹窗
-        var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
-
-        //等待确认
-        if (dialogResult != ContentDialogResult.Primary) return null;
-
-        return orderCreatorVm.Order;
-    }
-
-
-    /// <summary>
     ///     刷新数据
     /// </summary>
     /// <returns></returns>
@@ -382,17 +329,38 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            var orderVm = await CreateOrderAsync();
-            if (orderVm is null) return;
+            var salespersonList = await staffRepository
+                .FindAllByUserAndPositionTypeAsync(LoginUser, StaffPositionType.Salesperson);
+            
+            var orderCreatorVm = new OrderCreatorViewModel(salespersonList);
+
+            var content = new SimpleContentDialogCreateOptions
+            {
+                Title = "新增订单",
+                Content = new OrderCreatorView { DataContext = orderCreatorVm },
+                PrimaryButtonText = "创建",
+                CloseButtonText = "取消"
+            };
+
+            //弹窗
+            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
+
+            //等待确认
+            if (dialogResult != ContentDialogResult.Primary) return;
+
+            if (orderCreatorVm.Salesperson is null)
+            {
+                throw new Exception("订单新增失败, 未设置订单关联销售");
+            }
 
             //更新数据库
-            await orderRepository.AddAsync(orderVm, Staff, Customer);
+            await orderRepository.AddAsync(orderCreatorVm.Order, orderCreatorVm.Salesperson, Customer);
 
             //更新界面
-            OrderList.Add(orderVm);
-            Order = orderVm;
+            OrderList.Add(orderCreatorVm.Order);
+            Order = orderCreatorVm.Order;
 
-            snackbarService.ShowSuccess($"已添加订单: {orderVm.Name} - {orderVm.Id}");
+            snackbarService.ShowSuccess($"已添加订单: {orderCreatorVm.Order.Name} - {orderCreatorVm.Order.Id}");
         }
         catch (Exception ex)
         {
@@ -446,22 +414,6 @@ public partial class PerformanceDashboardViewModel(
     #region --划扣--
 
     /// <summary>
-    ///     创建划扣
-    /// </summary>
-    /// <returns></returns>
-    private ConsumeViewModel? CreateConsume()
-    {
-        return Order switch
-        {
-            TimingOrderViewModel => new TimingConsumeViewModel { ConsumeDays = 1 },
-            CountingOrderViewModel => new CountingConsumeViewModel { ConsumeCounts = 1 },
-            MixingOrderViewModel => new MixingConsumeViewModel { ConsumeDays = 1, ConsumeCounts = 0 },
-            _ => null
-        };
-    }
-
-
-    /// <summary>
     ///     刷新
     /// </summary>
     /// <returns></returns>
@@ -474,13 +426,13 @@ public partial class PerformanceDashboardViewModel(
 
             switch (Order)
             {
-                case TimingOrderViewModel:
+                case OrderTimingViewModel:
                     consumes.AddRange(await consumeRepository.GetAllByTimingOrderAsync(Order)); break;
 
-                case CountingOrderViewModel:
+                case OrderCountingViewModel:
                     consumes.AddRange(await consumeRepository.GetAllByCountingOrderAsync(Order)); break;
 
-                case MixingOrderViewModel:
+                case OrderMixingViewModel:
                     consumes.AddRange(await consumeRepository.GetAllByMixingOrderAsync(Order)); break;
             }
 
@@ -502,7 +454,14 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            var consumeVm = CreateConsume();
+            ConsumeViewModel consumeVm = Order switch
+            {
+                OrderTimingViewModel => new ConsumeTimingViewModel { ConsumeDays = 1 },
+                OrderCountingViewModel => new ConsumeCountingViewModel { ConsumeCounts = 1 },
+                OrderMixingViewModel => new ConsumeMixingViewModel { ConsumeDays = 1, ConsumeCounts = 0 },
+                _ => throw new Exception($"未知订单类型, 订单信息: {Order}")
+            };
+
             if (consumeVm is null) throw new Exception($"划扣创建失败, 订单类型不明确, 订单类型: {Order.GetType()}");
 
             await consumeRepository.AddAsync(consumeVm, Order, Staff);

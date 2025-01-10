@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.ViewModel;
 using DongKeJi.Work.Model.Entity.Order;
@@ -16,9 +18,14 @@ public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
     [ObservableProperty] private OrderViewModel _order = OrderViewModel.Empty;
 
     /// <summary>
-    ///     销售选择器
+    ///     当前选择的销售
     /// </summary>
-    [ObservableProperty] private ListViewModel<StaffViewModel> _salesperson;
+    [ObservableProperty] private StaffViewModel? _salesperson;
+
+    /// <summary>
+    ///     销售列表
+    /// </summary>
+    [ObservableProperty] private ObservableCollection<StaffViewModel> _salespersonSet;
 
     /// <summary>
     ///     当前订单类型
@@ -28,7 +35,9 @@ public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
 
     public OrderCreatorViewModel(IEnumerable<StaffViewModel> salespersonViewModels)
     {
-        Salesperson = new ListViewModel<StaffViewModel>(salespersonViewModels);
+        SalespersonSet = salespersonViewModels.ToObservableCollection();
+        Salesperson = SalespersonSet.FirstOrDefault();
+
         CurrentType = OrderType.Timing;
     }
 
@@ -36,7 +45,7 @@ public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
     {
         Order = value switch
         {
-            OrderType.Timing => new TimingOrderViewModel
+            OrderType.Timing => new OrderTimingViewModel
             {
                 Name = "设计包月",
                 Describe = Order.Describe,
@@ -46,7 +55,7 @@ public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
                 InitDays = 0,
                 TotalDays = 30
             },
-            OrderType.Counting => new CountingOrderViewModel
+            OrderType.Counting => new OrderCountingViewModel
             {
                 Name = "散单海报",
                 Describe = Order.Describe,
@@ -56,7 +65,7 @@ public partial class OrderCreatorViewModel : ViewModelBase, IOrderContext
                 InitCounts = 0,
                 TotalCounts = 1
             },
-            OrderType.Mixing => new MixingOrderViewModel
+            OrderType.Mixing => new OrderMixingViewModel
             {
                 Name = "30天20张",
                 Describe = Order.Describe,

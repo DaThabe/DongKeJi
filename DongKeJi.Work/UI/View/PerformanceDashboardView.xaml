@@ -67,7 +67,7 @@
                         <StackPanel.Resources>
 
                             <!--  混合  -->
-                            <DataTemplate x:Key="MixingOrder" DataType="{x:Type orderVm:MixingOrderViewModel}">
+                            <DataTemplate x:Key="MixingOrder" DataType="{x:Type orderVm:OrderMixingViewModel}">
 
                                 <ui:TextBlock
                                     FontTypography="Caption"
@@ -80,7 +80,7 @@
                             </DataTemplate>
 
                             <!--  计时  -->
-                            <DataTemplate x:Key="Timing" DataType="{x:Type orderVm:TimingOrderViewModel}">
+                            <DataTemplate x:Key="Timing" DataType="{x:Type orderVm:OrderTimingViewModel}">
 
                                 <ui:TextBlock
                                     FontTypography="Caption"
@@ -92,7 +92,7 @@
                             </DataTemplate>
 
                             <!--  计数  -->
-                            <DataTemplate x:Key="Counting" DataType="{x:Type orderVm:CountingOrderViewModel}">
+                            <DataTemplate x:Key="Counting" DataType="{x:Type orderVm:OrderCountingViewModel}">
 
                                 <ui:TextBlock
                                     FontTypography="Caption"
@@ -138,7 +138,7 @@
                 <ui:CardControl.Resources>
 
                     <!--  计时划扣  -->
-                    <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume:TimingConsumeViewModel}">
+                    <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume:ConsumeTimingViewModel}">
 
                         <StackPanel Orientation="Horizontal">
 
@@ -157,7 +157,7 @@
                     </DataTemplate>
 
                     <!--  计数划扣  -->
-                    <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume:CountingConsumeViewModel}">
+                    <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume:ConsumeCountingViewModel}">
 
                         <StackPanel Orientation="Horizontal">
 
@@ -176,7 +176,7 @@
                     </DataTemplate>
 
                     <!--  混合划扣  -->
-                    <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume:MixingConsumeViewModel}">
+                    <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume:ConsumeMixingViewModel}">
 
                         <StackPanel Orientation="Horizontal">
 

@@ -1,4 +1,5 @@
-﻿using DongKeJi.Common;
+﻿using AutoMapper;
+using DongKeJi.Common;
 using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
@@ -50,7 +51,7 @@ public interface IConsumeRepository
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<TimingConsumeViewModel>> GetAllByTimingOrderAsync(
+    ValueTask<IEnumerable<ConsumeTimingViewModel>> GetAllByTimingOrderAsync(
         IIdentifiable order,
         int? skip = null,
         int? take = null,
@@ -64,7 +65,7 @@ public interface IConsumeRepository
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<CountingConsumeViewModel>> GetAllByCountingOrderAsync(
+    ValueTask<IEnumerable<ConsumeCountingViewModel>> GetAllByCountingOrderAsync(
         IIdentifiable order,
         int? skip = null,
         int? take = null,
@@ -78,7 +79,7 @@ public interface IConsumeRepository
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<MixingConsumeViewModel>> GetAllByMixingOrderAsync(
+    ValueTask<IEnumerable<ConsumeMixingViewModel>> GetAllByMixingOrderAsync(
         IIdentifiable order,
         int? skip = null,
         int? take = null,
@@ -89,49 +90,57 @@ public interface IConsumeRepository
 ///     划扣服务
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IConsumeRepository))]
-internal class ConsumeRepository(IServiceProvider services
-) : Repository<WorkDbContext, ConsumeEntity, ConsumeViewModel>(services), IConsumeRepository
+internal class ConsumeRepository(
+    IServiceProvider services,
+    IMapper mapper,
+    WorkDbContext dbContext) : 
+    IConsumeRepository
 {
-    public ValueTask AddAsync(
+    public async ValueTask AddAsync(
         ConsumeViewModel consume,
         IIdentifiable order,
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var consumeEntity = await DbContext.Consumes
+            //验证
+            consume.Validate();
+
+            //划扣
+            var consumeEntity = await dbContext.Consumes
                 .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
+            RepositoryException.ThrowIfEntityAlreadyExists(consumeEntity, "划扣已存在");
 
-            if (consumeEntity != null && !consumeEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣添加失败, 相同Id已存在\n划扣信息: {staff}");
-            }
-
-            var staffEntity = await DbContext.Staffs
+            //员工
+            var staffEntity = await dbContext.Staffs
                 .Include(x => x.Customers)
                 .Include(x => x.Orders)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "关联员工不存在");
 
-            if (staffEntity == null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣添加失败, 关联员工不存在\n员工Id: {staff.Id}");
-            }
 
             //创建实体
-            consumeEntity = Mapper.Map<ConsumeEntity>(consume);
+            consumeEntity = mapper.Map<ConsumeEntity>(consume);
             await Handel(staffEntity, consumeEntity);
 
             //保存
-            await DbContext.AddAsync(consumeEntity, cancellation);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"划扣添加失败, 未写入数据库\n划扣信息: {consume}\n订单Id: {order.Id}\n员工Id: {staff.Id}");
-            }
-            RegisterAutoUpdate(consume);
+            await dbContext.AddAsync(consumeEntity, cancellation);
 
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
 
+            dbContext.RegisterAutoUpdate<ConsumeEntity, ConsumeViewModel>(consume, services);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"添加划扣时发生错误\n划扣信息: {consume}\n订单Id: {order.Id}\n员工Id: {staff.Id}", ex);
+        }
+
+        return;
 
         async ValueTask Handel(StaffEntity staffEntity, ConsumeEntity consumeEntity)
         {
@@ -153,16 +162,12 @@ internal class ConsumeRepository(IServiceProvider services
 
         async ValueTask Timing(StaffEntity staffEntity, TimingConsumeEntity timingConsumeEntity)
         {
-            var orderEntity = await DbContext.TimingOrders
+            var orderEntity = await dbContext.TimingOrders
                 .Include(x => x.Staffs)
                 .Include(x => x.Consumes)
                 .Where(x => x.Id == order.Id)
                 .FirstOrDefaultAsync(cancellation);
-
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣添加失败, 关联订单不存在, 订单Id: {order.Id}");
-            }
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "关联订单不存在");
 
             //员工-划扣 多对多
             staffEntity.Consumes.Add(timingConsumeEntity);
@@ -179,16 +184,12 @@ internal class ConsumeRepository(IServiceProvider services
 
         async ValueTask Counting(StaffEntity staffEntity, CountingConsumeEntity countingConsumeEntity)
         {
-            var orderEntity = await DbContext.CountingOrders
+            var orderEntity = await dbContext.CountingOrders
                 .Include(x => x.Staffs)
                 .Include(x => x.Consumes)
                 .Where(x => x.Id == order.Id)
                 .FirstOrDefaultAsync(cancellation);
-
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣添加失败, 关联订单不存在, 订单Id: {order.Id}");
-            }
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "关联订单不存在");
 
             //员工-划扣 多对多
             staffEntity.Consumes.Add(countingConsumeEntity);
@@ -205,16 +206,12 @@ internal class ConsumeRepository(IServiceProvider services
 
         async ValueTask Mixing(StaffEntity staffEntity, MixingConsumeEntity mixingConsumeEntity)
         {
-            var orderEntity = await DbContext.MixingOrders
+            var orderEntity = await dbContext.MixingOrders
                 .Include(x => x.Staffs)
                 .Include(x => x.Consumes)
                 .Where(x => x.Id == order.Id)
                 .FirstOrDefaultAsync(cancellation);
-
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣添加失败, 关联订单不存在, 订单Id: {order.Id}");
-            }
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "关联订单不存在");
 
             //员工-划扣 多对多
             staffEntity.Consumes.Add(mixingConsumeEntity);
@@ -230,83 +227,105 @@ internal class ConsumeRepository(IServiceProvider services
         }
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         IIdentifiable consume,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var consumeEntity = await DbContext.Consumes
-            .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
+            var consumeEntity = await dbContext.Consumes
+                .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
+            consumeEntity = RepositoryException.ThrowIfEntityNotFound(consumeEntity, "划扣不存在");
 
-            if (consumeEntity is null || consumeEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣删除失败, 数据不存在, 划扣Id: {consume.Id}");
-            }
+            dbContext.Remove(consumeEntity);
 
-            DbContext.Remove(consumeEntity);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"划扣删除失败, 未写入数据库\n划扣Id: {consume.Id}");
-            }
-
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"删除划扣时发生错误\n划扣Id: {consume.Id}", ex);
+        }
     }
 
-    public async ValueTask<IEnumerable<TimingConsumeViewModel>> GetAllByTimingOrderAsync(
+    public async ValueTask<IEnumerable<ConsumeTimingViewModel>> GetAllByTimingOrderAsync(
         IIdentifiable order,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return await UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var entityList = await DbContext.TimingConsumes
+            var entityList = await dbContext.TimingConsumes
                 .OrderBy(x => x.Id)
                 .Where(x => x.OrderId == order.Id)
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(x => RegisterAutoUpdate<TimingConsumeViewModel>(x));
-
-        }, cancellation);
+            return entityList.Select(x =>
+                dbContext.RegisterAutoUpdate<TimingConsumeEntity, ConsumeTimingViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取计时订单下所有划扣时发生错误\n订单Id: {order.Id}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<CountingConsumeViewModel>> GetAllByCountingOrderAsync(
+    public async ValueTask<IEnumerable<ConsumeCountingViewModel>> GetAllByCountingOrderAsync(
         IIdentifiable order,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var entityList = await DbContext.CountingConsumes
+            var entityList = await dbContext.CountingConsumes
                 .OrderBy(x => x.Id)
                 .Where(x => x.OrderId == order.Id)
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(x => RegisterAutoUpdate<CountingConsumeViewModel>(x));
-
-        }, cancellation);
+            return entityList.Select(x =>
+                dbContext.RegisterAutoUpdate<CountingConsumeEntity, ConsumeCountingViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取计时订单下所有划扣时发生错误\n订单Id: {order.Id}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<MixingConsumeViewModel>> GetAllByMixingOrderAsync(
+    public async ValueTask<IEnumerable<ConsumeMixingViewModel>> GetAllByMixingOrderAsync(
         IIdentifiable order,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var entityList = await DbContext.MixingConsumes
+            var entityList = await dbContext.MixingConsumes
                 .OrderBy(x => x.Id)
                 .Where(x => x.OrderId == order.Id)
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(x => RegisterAutoUpdate<MixingConsumeViewModel>(x));
-
-        }, cancellation);
+            return entityList.Select(x =>
+                dbContext.RegisterAutoUpdate<MixingConsumeEntity, ConsumeMixingViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取混合订单下所有划扣时发生错误\n订单Id: {order.Id}", ex);
+        }
     }
 }

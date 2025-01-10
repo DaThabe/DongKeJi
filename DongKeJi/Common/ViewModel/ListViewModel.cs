@@ -6,6 +6,7 @@ namespace DongKeJi.Common.ViewModel;
 /// <summary>
 ///     列表VM
 /// </summary>
+[Obsolete("直接用通知集合类: ObservableCollection")]
 public partial class ListViewModel<TViewModel> : ViewModelBase
 {
     /// <summary>

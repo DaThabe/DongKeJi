@@ -6,7 +6,7 @@ namespace DongKeJi.Work.ViewModel.Common.Order;
 /// <summary>
 ///     计时订阅订单
 /// </summary>
-public partial class TimingOrderViewModel : OrderViewModel
+public partial class OrderTimingViewModel : OrderViewModel
 {
     /// <summary>
     ///     初始天数

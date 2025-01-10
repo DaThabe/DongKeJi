@@ -8,7 +8,7 @@ namespace DongKeJi.Work.ViewModel.Common.Staff;
 /// <summary>
 ///     员工职位
 /// </summary>
-public partial class StaffPositionViewModel : IdentifiableViewModel, IEmptyable<StaffPositionViewModel>
+public partial class StaffPositionViewModel : DataViewModel, IEmptyable<StaffPositionViewModel>
 {
     /// <summary>
     ///     描述

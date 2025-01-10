@@ -15,7 +15,7 @@
     <UserControl.Resources>
 
         <!--  混合  -->
-        <DataTemplate x:Key="MixingOrder" DataType="{x:Type order:MixingOrderViewModel}">
+        <DataTemplate x:Key="MixingOrder" DataType="{x:Type order:OrderMixingViewModel}">
             <UniformGrid Columns="2" Rows="2">
 
                 <ui:CardControl Header="起始天数">
@@ -26,7 +26,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入创建时已经消耗的天数"
-                            Value="{Binding InitDays}" />
+                            Value="{Binding InitDays, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -38,7 +38,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入总天数"
-                            Value="{Binding TotalDays}" />
+                            Value="{Binding TotalDays, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -50,7 +50,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入创建时已经消耗的张数"
-                            Value="{Binding InitCounts}" />
+                            Value="{Binding InitCounts, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -62,7 +62,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入总张数"
-                            Value="{Binding TotalCounts}" />
+                            Value="{Binding TotalCounts, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -70,7 +70,7 @@
         </DataTemplate>
 
         <!--  计时  -->
-        <DataTemplate x:Key="TimingOrder" DataType="{x:Type order:TimingOrderViewModel}">
+        <DataTemplate x:Key="TimingOrder" DataType="{x:Type order:OrderTimingViewModel}">
             <UniformGrid Columns="2">
 
                 <ui:CardControl Header="起始天数">
@@ -81,7 +81,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入创建时已经消耗的天数"
-                            Value="{Binding InitDays}" />
+                            Value="{Binding InitDays, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -93,7 +93,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入总天数"
-                            Value="{Binding TotalDays}" />
+                            Value="{Binding TotalDays, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -101,7 +101,7 @@
         </DataTemplate>
 
         <!--  计数  -->
-        <DataTemplate x:Key="CountingOrder" DataType="{x:Type order:CountingOrderViewModel}">
+        <DataTemplate x:Key="CountingOrder" DataType="{x:Type order:OrderCountingViewModel}">
             <UniformGrid Columns="2">
 
                 <ui:CardControl Header="起始张数">
@@ -112,7 +112,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入创建时已经消耗的张数"
-                            Value="{Binding InitCounts}" />
+                            Value="{Binding InitCounts, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -124,7 +124,7 @@
                             Maximum="9999"
                             Minimum="0"
                             ToolTip="请输入总张数"
-                            Value="{Binding TotalCounts}" />
+                            Value="{Binding TotalCounts, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                     </ui:CardControl.Content>
                 </ui:CardControl>
 
@@ -167,7 +167,7 @@
                 Header="名称">
 
                 <ui:CardControl.Content>
-                    <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name}" />
+                    <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:CardControl.Content>
 
             </ui:CardControl>
@@ -192,7 +192,7 @@
                 Header="备注">
 
                 <ui:CardControl.Content>
-                    <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Describe}" />
+                    <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Describe, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:CardControl.Content>
 
             </ui:CardControl>
@@ -205,7 +205,7 @@
                 Header="时间">
 
                 <ui:CardControl.Content>
-                    <DatePicker SelectedDate="{Binding SubscribeTime}" ToolTip="创建的时间" />
+                    <DatePicker SelectedDate="{Binding SubscribeTime, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="创建的时间" />
                 </ui:CardControl.Content>
 
             </ui:CardControl>
@@ -222,7 +222,7 @@
                         Maximum="99999"
                         Minimum="0"
                         PlaceholderText="点击输入..."
-                        Text="{Binding Price}" />
+                        Text="{Binding Price, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:CardControl.Content>
 
             </ui:CardControl>

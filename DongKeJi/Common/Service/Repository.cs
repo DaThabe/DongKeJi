@@ -1,108 +1,112 @@
-﻿using AutoMapper;
+﻿using System.ComponentModel;
+using AutoMapper;
 using DongKeJi.Common.Entity;
-using DongKeJi.Common.Exceptions;
+using DongKeJi.Common.UI;
+using DongKeJi.Common.Validation;
 using DongKeJi.Common.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Wpf.Ui;
 
 namespace DongKeJi.Common.Service;
 
 
-/// <summary>
-/// 储存库
-/// </summary>
-/// <typeparam name="TDbContext"></typeparam>
-/// <typeparam name="TEntity"></typeparam>
-/// <typeparam name="TViewModel"></typeparam>
-public abstract class Repository<TDbContext, TEntity,TViewModel>(IServiceProvider services) : IInfrastructure
-    where TDbContext : DbContext
-    where TEntity : EntityBase
-    where TViewModel : IViewModel, IIdentifiable
+public static class RepositoryExtensions
 {
     /// <summary>
-    /// 
+    /// 保存
     /// </summary>
-    public IServiceProvider ServiceProvider => services;
-
-    /// <summary>
-    /// 实体转换器
-    /// </summary>
-    public IMapper Mapper => ServiceProvider.GetRequiredService<IMapper>();
-
-    /// <summary>
-    /// 数据库上下文
-    /// </summary>
-    public TDbContext DbContext => ServiceProvider.GetRequiredService<TDbContext>();
-
-    /// <summary>
-    /// 当前储存库数据表
-    /// </summary>
-    public DbSet<TEntity> DbSet => DbContext.Set<TEntity>();
-
-
-    /// <summary>
-    /// 注册视图模型自动更新
-    /// </summary>
-    /// <param name="vm"></param>
-    /// <param name="exceptionCallback"></param>
+    /// <param name="dbContext"></param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
-    protected TViewModel RegisterAutoUpdate(TViewModel vm, Action<Exception>? exceptionCallback = null)
+    /// <exception cref="DbUpdateException"></exception>
+    public static async ValueTask AssertSaveSuccessAsync<TDbContext>(this TDbContext dbContext, CancellationToken cancellation = default)
+        where TDbContext : DbContext
     {
-        return DbContext.RegisterAutoUpdate<TEntity, TViewModel>(vm, Mapper, exceptionCallback);
+        var result = await dbContext.SaveChangesAsync(cancellation);
+        if(result < 0) throw new DbUpdateException("数据未写入数据库");
     }
 
-    /// <summary>
-    /// 注册视图模型可指定派生类
-    /// </summary>
-    /// <typeparam name="TViewModelChild"></typeparam>
-    /// <param name="vm"></param>
-    /// <param name="exceptionCallback"></param>
-    /// <returns></returns>
-    protected TViewModelChild RegisterAutoUpdate<TViewModelChild>(TViewModelChild vm, Action<Exception>? exceptionCallback = null)
-        where TViewModelChild : TViewModel
+
+    public static IAutoUpdateHandel<TViewModel> AutoUpdate<TEntity, TViewModel>(this DbContext dbContext, TViewModel viewModel, IMapper mapper)
+        where TEntity : EntityBase
+        where TViewModel : IViewModel, IIdentifiable
     {
-        return DbContext.RegisterAutoUpdate<TEntity, TViewModelChild>(vm, Mapper, exceptionCallback);
+        return new AutoUpdateHandel<TEntity, TViewModel>(dbContext, mapper, viewModel);
+    }
+
+    public static IAutoUpdateHandel<TViewModel> AutoUpdate<TEntity, TViewModel>(this DbContext dbContext, TEntity entity, IMapper mapper)
+        where TEntity : EntityBase
+        where TViewModel : IViewModel, IIdentifiable
+    {
+        var viewModel = mapper.Map<TViewModel>(entity);
+        return dbContext.AutoUpdate<TEntity, TViewModel>(viewModel, mapper);
     }
 
 
     /// <summary>
-    /// 将传入的实体转为视图模型后, 注册视图模型自动更新
+    /// 注册自动保存
     /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TViewModel"></typeparam>
+    /// <param name="dbContext"></param>
     /// <param name="entity"></param>
-    /// <param name="exceptionCallback"></param>
-    /// <returns></returns>
-    protected TViewModel RegisterAutoUpdate(TEntity entity, Action<Exception>? exceptionCallback = null)
+    /// <param name="services"></param>
+    public static TViewModel RegisterAutoUpdate<TEntity, TViewModel>(
+        this DbContext dbContext,
+        TEntity entity,
+        IServiceProvider services)
+        where TEntity : EntityBase
+        where TViewModel : DataViewModel
     {
-        return RegisterAutoUpdate(Mapper.Map<TViewModel>(entity), exceptionCallback);
+        var mapper = services.GetRequiredService<IMapper>();
+        var viewModel = mapper.Map<TViewModel>(entity);
+
+        return dbContext.RegisterAutoUpdate<TEntity, TViewModel>(viewModel, services);
     }
 
+
     /// <summary>
-    /// 将传入的实体转为视图模型后, 注册视图模型自动更新
+    /// 注册自动保存
     /// </summary>
-    /// <param name="entity"></param>
-    /// <param name="exceptionCallback"></param>
-    /// <returns></returns>
-    protected TViewModelChild RegisterAutoUpdate<TViewModelChild>(TEntity entity, Action<Exception>? exceptionCallback = null)
-        where TViewModelChild : TViewModel
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TViewModel"></typeparam>
+    /// <param name="dbContext"></param>
+    /// <param name="viewModel"></param>
+    /// <param name="services"></param>
+    public static TViewModel RegisterAutoUpdate<TEntity, TViewModel>(
+        this DbContext dbContext,
+        TViewModel viewModel,
+        IServiceProvider services)
+        where TEntity : EntityBase
+        where TViewModel : DataViewModel
     {
-        return RegisterAutoUpdate(Mapper.Map<TViewModelChild>(entity), exceptionCallback);
+        var mapper = services.GetRequiredService<IMapper>();
+        var snackbar = services.GetRequiredService<ISnackbarService>();
+
+        var handel =  dbContext.AutoUpdate<TEntity, TViewModel>(viewModel, mapper);
+        handel.Faulted += ex => snackbar.ShowError(ex);
+
+        return handel.ViewModel;
     }
+
 
 
 
     /// <summary>
     /// 开启事务, 确保数据原子性
     /// </summary>
+    /// <param name="dbContext"></param>
     /// <param name="action"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    protected async ValueTask UnitOfWorkAsync(Func<IDbContextTransaction, ValueTask> action, CancellationToken cancellation = default)
+    public static async ValueTask UnitOfWorkAsync(
+        this DbContext dbContext, 
+        Func<IDbContextTransaction, ValueTask> action, 
+        CancellationToken cancellation = default)
     {
-        await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
         try
         {
@@ -119,12 +123,16 @@ public abstract class Repository<TDbContext, TEntity,TViewModel>(IServiceProvide
     /// <summary>
     /// 开启事务, 确保数据原子性
     /// </summary>
+    /// <param name="dbContext"></param>
     /// <param name="action"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    protected async ValueTask<TResult> UnitOfWorkAsync<TResult>(Func<IDbContextTransaction, ValueTask<TResult>> action, CancellationToken cancellation = default)
+    public static async ValueTask<TResult> UnitOfWorkAsync<TResult>(
+        this DbContext dbContext, 
+        Func<IDbContextTransaction, ValueTask<TResult>> action, 
+        CancellationToken cancellation = default)
     {
-        await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
         try
         {
@@ -139,89 +147,143 @@ public abstract class Repository<TDbContext, TEntity,TViewModel>(IServiceProvide
             throw;
         }
     }
+
+
+
+    
 }
 
-public static class RepositoryExtensions
+public interface IAutoUpdateHandel<out TViewModel> : IDisposable
+    where TViewModel : IViewModel, IIdentifiable
 {
     /// <summary>
-    /// 注册自动保存
+    /// 更新中
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <typeparam name="TViewModel"></typeparam>
-    /// <param name="dbContext"></param>
-    /// <param name="viewModel"></param>
-    /// <param name="mapper"></param>
-    /// <param name="exceptionCallback"></param>
-    /// <param name="cancellation"></param>
-    /// <exception cref="RepositoryException"></exception>
-    public static TViewModel RegisterAutoUpdate<TEntity, TViewModel>(
-        this DbContext dbContext,
-        TViewModel viewModel, 
-        IMapper mapper, 
-        Action<Exception>? exceptionCallback = null,
-        CancellationToken cancellation = default)
-        where TEntity : EntityBase
-        where TViewModel : IViewModel, IIdentifiable
+    event Action<TViewModel>? Updating;
+
+    /// <summary>
+    /// 更新完毕
+    /// </summary>
+    event Action<TViewModel>? Updated;
+
+    /// <summary>
+    /// 发生错误
+    /// </summary>
+    event Action<Exception>? Faulted;
+
+
+    /// <summary>
+    /// 是否暂停更新
+    /// </summary>
+    bool IsStop { get; set; }
+
+    /// <summary>
+    /// 视图模型
+    /// </summary>
+    TViewModel ViewModel { get; }
+}
+
+
+public class AutoUpdateHandel<TEntity, TViewModel> : IAutoUpdateHandel<TViewModel>
+    where TEntity : EntityBase
+    where TViewModel : IViewModel, IIdentifiable
+{
+    private TViewModel? _backup;
+    private PropertyChangedEventHandler? _propertyChangedEventHandler;
+
+
+    /// <summary>
+    /// 是否暂停更新
+    /// </summary>
+    public bool IsStop { get; set; }
+
+    public TViewModel ViewModel { get; }
+
+
+    /// <summary>
+    /// 更新中
+    /// </summary>
+    public event Action<TViewModel>? Updating;
+
+    /// <summary>
+    /// 更新完毕
+    /// </summary>
+    public event Action<TViewModel>? Updated;
+
+    /// <summary>
+    /// 发生错误
+    /// </summary>
+    public event Action<Exception>? Faulted;
+
+
+    public AutoUpdateHandel(DbContext dbContext, IMapper mapper, TViewModel viewModel)
     {
-        viewModel.PropertyChanged += async (_, _) =>
+        ViewModel = viewModel;
+
+        _propertyChangedEventHandler = async void (_, _) =>
         {
             try
             {
-                await SaveProcessAsync();
+                if (IsStop) return;
+
+                Updating?.Invoke(viewModel);
+
+                await UpdateAsync(dbContext, mapper, viewModel, CancellationToken.None);
+
+                Updated?.Invoke(viewModel);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                exceptionCallback?.Invoke(e);
+                Faulted?.Invoke(ex);
             }
         };
 
-        return viewModel;
+        viewModel.PropertyChanging += (_, _) => _backup = mapper.Map<TViewModel>(viewModel);
+        viewModel.PropertyChanged += _propertyChangedEventHandler;
+    }
 
-        //保存过程
-        async Task SaveProcessAsync()
-        {
-            var existEntity = await dbContext
-                .Set<TEntity>()
-                .FirstOrDefaultAsync(x => x.Id == viewModel.Id, cancellationToken: cancellation);
+    public void Dispose()
+    {
+        IsStop = true;
+        Updating = null;
+        Updated = null;
+        Faulted = null;
 
-            if (existEntity is null || existEntity.IsEmpty())
-            {
-                var entity = mapper.Map<TEntity>(viewModel);
-                dbContext.Add(entity);
-            }
-            else
-            {
-                mapper.Map(viewModel, existEntity);
-            }
-
-            if (await dbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"写入数据库失败, 数据信息:{viewModel}");
-            }
-        }
+        ViewModel.PropertyChanged -= _propertyChangedEventHandler;
+        _propertyChangedEventHandler = null;
     }
 
 
+
+
     /// <summary>
-    /// 注册自动保存
+    /// 更新过程
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <typeparam name="TViewModel"></typeparam>
-    /// <param name="dbContext"></param>
-    /// <param name="entity"></param>
     /// <param name="mapper"></param>
-    /// <param name="exceptionCallback"></param>
+    /// <param name="viewModel"></param>
     /// <param name="cancellation"></param>
-    public static TViewModel RegisterAutoUpdate<TEntity, TViewModel>(
-        this DbContext dbContext,
-        TEntity entity,
-        IMapper mapper,
-        Action<Exception>? exceptionCallback = null,
-        CancellationToken cancellation = default)
-        where TEntity : EntityBase
-        where TViewModel : IViewModel, IIdentifiable
+    /// <param name="dbContext"></param>
+    /// <returns></returns>
+    private static async ValueTask UpdateAsync(DbContext dbContext, IMapper mapper, IIdentifiable viewModel, CancellationToken cancellation = default)
     {
-        var viewModel = mapper.Map<TViewModel>(entity);
-        return dbContext.RegisterAutoUpdate<TEntity, TViewModel>(viewModel, mapper, exceptionCallback, cancellation);
+        //查询数据库
+        var existEntity = await dbContext
+            .Set<TEntity>()
+            .FirstOrDefaultAsync(x => x.Id == viewModel.Id, cancellation);
+
+        if (existEntity is null || existEntity.IsEmpty())
+        {
+            //新增数据
+            var entity = mapper.Map<TEntity>(viewModel);
+            dbContext.Add(entity);
+        }
+        else
+        {
+            //更新数据
+            mapper.Map(viewModel, existEntity);
+        }
+
+        //保存到数据库
+        await dbContext.AssertSaveSuccessAsync(cancellation);
     }
 }

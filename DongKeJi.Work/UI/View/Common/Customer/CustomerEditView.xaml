@@ -10,13 +10,29 @@
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
+    <UserControl.Resources>
+
+        <ControlTemplate x:Key="ValidationErrorTemplate">
+            <StackPanel>
+                <Border BorderBrush="Red" BorderThickness="1">
+                    <AdornedElementPlaceholder />
+                </Border>
+                <TextBlock
+                    FontSize="12"
+                    Foreground="Red"
+                    Text="{Binding [0].ErrorContent}" />
+            </StackPanel>
+        </ControlTemplate>
+
+    </UserControl.Resources>
+
     <StackPanel>
 
         <!--  内容  -->
         <ui:CardControl Header="名称">
 
             <ui:CardControl.Content>
-                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name}" />
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
             </ui:CardControl.Content>
 
         </ui:CardControl>
@@ -24,7 +40,7 @@
         <ui:CardControl Header="区域">
 
             <ui:CardControl.Content>
-                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Area}" />
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Area, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
             </ui:CardControl.Content>
 
         </ui:CardControl>

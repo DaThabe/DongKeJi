@@ -1,8 +1,10 @@
-﻿using DongKeJi.Common;
+﻿using AutoMapper;
+using DongKeJi.Common;
 using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.Service;
+using DongKeJi.Common.Validation;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
@@ -22,13 +24,13 @@ public interface IOrderRepository
     ///     创建订单
     /// </summary>
     /// <param name="order"></param>
-    /// <param name="staff">创建订单的员工</param>
+    /// <param name="salesperson">创建订单的销售</param>
     /// <param name="customer"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
     ValueTask AddAsync(
         OrderViewModel order,
-        IIdentifiable staff,
+        IIdentifiable salesperson,
         IIdentifiable customer,
         CancellationToken cancellation = default);
 
@@ -97,209 +99,228 @@ public interface IOrderRepository
 ///     订单服务
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IOrderRepository))]
-internal class OrderRepository(IServiceProvider services) :
-    Repository<WorkDbContext, OrderEntity, OrderViewModel>(services), IOrderRepository
+internal class OrderRepository(
+    IServiceProvider services,
+    WorkDbContext dbContext, 
+    IMapper mapper) : IOrderRepository
 {
-    public ValueTask AddAsync(
+    public async ValueTask AddAsync(
         OrderViewModel order,
-        IIdentifiable staff,
+        IIdentifiable salesperson,
         IIdentifiable customer,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntity = await DbContext.Orders
-                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+            //验证
+            order.AssertValidate();
 
-            if (orderEntity is not null)
-            {
-                throw new RepositoryException($"订单添加失败, 订单已存在\n订单信息: {order}\n员工Id: {staff.Id}, 机构Id: {customer}");
-            }
+            //订单
+            var orderEntity = await dbContext.Orders
+                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellationToken: cancellation);
+            RepositoryException.ThrowIfEntityAlreadyExists(orderEntity, "订单已存在");
 
 
-            var staffEntity = await DbContext.Staffs
-                .Include(x => x.Orders)
-                .Include(x => x.Customers)
-                .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"订单添加失败, 关联员工不存在\n订单信息: {order}\n员工Id: {staff.Id}");
-            }
-
-            var customerEntity = await DbContext.Customers
-                .Include(x => x.Orders)
+            //职位
+            var positionEntity = await dbContext.StaffPositions
                 .Include(x => x.Staffs)
+                .FirstOrDefaultAsync(x => x.Type ==  StaffPositionType.Salesperson, cancellation);
+            positionEntity = RepositoryException.ThrowIfEntityNotFound(positionEntity, "销售职位不存在");
+
+
+            //员工
+            var salespersonEntity = await dbContext.Staffs
+                .Include(x => x.Positions)
+                .Where(x => x.Positions.Contains(positionEntity))
+                .FirstOrDefaultAsync(x => x.Id == salesperson.Id, cancellation);
+            salespersonEntity = RepositoryException.ThrowIfEntityNotFound(salespersonEntity,"销售员工不存在");
+
+            //机构
+            var customerEntity = await dbContext.Customers
+                .Include(x=>x.Orders)
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
-            
-            if (customerEntity is null || customerEntity.IsEmpty())
-            {
-                throw new RepositoryException($"订单添加失败, 关联机构不存在\n订单信息: {order}\n机构Id: {customer.Id}");
-            }
+            customerEntity = RepositoryException.ThrowIfEntityNotFound(customerEntity, "机构不存在");
 
-            //创建实体
-            orderEntity = Mapper.Map<OrderEntity>(order);
+            //关联
+            orderEntity = mapper.Map<OrderEntity>(order);
 
-            //员工-机构 多对多
-            staffEntity.Customers.Add(customerEntity, x => x.Id != customerEntity.Id);
-            customerEntity.Staffs.Add(staffEntity, x => x.Id != staffEntity.Id);
-
-            //订单-员工 多对多
-            orderEntity.Staffs.Add(staffEntity);
-            staffEntity.Orders.Add(orderEntity);
-
-            //订单-机构 多对多
+            orderEntity.Staffs.Add(salespersonEntity, x => x.Id != salesperson.Id);
             orderEntity.Customer = customerEntity;
+
+            salespersonEntity.Orders.Add(orderEntity);
             customerEntity.Orders.Add(orderEntity);
 
             //保存
-            await DbContext.AddAsync(orderEntity, cancellation);
-            if(await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"订单添加失败, 未写入数据库\n订单信息: {order}\n员工Id: {staff.Id}\n机构Id: {customer.Id}");
-            }
-            
-            RegisterAutoUpdate(order);
+            await dbContext.AddAsync(orderEntity, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation);
 
-        }, cancellation);
+            dbContext.RegisterAutoUpdate<OrderEntity, OrderViewModel>(order, services);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"添加订单时发生错误\n订单信息: {order}\n销售Id: {salesperson}\n机构Id: {customer}", ex);
+        }
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         IIdentifiable order,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntity = await DbContext.Orders
-                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+            //订单
+            var orderEntity = await dbContext.Orders
+                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellationToken: cancellation);
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
 
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"机构删除失败, 数据不存在\n订单Id: {order.Id}");
-            }
+            dbContext.Remove(orderEntity);
 
-            DbContext.Remove(orderEntity);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"机构删除失败, 未写入数据库\n订单Id: {orderEntity.Id}");
-            }
-
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"删除订单时发生错误\n订单Id: {order}", ex);
+        }
     }
 
-    public ValueTask<StaffViewModel> FindSalespersonAsync(
-        IIdentifiable order, 
+    public async ValueTask<StaffViewModel> FindSalespersonAsync(
+        IIdentifiable order,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntity = await DbContext.Orders
+            //订单
+            var orderEntity = await dbContext.Orders
                 .Include(x => x.Staffs)
-                .ThenInclude(x => x.Positions)
+                .ThenInclude(staffEntity => staffEntity.Positions)
                 .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
 
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"订单销售查询除失败, 数据不存在\n订单Id: {order.Id}");
-            }
+            //职位
+            var positionEntity = await dbContext.StaffPositions
+                .FirstOrDefaultAsync(x => x.Type == StaffPositionType.Salesperson, cancellationToken: cancellation);
+            positionEntity = RepositoryException.ThrowIfEntityNotFound(positionEntity, "销售职位不存在");
 
-            var salespersonStaff = orderEntity.Staffs.FirstOrDefault(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
+            //订单-销售
+            var salespersonStaff = orderEntity.Staffs
+                .FirstOrDefault(x => x.Positions.Contains(positionEntity));
+            salespersonStaff = RepositoryException.ThrowIfEntityNotFound(salespersonStaff, "销售不存在");
 
-            if (salespersonStaff is null || salespersonStaff.IsEmpty())
-            {
-                throw new RepositoryException("订单销售查询失败, 销售不存在");
-            }
-
-            var salespersonVm = Mapper.Map<StaffViewModel>(salespersonStaff);
-            DbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(salespersonVm, Mapper);
-
-            return salespersonVm;
-
-        }, cancellation);
+            mapper.Map<StaffViewModel>(salespersonStaff);
+            return dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(salespersonStaff, services);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"查询订单销售时发生错误\n订单Id: {order}", ex);
+        }
     }
 
-    public ValueTask ChangeSalespersonAsync(
-        IIdentifiable order, 
+    public async ValueTask ChangeSalespersonAsync(
+        IIdentifiable order,
         IIdentifiable salesperson,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntity = await DbContext.Orders
-                .Include(x=>x.Staffs)
-                .ThenInclude(x=>x.Positions)
+            //订单
+            var orderEntity = await dbContext.Orders
+                .Include(x => x.Staffs)
+                .ThenInclude(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
 
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"订单更换销售除失败, 数据不存在\n机构Id: {order.Id}");
-            }
-
-            var salespersonEntity = await DbContext.Staffs
+            //销售
+            var salespersonEntity = await dbContext.Staffs
                 .Include(staffEntity => staffEntity.Orders)
                 .FirstOrDefaultAsync(x => x.Id == salesperson.Id, cancellation);
+            salespersonEntity = RepositoryException.ThrowIfEntityNotFound(salespersonEntity, "销售不存在");
 
-            if (salespersonEntity is null || salespersonEntity.IsEmpty())
-            {
-                throw new RepositoryException($"订单更换销售除失败, 销售不存在\n员工Id: {salesperson.Id}");
-            }
-
-            var salespersonStaffList = orderEntity.Staffs.Where(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
-            foreach (var salespersonItem in salespersonStaffList)
+            //订单-销售
+            var orderSalespersonSet = orderEntity.Staffs
+                .Where(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
+            
+            foreach (var salespersonItem in orderSalespersonSet)
             {
                 orderEntity.Staffs.Remove(salespersonItem);
             }
 
-            orderEntity.Staffs.Add(salespersonEntity, x=>x.Id != salespersonEntity.Id);
+            orderEntity.Staffs.Add(salespersonEntity, x => x.Id != salespersonEntity.Id);
             salespersonEntity.Orders.Add(orderEntity, x => x.Id != orderEntity.Id);
 
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"机构删除失败, 未写入数据库\n订单Id: {orderEntity.Id}");
-            }
-
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"查询订单销售时发生错误\n订单Id: {order}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerIdAsync(
+    public async ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerIdAsync(
         IIdentifiable customer,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntityList = await DbContext.Customers
+            var orderEntityList = await dbContext.Customers
                 .Include(x => x.Orders)
                 .Where(x => x.Id == customer.Id)
                 .Select(x => x.Orders
                     .SkipAndTake(skip, take)
                     .ToList())
-                .FirstOrDefaultAsync(cancellation);
+                .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return orderEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
-
-        }, cancellation);
+            return orderEntityList.Select(x => dbContext.RegisterAutoUpdate<OrderEntity, OrderViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取机构下所有订单时发生错误\n机构Id: {customer}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<OrderViewModel>> GetAllByStaffIdAsync(
+    public async ValueTask<IEnumerable<OrderViewModel>> GetAllByStaffIdAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntityList = await DbContext.Staffs
+            var orderEntityList = await dbContext.Staffs
                 .Include(x => x.Orders)
                 .Where(x => x.Id == staff.Id)
                 .Select(x => x.Orders
                     .SkipAndTake(skip, take)
                     .ToList())
-                .FirstOrDefaultAsync(cancellation);
+                .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return orderEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
-
-        }, cancellation);
+            return orderEntityList.Select(x => dbContext.RegisterAutoUpdate<OrderEntity, OrderViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取员工下所有订单时发生错误\n员工Id: {staff}", ex);
+        }
     }
 }

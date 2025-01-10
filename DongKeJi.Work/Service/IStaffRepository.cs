@@ -1,10 +1,12 @@
-﻿using DongKeJi.Common;
+﻿using AutoMapper;
+using DongKeJi.Common;
 using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.Service;
+using DongKeJi.Common.Validation;
 using DongKeJi.Model;
-using DongKeJi.Service;
+using DongKeJi.Model.Entity;
 using DongKeJi.ViewModel.User;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
@@ -110,116 +112,134 @@ public interface IStaffRepository
 [Inject(ServiceLifetime.Singleton, typeof(IStaffRepository))]
 internal class StaffRepository(
     IServiceProvider services,
-    IUserRepository userRepository,
-    CoreDbContext coreDbContext
-) : Repository<WorkDbContext, StaffEntity, StaffViewModel>(services), IStaffRepository
+    IMapper mapper,
+    IValidation<StaffViewModel> validation,
+    CoreDbContext coreDbContext,
+    WorkDbContext dbContext) : IStaffRepository
 {
-    public ValueTask<UserViewModel> FindUserByStaffAsync(
+    public async ValueTask<UserViewModel> FindUserByStaffAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntity = await DbContext.Staffs
+            //员工
+            var staffEntity = await dbContext.Staffs
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"员工关联用户查询失败, 没有查询到数据\n员工Id: {staff.Id}");
-            }
+            //用户Id
+            if (staffEntity.UserId is null) throw new RepositoryException("关联用户为空");
 
-            if (staffEntity.UserId is null)
-            {
-                throw new RepositoryException($"员工关联用户查询失败, 关联用户为空\n员工Id: {staff.Id}");
-            }
+            //用户
+            var userEntity = await coreDbContext.Users
+                .FirstOrDefaultAsync(x => x.Id == staffEntity.UserId, cancellation);
+            userEntity = RepositoryException.ThrowIfEntityNotFound(userEntity, "用户不存在");
 
-            return await userRepository.FindByIdAsync(Identifiable.Create(staffEntity.UserId!.Value), cancellation);
-
-        }, cancellation);
+            return coreDbContext.RegisterAutoUpdate<UserEntity, UserViewModel>(userEntity, services);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"查询员工关联用户时发生错误\n员工信息: {staff}", ex);
+        }
     }
 
-    public ValueTask AddAsync(
-        StaffViewModel staff, 
+    public async ValueTask AddAsync(
+        StaffViewModel staff,
         IIdentifiable user,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntity = await DbContext.Staffs
+            //验证
+            validation.AssertValidate(staff);
+
+            //员工
+            var staffEntity = await dbContext.Staffs
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+            RepositoryException.ThrowIfEntityAlreadyExists(staffEntity, "员工已存在");
 
-            if (staffEntity is not null)
-            {
-                throw new RepositoryException($"员工添加失败, 员工已存在\n员工信息: {staff}\n用户Id: {user.Id}");
-            }
-
+            //用户
             var userEntity = await coreDbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
-            
-            if (userEntity is null || userEntity.IsEmpty())
-            {
-                throw new RepositoryException($"员工添加失败, 关联用户不存在\n员工信息: {staff}\n用户Id: {user.Id}");
-            }
+            userEntity = RepositoryException.ThrowIfEntityNotFound(userEntity, "用户不存在");
 
             //修改
-            staffEntity = Mapper.Map<StaffEntity>(staff);
+            staffEntity = mapper.Map<StaffEntity>(staff);
             staffEntity.UserId = userEntity.Id;
+            dbContext.Add(staffEntity);
 
             //保存
-            await DbContext.AddAsync(staffEntity, cancellation);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"员工添加失败, 未写入数据库\n员工信息: {staff}\n用户Id: {user.Id}");
-            }
+            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await transaction.CommitAsync(cancellation);
 
-            RegisterAutoUpdate(staff);
-
-        }, cancellation);
+            dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(staff, services);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"添加员工时发生错误\n员工信息: {staff}\n用户Id: {user.Id}", ex);
+        }
     }
 
-    public ValueTask<StaffViewModel> FindByIdAsync(
-        IIdentifiable staff, 
+    public async ValueTask<StaffViewModel> FindByIdAsync(
+        IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntity = await DbContext.Staffs
+            var staffEntity = await dbContext.Staffs
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"员工查询失败, 数据不存在\n员工Id: {staff}");
-            }
-
-            return RegisterAutoUpdate(staffEntity);
-
-        }, cancellation);
+            return dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(staffEntity, services);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"查询员工时发生错误\n员工Id: {staff.Id}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
+    public async ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
         IIdentifiable user,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntityList = await DbContext.Staffs
+            var staffEntityList = await dbContext.Staffs
                 .Where(x => x.UserId == user.Id)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
+            return staffEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"根据用户查询所有员工时发生错误\n用户Id: {user}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(
+    public async ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(
         StaffPositionType type,
-        int? skip = null, 
-        int? take = null, 
+        int? skip = null,
+        int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffPositionEntity = await DbContext.StaffPositions
+            var staffPositionEntity = await dbContext.StaffPositions
                 .Include(x => x.Staffs)
                 .Where(x => x.Type == type)
                 .Select(x => x.Staffs
@@ -228,28 +248,35 @@ internal class StaffRepository(
                     .ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return staffPositionEntity.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
+            return staffPositionEntity.Select(x =>
+                dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"根据职位查询所有员工时发生错误\n职位类型: {type}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(
+    public async ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(
         IIdentifiable user,
-        StaffPositionType type, 
+        StaffPositionType type,
         int? skip = null,
-        int? take = null, 
+        int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var positionEntity = await DbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPositions
                 .Include(x => x.Staffs)
                 .Where(x => x.Type == type)
                 .FirstOrDefaultAsync(cancellation);
 
             if (positionEntity is null || positionEntity.IsEmpty()) return [];
 
-            var staffEntityList = await DbContext.Staffs
+            var staffEntityList = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .Where(x => x.UserId == user.Id)
                 .Where(x => !x.IsPrimaryAccount)
@@ -257,24 +284,34 @@ internal class StaffRepository(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
+            return staffEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"根据职位和用户查询所有员工时发生错误\n用户Id: {user.Id}\n职位类型: {type}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<StaffViewModel>> GetAllAsync(
-        int? skip = null, 
+    public async ValueTask<IEnumerable<StaffViewModel>> GetAllAsync(
+        int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntityList = await DbContext.Staffs
+            var staffEntityList = await dbContext.Staffs
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
+            return staffEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException("获取所有员工时发生错误", ex);
+        }
     }
 }

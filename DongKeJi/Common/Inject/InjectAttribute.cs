@@ -6,7 +6,7 @@ namespace DongKeJi.Common.Inject;
 ///     标注为注入类型
 /// </summary>
 /// <param name="serviceLifetime"></param>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class InjectAttribute(ServiceLifetime serviceLifetime, Type? serviceType, object? serviceKey)
     : Attribute, IInjectDescriptor
 {

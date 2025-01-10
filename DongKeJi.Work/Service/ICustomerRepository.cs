@@ -1,8 +1,10 @@
-﻿using DongKeJi.Common;
+﻿using AutoMapper;
+using DongKeJi.Common;
 using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Extensions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.Service;
+using DongKeJi.Common.Validation;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.ViewModel.Common.Customer;
@@ -50,92 +52,105 @@ public interface ICustomerRepository
 }
 
 [Inject(ServiceLifetime.Singleton, typeof(ICustomerRepository))]
-internal class CustomerRepository(IServiceProvider services) : 
-    Repository<WorkDbContext, CustomerEntity, CustomerViewModel>(services), ICustomerRepository
+internal class CustomerRepository(
+    IServiceProvider services,
+    IMapper mapper,
+    WorkDbContext dbContext) : ICustomerRepository
 {
-    public ValueTask AddAsync(
+    public async ValueTask AddAsync(
         CustomerViewModel customer,
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var customerEntity = await DbContext.Customers
+            //验证
+            customer.AssertValidate();
+
+            //机构
+            var customerEntity = await dbContext.Customers
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
+            RepositoryException.ThrowIfEntityAlreadyExists(customerEntity, "机构已存在");
 
-            if (customerEntity is not null)
-            {
-                throw new RepositoryException($"机构添加失败, 相同Id已存在\n机构信息: {customer}");
-            }
-
-            var staffEntity = await DbContext.Staffs
+            //员工
+            var staffEntity = await dbContext.Staffs
                 .Include(x => x.Customers)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-            
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"机构添加失败, 关联员工不存在\n机构信息: {customer}\n员工Id: {staff.Id}");
-            }
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "关联员工不存在");
 
             //编辑
-            customerEntity = Mapper.Map<CustomerEntity>(customer);
-            await DbContext.AddAsync(customerEntity, cancellation);
+            customerEntity = mapper.Map<CustomerEntity>(customer);
+            await dbContext.AddAsync(customerEntity, cancellation);
 
             //关联
             customerEntity.Staffs.Add(staffEntity, x => x.Id == staff.Id);
             staffEntity.Customers.Add(customerEntity, x => x.Id == customer.Id);
 
             //保存
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"机构添加失败, 未写入数据库\n机构信息: {customer}\n员工Id: {staff.Id}");
-            }
-            RegisterAutoUpdate(customer);
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
 
-        }, cancellation);
+            dbContext.RegisterAutoUpdate<CustomerEntity, CustomerViewModel>(customer, services);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"添加机构时发生错误\n机构信息: {customer}\n员工Id: {staff.Id}", ex);
+        }
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         IIdentifiable customer,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var orderEntity = await DbContext.Customers
+            var orderEntity = await dbContext.Customers
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
+            orderEntity = RepositoryException.ThrowIfEntityNotFound(orderEntity, "机构不存在");
 
-            if (orderEntity is null || orderEntity.IsEmpty())
-            {
-                throw new RepositoryException($"划扣删除失败, 数据不存在\n机构Id: {customer.Id}");
-            }
+            dbContext.Remove(orderEntity);
 
-            DbContext.Remove(orderEntity);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"机构删除失败, 未写入数据库\n机构Id: {customer.Id}");
-            }
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"删除机构时发生错误\n机构信息: {customer}", ex);
+        }
     }
 
 
-    public ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffIdAsync(
+    public async ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffIdAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var customerEntityList = await DbContext.Staffs
+            var customerEntityList = await dbContext.Staffs
                 .Include(x => x.Customers)
                 .Where(x => x.Id == staff.Id)
                 .Select(x => x.Customers
                     .SkipAndTake(skip, take)
                     .ToList())
-                .FirstOrDefaultAsync(cancellation);
+                .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return customerEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
-
-        }, cancellation);
+            return customerEntityList.Select(x =>
+                dbContext.RegisterAutoUpdate<CustomerEntity, CustomerViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取员工下所有机构时发生错误\n员工Id: {staff.Id}", ex);
+        }
     }
 }

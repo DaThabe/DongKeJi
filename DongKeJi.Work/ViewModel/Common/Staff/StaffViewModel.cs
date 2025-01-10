@@ -7,7 +7,7 @@ namespace DongKeJi.Work.ViewModel.Common.Staff;
 /// <summary>
 ///     员工
 /// </summary>
-public partial class StaffViewModel : IdentifiableViewModel, IEmptyable<StaffViewModel>
+public partial class StaffViewModel : DataViewModel, IEmptyable<StaffViewModel>
 {
     /// <summary>
     ///     是否是主账户  (真实身份, 其他的员工只是用来填充数据

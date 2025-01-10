@@ -8,7 +8,7 @@ namespace DongKeJi.Work.ViewModel.Common.Order;
 /// <summary>
 ///     订阅订单
 /// </summary>
-public abstract partial class OrderViewModel : IdentifiableViewModel, IEmptyable<OrderViewModel>
+public abstract partial class OrderViewModel : DataViewModel, IEmptyable<OrderViewModel>
 {
     /// <summary>
     ///     描述

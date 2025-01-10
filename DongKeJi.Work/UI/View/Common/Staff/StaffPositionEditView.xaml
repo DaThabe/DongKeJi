@@ -16,7 +16,7 @@
         <ui:CardControl Header="名称">
             <ui:CardControl.Content>
 
-                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Title}" />
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Title, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
             </ui:CardControl.Content>
         </ui:CardControl>
@@ -25,7 +25,7 @@
         <ui:CardControl Header="描述">
             <ui:CardControl.Content>
 
-                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Describe}" />
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Describe, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
             </ui:CardControl.Content>
         </ui:CardControl>

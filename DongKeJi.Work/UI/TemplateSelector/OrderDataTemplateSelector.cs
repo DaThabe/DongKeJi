@@ -16,11 +16,11 @@ internal class OrderDataTemplateSelector : DataTemplateSelector
 
     public override DataTemplate SelectTemplate(object? item, DependencyObject container)
     {
-        if (item is TimingOrderViewModel) return Timing;
+        if (item is OrderTimingViewModel) return Timing;
 
-        if (item is CountingOrderViewModel) return Counting;
+        if (item is OrderCountingViewModel) return Counting;
 
-        if (item is MixingOrderViewModel) return Mixing;
+        if (item is OrderMixingViewModel) return Mixing;
 
         return base.SelectTemplate(item, container);
     }

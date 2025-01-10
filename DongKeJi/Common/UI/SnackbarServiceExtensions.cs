@@ -1,4 +1,5 @@
-﻿using Wpf.Ui;
+﻿using DongKeJi.Common.Exceptions;
+using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.Common.UI;
@@ -58,9 +59,10 @@ public static class SnackbarServiceExtensions
         snackbar.Show(x =>
         {
             x.Title = ErrorTitle;
+            x.Timeout = TimeSpan.FromSeconds(4);
             x.Icon = new SymbolIcon(ErrorSymbol);
             x.Appearance = ControlAppearance.Danger;
-            x.Message = exception.Message;
+            x.Message = exception.FormatAllMessage();
 
             configAction?.Invoke(x);
         });

@@ -8,6 +8,9 @@ using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
+using DongKeJi.Work.Model.Validation;
+using DongKeJi.Common.Validation;
 
 namespace DongKeJi.Work.Service;
 
@@ -94,31 +97,31 @@ public interface IStaffPositionService
 }
 
 [Inject(ServiceLifetime.Transient, typeof(IStaffPositionService))]
-internal class StaffPositionService(IServiceProvider services) :
-    Repository<WorkDbContext, StaffPositionEntity, StaffPositionViewModel>(services), IStaffPositionService
+internal class StaffPositionService(
+    IServiceProvider services, 
+    IMapper mapper,
+    WorkDbContext dbContext) :  IStaffPositionService
 {
-    public ValueTask<StaffPositionViewModel> BindingAsync(
+    public async ValueTask<StaffPositionViewModel> BindingAsync(
         StaffPositionType positionType,
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
-        {
-            if (positionType == StaffPositionType.None)
-            {
-                throw new RepositoryException($"员工职位绑定失败, 职位不明确\n职位类型: {positionType}\n员工Id: {staff.Id}");
-            }
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
-            var staffEntity = await DbContext.Staffs
+        try
+        {
+            //验证
+            positionType.AssertValidate();
+
+            //员工
+            var staffEntity = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"员工职位绑定失败, 员工不存在\n职位类型: {positionType}\n员工Id: {staff.Id}");
-            }
-
-            var staffPositionEntity = await DbContext.StaffPositions
+            //职位
+            var staffPositionEntity = await dbContext.StaffPositions
                 .Include(x => x.Staffs)
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
 
@@ -136,173 +139,197 @@ internal class StaffPositionService(IServiceProvider services) :
             staffEntity.Positions.Add(staffPositionEntity, x => x.Type != staffPositionEntity.Type);
 
             //保存
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"员工职位绑定失败, 未写入数据库\n职位类型: {positionType}\n员工Id: {staff.Id}");
-            }
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
 
-            return RegisterAutoUpdate(staffPositionEntity);
-
-        }, cancellation);
+            return dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(staffPositionEntity, services);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"关联员工职位时发生错误\n职位类型: {positionType}\n员工Id: {staff.Id}", ex);
+        }
     }
-    public ValueTask UnbindingAsync(
+
+    public async ValueTask UnbindingAsync(
         StaffPositionType positionType,
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntity = await DbContext.Staffs
+            var staffEntity = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"员工职位解除绑定失败, 员工不存在\n职位类型: {positionType}\n员工Id: {staff.Id}");
-            }
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             //保存
             staffEntity.Positions.Remove(x => x.Type == positionType);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"员工职位解除绑定失败, 未写入数据库\n职位类型: {positionType}\n员工Id: {staff.Id}");
-            }
-
-        }, cancellation);
+            
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"解除员工职位时发生错误\n职位类型: {positionType}\n员工Id: {staff.Id}", ex);
+        }
     }
 
-    public ValueTask UnbindingAsync(
+    public async ValueTask UnbindingAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var staffEntity = await DbContext.Staffs
+            var staffEntity = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-
-            if (staffEntity is null || staffEntity.IsEmpty())
-            {
-                throw new RepositoryException($"员工职位清除失败, 员工不存在\n员工Id: {staff.Id}");
-            }
+            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             staffEntity.Positions.Clear();
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"员工职位清除失败, 未写入数据库\n员工Id: {staff.Id}");
-            }
 
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"解除员工所有职位时发生错误\n员工Id: {staff.Id}", ex);
+        }
     }
 
-    public ValueTask SetAsync(
+    public async ValueTask SetAsync(
         StaffPositionViewModel position,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
-        {
-            if (position.Type == StaffPositionType.None)
-            {
-                throw new RepositoryException($"职位设置失败, 职位不明确\n职位信息: {position}");
-            }
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
-            var positionEntity = await DbContext.StaffPositions
+        try
+        {
+            //验证
+            validation.Validate(position);
+
+            //职位
+            var positionEntity = await dbContext.StaffPositions
                 .FirstOrDefaultAsync(x => x.Type == position.Type, cancellation);
 
             if (positionEntity is null || positionEntity.IsEmpty())
             {
-                positionEntity = Mapper.Map<StaffPositionEntity>(position);
-                await DbContext.AddAsync(positionEntity, cancellation);
+                //新增
+                positionEntity = mapper.Map<StaffPositionEntity>(position);
+                await dbContext.AddAsync(positionEntity, cancellation);
             }
             else
             {
-                Mapper.Map(positionEntity, position);
+                //更新
+                mapper.Map(positionEntity, position);
             }
 
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"职位设置失败, 未写入数据库\n职位信息: {position}");
-            }
+            //保存
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
 
-            RegisterAutoUpdate(position);
-
-        }, cancellation);
+            dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(position, services);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"设置员工职位时发生错误\n职位信息: {position}", ex);
+        }
     }
 
-    public ValueTask RemoveAsync(
+    public async ValueTask RemoveAsync(
         StaffPositionType positionType,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var positionEntity = await DbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPositions
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
+            positionEntity = RepositoryException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
-            if (positionEntity is null || positionEntity.IsEmpty())
-            {
-                throw new RepositoryException($"职位删除失败, 数据不存在\n职位类型: {positionType}");
-            }
+            dbContext.Remove(positionEntity);
 
-            DbContext.Remove(positionEntity);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"职位删除失败, 未写入数据库\n职位类型: {positionType}");
-            }
-
-        }, cancellation);
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"删除职位时发生错误\n职位类型: {positionType}", ex);
+        }
     }
 
-    public ValueTask<StaffPositionViewModel> FindByTypeAsync(
+    public async ValueTask<StaffPositionViewModel> FindByTypeAsync(
         StaffPositionType positionType,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var positionEntity = await DbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPositions
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
+            positionEntity = RepositoryException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
-            if (positionEntity is null || positionEntity.IsEmpty())
-            {
-                throw new RepositoryException($"查询职位失败, 数据不存在\n职位类型: {positionType}");
-            }
-
-            return RegisterAutoUpdate(positionEntity);
-
-        }, cancellation);
+            return dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(positionEntity, services);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"删除职位时发生错误\n职位类型: {positionType}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<StaffPositionViewModel>> FindAllByStaffAsync(
+    public async ValueTask<IEnumerable<StaffPositionViewModel>> FindAllByStaffAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var positionEntityList = await DbContext.Staffs
+            var positionEntityList = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .Where(x => x.Id == staff.Id)
                 .Select(x => x.Positions.SkipAndTake(skip, take).ToList())
-                .FirstOrDefaultAsync(cancellation);
+                .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return positionEntityList?.Select(x => RegisterAutoUpdate(x)) ?? [];
-
-        }, cancellation);
+            return positionEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取员工下所有职位时发生错误\n员工Id: {staff.Id}", ex);
+        }
     }
 
-    public ValueTask<IEnumerable<StaffPositionViewModel>> GetAllAsync(
+    public async ValueTask<IEnumerable<StaffPositionViewModel>> GetAllAsync(
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        try
         {
-            var positionEntityList = await DbContext.StaffPositions
+            var positionEntityList = await dbContext.StaffPositions
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return positionEntityList.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
+            return positionEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(x, services));
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException("获取所有职位时发生错误", ex);
+        }
     }
 }

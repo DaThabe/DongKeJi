@@ -1,10 +1,12 @@
-﻿using System.Linq.Expressions;
+﻿using AutoMapper;
 using DongKeJi.Common;
 using DongKeJi.Common.Exceptions;
 using DongKeJi.Common.Inject;
 using DongKeJi.Common.Service;
+using DongKeJi.Common.Validation;
 using DongKeJi.Model;
 using DongKeJi.Model.Entity;
+using DongKeJi.Model.Validation;
 using DongKeJi.ViewModel;
 using DongKeJi.ViewModel.User;
 using Microsoft.EntityFrameworkCore;
@@ -74,8 +76,10 @@ public interface IUserRepository
 [Inject(ServiceLifetime.Singleton, typeof(IUserRepository))]
 internal class UserRepository(
     IServiceProvider services,
-    IApplicationContext applicationContext
-) :  Repository<CoreDbContext, UserEntity, UserViewModel>(services), IUserRepository
+    IMapper mapper,
+    UserViewModelValidationSet validation,
+    CoreDbContext dbContext,
+    IApplicationContext applicationContext) :  IUserRepository
 {
     public void Login(UserViewModel user, CancellationToken cancellation = default)
     {
@@ -87,90 +91,91 @@ internal class UserRepository(
         applicationContext.LoginUser = UserViewModel.Empty;
     }
 
-    public ValueTask AddAsync(UserViewModel user, CancellationToken cancellation = default)
+    public async ValueTask AddAsync(UserViewModel user, CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
-        {
-            var userEntity = await DbContext.Users
-                .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
-            if (userEntity is not null)
-            {
-                throw new RepositoryException($"用户添加失败, 相同Id已存在\n用户信息: {user}");
-            }
+        try
+        {
+            //验证
+            validation.AssertValidate(user);
+
+            //查询
+            var userEntity = await dbContext.Users
+                .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
+             RepositoryException.ThrowIfEntityAlreadyExists(userEntity, "用户已存在");
 
             //保存
-            userEntity = Mapper.Map<UserEntity>(user);
-            await DbContext.AddAsync(userEntity, cancellation);
-            if (await DbContext.SaveChangesAsync(cancellation) <= 0)
-            {
-                throw new RepositoryException($"用户添加失败, 未写入数据库\n用户信息: {user}");
-            }
+            userEntity = mapper.Map<UserEntity>(user);
+            await dbContext.AddAsync(userEntity, cancellation);
 
-            RegisterAutoUpdate(user);
+            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await transaction.CommitAsync(cancellation);
 
-        }, cancellation);
+            dbContext.RegisterAutoUpdate<UserEntity, UserViewModel>(user, services);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"添加用户时发生错误\n用户信息: {user}", ex);
+        }
     }
 
-    public ValueTask<UserViewModel> FindByNameAsync(string name, CancellationToken cancellation = default)
+    public async ValueTask<UserViewModel> FindByNameAsync(string name, CancellationToken cancellation = default)
     {
-        return UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            name = name.ToLower();
-            var userEntity = await DbContext.Users
-                .FirstOrDefaultAsync(x => x.Name.ToLower() == name, cancellation);
+            var searchName = name.ToLower();
+            var userEntity = await dbContext.Users
+                .FirstOrDefaultAsync(x => x.Name.ToLower() == searchName, cancellation);
+            userEntity = RepositoryException.ThrowIfEntityNotFound(userEntity, "用户不存在");
 
-            if (userEntity is null || userEntity.IsEmpty())
-            {
-                throw new RepositoryException($"用户查询失败, 数据不存在\n用户名称: {name}");
-            }
-
-            return RegisterAutoUpdate(userEntity);
-
-        }, cancellation);
+            return dbContext.RegisterAutoUpdate<UserEntity, UserViewModel>(userEntity, services);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"查询用户时发生错误\n用户名称: {name}", ex);
+        }
     }
 
     public async ValueTask<UserViewModel> FindByIdAsync(IIdentifiable user, CancellationToken cancellation = default)
     {
-        return await UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var userEntity = await DbContext.Users
+            var userEntity = await dbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
+            userEntity = RepositoryException.ThrowIfEntityNotFound(userEntity, "用户不存在");
 
-            if (userEntity is null || userEntity.IsEmpty())
-            {
-                throw new RepositoryException($"用户查询失败, 数据不存在\n用户Id: {user.Id}");
-            }
-
-            return RegisterAutoUpdate(userEntity);
-
-        }, cancellation);
+            return dbContext.RegisterAutoUpdate<UserEntity, UserViewModel>(userEntity, services);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"查询用户时发生错误\n用户Id: {user.Id}", ex);
+        }
     }
 
     public async ValueTask<IEnumerable<UserViewModel>> GetAllAsync(int? skip = null, int? take = null,
         CancellationToken cancellation = default)
     {
-        return await UnitOfWorkAsync(async _ =>
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
         {
-            var userEntityList = await DbContext.Users
+            var userEntityList = await dbContext.Users
                 .ToListAsync(cancellation);
 
-            return userEntityList.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
-    }
-
-    public async ValueTask<IEnumerable<UserViewModel>> FindAllAsync(Expression<Func<UserEntity, bool>> queryable,
-        CancellationToken cancellation = default)
-    {
-        return await UnitOfWorkAsync(async _ =>
+            return userEntityList.Select(x => dbContext.RegisterAutoUpdate<UserEntity, UserViewModel>(x, services));
+        }
+        catch (Exception ex)
         {
-            var userEntityList = await DbContext.Users
-                .Where(queryable)
-                .ToListAsync(cancellation);
-
-            return userEntityList.Select(x => RegisterAutoUpdate(x));
-
-        }, cancellation);
+            //await transaction.RollbackAsync(cancellation);
+            throw new RepositoryException($"获取所有用户时发生错误", ex);
+        }
     }
 }
