@@ -1,0 +1,27 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Staff.StaffEditView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
+    xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    d:DataContext="{d:DesignInstance staff:StaffViewModel,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <StackPanel>
+
+        <!--  名称  -->
+        <ui:CardControl Header="名称" ToolTip="Error">
+            <ui:CardControl.Content>
+
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+
+            </ui:CardControl.Content>
+        </ui:CardControl>
+
+    </StackPanel>
+
+</UserControl>

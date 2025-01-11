@@ -1,6 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using DongKeJi.Work.ViewModel.Common.Consume;
+using ConsumeCountingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeCountingViewModel;
+using ConsumeMixingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeMixingViewModel;
+using ConsumeTimingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeTimingViewModel;
 
 namespace DongKeJi.Work.UI.TemplateSelector;
 

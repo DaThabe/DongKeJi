@@ -9,20 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DongKeJi.Core\DongKeJi.Core.csproj" />
     <ProjectReference Include="..\DongKeJi\DongKeJi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UI\View\Common\Staff\StaffEditView.xaml.cs">
+    <Compile Update="UI\View\Staff\StaffEditView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\View\Common\Staff\StaffPositionView.xaml.cs">
+    <Compile Update="UI\View\Staff\StaffPositionView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\View\Common\Staff\StaffPositionTypeComboBox.xaml.cs">
+    <Compile Update="UI\View\Staff\StaffPositionTypeComboBox.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\View\Common\Staff\StaffPositionEditView.xaml.cs">
+    <Compile Update="UI\View\Staff\StaffPositionEditView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

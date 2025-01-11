@@ -1,0 +1,83 @@
+﻿<view:AutoViewModelView
+    x:Class="DongKeJi.Core.UI.View.Setting.SettingDashboardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converter1="clr-namespace:DongKeJi.Core.UI.Converter"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:setting="clr-namespace:DongKeJi.Core.ViewModel.Setting"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:view="clr-namespace:DongKeJi.UI.View;assembly=DongKeJi"
+    d:DataContext="{d:DesignInstance setting:SettingDashboardObservableViewModel,
+                                     IsDesignTimeCreatable=False}"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+    mc:Ignorable="d">
+
+    <view:AutoViewModelView.Resources>
+
+        <converter1:ApplicationThemeEnumToBooleanConverter x:Key="ApplicationThemeEnumToBooleanConverter" />
+
+    </view:AutoViewModelView.Resources>
+
+    <TabControl>
+
+        <!--  主题  -->
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
+                    <TextBlock Text="个性化" />
+                </StackPanel>
+            </TabItem.Header>
+
+            <StackPanel>
+                <TextBlock Margin="0,12,0,0" Text="主题" />
+                <RadioButton
+                    Margin="0,12,0,0"
+                    Command="{Binding Application.ChangeThemeCommand, Mode=OneWay}"
+                    CommandParameter="Light"
+                    Content="亮色"
+                    GroupName="themeSelect"
+                    IsChecked="{Binding Application.Theme, Converter={StaticResource ApplicationThemeEnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
+                <RadioButton
+                    Margin="0,8,0,0"
+                    Command="{Binding Application.ChangeThemeCommand, Mode=OneWay}"
+                    CommandParameter="Dark"
+                    Content="暗色"
+                    GroupName="themeSelect"
+                    IsChecked="{Binding Application.Theme, Converter={StaticResource ApplicationThemeEnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+                <RadioButton
+                    Margin="0,8,0,0"
+                    Command="{Binding Application.ChangeThemeCommand, Mode=OneWay}"
+                    CommandParameter="HighContrast"
+                    Content="高亮"
+                    GroupName="themeSelect"
+                    IsChecked="{Binding Application.Theme, Converter={StaticResource ApplicationThemeEnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}" />
+
+            </StackPanel>
+        </TabItem>
+
+        <!--  关于  -->
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
+                    <TextBlock Text="关于" />
+                </StackPanel>
+            </TabItem.Header>
+
+            <StackPanel>
+                <TextBlock
+                    Margin="0,24,0,0"
+                    FontSize="20"
+                    FontWeight="Medium"
+                    Text="懂科技" />
+                <TextBlock Margin="0,12,0,0" Text="{Binding Application.Version, Mode=OneWay}" />
+            </StackPanel>
+        </TabItem>
+
+    </TabControl>
+
+</view:AutoViewModelView>

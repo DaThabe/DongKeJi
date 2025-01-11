@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DongKeJi.Core\DongKeJi.Core.csproj" />
     <ProjectReference Include="..\DongKeJi.Work\DongKeJi.Work.csproj" />
     <ProjectReference Include="..\DongKeJi\DongKeJi.csproj" />
   </ItemGroup>

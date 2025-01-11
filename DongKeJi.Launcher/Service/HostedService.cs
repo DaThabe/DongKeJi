@@ -1,5 +1,6 @@
 ﻿using DongKeJi.UI.View;
 using Microsoft.Extensions.Hosting;
+using MainFrame = DongKeJi.Core.UI.View.MainFrame;
 
 namespace DongKeJi.Launcher.Service;
 

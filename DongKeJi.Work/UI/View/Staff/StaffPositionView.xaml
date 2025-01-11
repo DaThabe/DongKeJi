@@ -1,0 +1,33 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Staff.StaffPositionView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
+    xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    d:DataContext="{d:DesignInstance staff:StaffPositionViewModel,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <converter:StaffPositionTypeToSymbolConverter x:Key="StaffPositionTypeToSymbolConverter" />
+
+    </UserControl.Resources>
+
+    <ui:CardControl
+        d:Content="标题"
+        d:Icon="{ui:SymbolIcon Symbol=Bug24}"
+        Content="{Binding Title}"
+        IsHitTestVisible="False">
+
+        <ui:CardControl.Icon>
+            <ui:SymbolIcon Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
+        </ui:CardControl.Icon>
+
+    </ui:CardControl>
+
+</UserControl>

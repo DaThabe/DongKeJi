@@ -1,16 +1,15 @@
-﻿using DongKeJi.Common;
-using DongKeJi.Common.Exceptions;
-using DongKeJi.Common.Extensions;
-using DongKeJi.Common.Inject;
-using DongKeJi.Common.Service;
+﻿using DongKeJi.Common.Inject;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
-using DongKeJi.Work.Model.Validation;
-using DongKeJi.Common.Validation;
+using DongKeJi.Validation;
+using DongKeJi.Exceptions;
+using DongKeJi.Extensions;
+using DongKeJi.Database;
+using StaffPositionViewModel = DongKeJi.Work.ViewModel.Staff.StaffPositionViewModel;
 
 namespace DongKeJi.Work.Service;
 
@@ -112,13 +111,13 @@ internal class StaffPositionService(
         try
         {
             //验证
-            positionType.AssertValidate();
+            ValidationExtensions.AssertValidate(positionType, positionType == StaffPositionType.None, "职位不明确");
 
             //员工
             var staffEntity = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
+            staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             //职位
             var staffPositionEntity = await dbContext.StaffPositions
@@ -147,7 +146,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"关联员工职位时发生错误\n职位类型: {positionType}\n员工Id: {staff.Id}", ex);
+            throw new DatabaseException($"关联员工职位时发生错误\n职位类型: {positionType}\n员工Id: {staff.Id}", ex);
         }
     }
 
@@ -163,7 +162,7 @@ internal class StaffPositionService(
             var staffEntity = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
+            staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             //保存
             staffEntity.Positions.Remove(x => x.Type == positionType);
@@ -174,7 +173,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"解除员工职位时发生错误\n职位类型: {positionType}\n员工Id: {staff.Id}", ex);
+            throw new DatabaseException($"解除员工职位时发生错误\n职位类型: {positionType}\n员工Id: {staff.Id}", ex);
         }
     }
 
@@ -189,7 +188,7 @@ internal class StaffPositionService(
             var staffEntity = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
-            staffEntity = RepositoryException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
+            staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             staffEntity.Positions.Clear();
 
@@ -199,7 +198,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"解除员工所有职位时发生错误\n员工Id: {staff.Id}", ex);
+            throw new DatabaseException($"解除员工所有职位时发生错误\n员工Id: {staff.Id}", ex);
         }
     }
 
@@ -212,7 +211,7 @@ internal class StaffPositionService(
         try
         {
             //验证
-            validation.Validate(position);
+            position.AssertValidate();
 
             //职位
             var positionEntity = await dbContext.StaffPositions
@@ -239,7 +238,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"设置员工职位时发生错误\n职位信息: {position}", ex);
+            throw new DatabaseException($"设置员工职位时发生错误\n职位信息: {position}", ex);
         }
     }
 
@@ -253,7 +252,7 @@ internal class StaffPositionService(
         {
             var positionEntity = await dbContext.StaffPositions
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
-            positionEntity = RepositoryException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
+            positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
             dbContext.Remove(positionEntity);
 
@@ -263,7 +262,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"删除职位时发生错误\n职位类型: {positionType}", ex);
+            throw new DatabaseException($"删除职位时发生错误\n职位类型: {positionType}", ex);
         }
     }
 
@@ -277,14 +276,14 @@ internal class StaffPositionService(
         {
             var positionEntity = await dbContext.StaffPositions
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
-            positionEntity = RepositoryException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
+            positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
             return dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(positionEntity, services);
         }
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"删除职位时发生错误\n职位类型: {positionType}", ex);
+            throw new DatabaseException($"删除职位时发生错误\n职位类型: {positionType}", ex);
         }
     }
 
@@ -309,7 +308,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException($"获取员工下所有职位时发生错误\n员工Id: {staff.Id}", ex);
+            throw new DatabaseException($"获取员工下所有职位时发生错误\n员工Id: {staff.Id}", ex);
         }
     }
 
@@ -329,7 +328,7 @@ internal class StaffPositionService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new RepositoryException("获取所有职位时发生错误", ex);
+            throw new DatabaseException("获取所有职位时发生错误", ex);
         }
     }
 }

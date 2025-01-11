@@ -1,7 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
-using DongKeJi.Common.Module;
+using DongKeJi.Core;
 using DongKeJi.Launcher.Service;
+using DongKeJi.Module;
 using DongKeJi.Work;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,6 +20,7 @@ public partial class App : Application
     public App()
     {
         var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+            .RegisterModule<LauncherModule>()
             .RegisterModule<CoreModule>()
             .RegisterModule<WorkModule>()
             .ConfigureLogging(x => x.SetMinimumLevel(LogLevel.Trace))

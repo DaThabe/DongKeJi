@@ -1,14 +1,11 @@
-using DongKeJi.Common.Inject;
-using DongKeJi.Common.Module;
-using DongKeJi.Service;
-using DongKeJi.ViewModel;
-using DongKeJi.ViewModel.User;
+using DongKeJi.Core;
+using DongKeJi.Core.Service;
+using DongKeJi.Inject;
+using DongKeJi.Module;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
 using DongKeJi.Work.UI.View;
-using DongKeJi.Work.ViewModel;
-using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,10 +14,32 @@ using Wpf.Ui.Controls;
 namespace DongKeJi.Work;
 
 
+/// <summary>
+/// 办公模块
+/// </summary>
 public class WorkModule : IModule
 {
-    public string Title => "服务明细记录";
-    public string Describe => "提供机构服务明细记录功能";
+    private static readonly ModuleMetaInfo ModuleMetaInfo = new()
+    {
+        Id = Guid.NewGuid(),
+        Version = new Version(0, 0, 1),
+        Title = "办公",
+        Developers = ["DaThabe"],
+        Describe = """
+                   办公模块
+                   -机构明细记录
+                   """,
+        CreatedAt = new DateTime(2024, 9, 17),
+        ReleaseDate = new DateTime(2025, 1, 12),
+        Dependencies =
+        [
+            typeof(BaseModule).Assembly.GetName(),
+            typeof(CoreModule).Assembly.GetName(),
+        ]
+    };
+
+
+    public IModuleMetaInfo MetaInfo => ModuleMetaInfo;
 
     public void Configure(IHostBuilder builder)
     {
@@ -39,10 +58,10 @@ public class WorkModule : IModule
 
 file class HostedService(
     ILogger<HostedService> logger,
-    IApplicationContext applicationContext,
     IMainFrameService mainFrameService,
+    ICoreContext coreContext,
     IWorkContext workContext,
-    IStaffRepository staffRepository,
+    IStaffService staffService,
     IStaffPositionService staffPositionService
 ) : IHostedService
 {
@@ -63,7 +82,6 @@ file class HostedService(
         }
     }
 
-
     public Task StopAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
@@ -78,21 +96,24 @@ file class HostedService(
     /// <exception cref="Exception"></exception>
     private async Task InitStaffAccount(CancellationToken cancellation = default)
     {
-        if (workContext.LoginUser == UserViewModel.Empty) throw new Exception("未登录用户, 无法初始化明细页面");
+        if (coreContext.CurrentUser is null)
+        {
+            throw new Exception("未登录用户, 无法初始化明细页面");
+        }
 
-        var result = await staffRepository.FindAllByUserAsync(workContext.LoginUser, cancellation);
+        var result = await staffService.FindAllByUserAsync(coreContext.CurrentUser, cancellation);
         var staffs = result.ToList();
 
         if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
         {
-            var staff = new StaffViewModel { Name = workContext.LoginUser.Name, IsPrimaryAccount = true };
-            await staffRepository.AddAsync(staff, workContext.LoginUser, cancellation);
+            var staff = new StaffViewModel { Name = coreContext.CurrentUser.Name, IsPrimaryAccount = true };
+            await staffService.AddAsync(staff, coreContext.CurrentUser, cancellation);
             staffs.Add(staff);
         }
 
-        workContext.PrimaryStaff = staffs.Find(x => x.IsPrimaryAccount) ?? StaffViewModel.Empty;
+        var staffViewModel = staffs.Find(x => x.IsPrimaryAccount);
 
-        if (workContext.PrimaryStaff == StaffViewModel.Empty) throw new Exception("未能创建或加载用户");
+        workContext.CurrentStaff = staffViewModel ?? throw new Exception("未能创建或加载用户");
     }
 
     /// <summary>
@@ -108,7 +129,7 @@ file class HostedService(
         {
             await staffPositionService.FindByTypeAsync(StaffPositionType.Salesperson, cancellation);
         }
-        catch (Exception e)
+        catch
         {
             await staffPositionService.SetAsync(new StaffPositionViewModel
             {
@@ -122,7 +143,7 @@ file class HostedService(
         {
             await staffPositionService.FindByTypeAsync(StaffPositionType.Designer, cancellation);
         }
-        catch (Exception e)
+        catch 
         {
             await staffPositionService.SetAsync(new StaffPositionViewModel
             {

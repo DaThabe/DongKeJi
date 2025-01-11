@@ -6,19 +6,22 @@
     xmlns:consume="clr-namespace:DongKeJi.Work.ViewModel.Common.Consume"
     xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
     xmlns:converter1="clr-namespace:DongKeJi.Common.UI.Converter;assembly=DongKeJi"
-    xmlns:customer="clr-namespace:DongKeJi.Work.UI.View.Common.Customer"
     xmlns:customerVm="clr-namespace:DongKeJi.Work.ViewModel.Common.Customer"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dkjui="clr-namespace:DongKeJi.Common.UI;assembly=DongKeJi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Common.Order"
     xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Common.Order"
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:view="clr-namespace:DongKeJi.Common.UI.View;assembly=DongKeJi"
     xmlns:viewModel="clr-namespace:DongKeJi.Work.ViewModel"
-    d:DataContext="{d:DesignInstance viewModel:PerformanceDashboardViewModel,
+    xmlns:customerVm1="clr-namespace:DongKeJi.Work.ViewModel.Customer"
+    xmlns:orderVm1="clr-namespace:DongKeJi.Work.ViewModel.Order"
+    xmlns:consume1="clr-namespace:DongKeJi.Work.ViewModel.Consume"
+    xmlns:staff1="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Order"
+    xmlns:customer="clr-namespace:DongKeJi.Work.UI.View.Customer"
+    d:DataContext="{d:DesignInstance viewModel:PerformanceDashboardObservableViewModel,
                                      IsDesignTimeCreatable=False}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
@@ -32,7 +35,7 @@
 
 
         <!--  机构列表元素  -->
-        <DataTemplate x:Key="CustomerListItem" DataType="{x:Type customerVm:CustomerViewModel}">
+        <DataTemplate x:Key="CustomerListItem" DataType="{x:Type customerVm1:CustomerViewModel}">
 
             <ui:CardAction IsHitTestVisible="False">
                 <ui:CardAction.Content>
@@ -52,7 +55,7 @@
         </DataTemplate>
 
         <!--  订单列表元素  -->
-        <DataTemplate x:Key="OrderListItem" DataType="{x:Type orderVm:OrderViewModel}">
+        <DataTemplate x:Key="OrderListItem" DataType="{x:Type orderVm1:OrderViewModel}">
 
             <ui:CardAction IsHitTestVisible="False">
 
@@ -67,7 +70,7 @@
                         <StackPanel.Resources>
 
                             <!--  混合  -->
-                            <DataTemplate x:Key="MixingOrder" DataType="{x:Type orderVm:OrderMixingViewModel}">
+                            <DataTemplate x:Key="MixingOrder" DataType="{x:Type orderVm1:OrderMixingViewModel}">
 
                                 <ui:TextBlock
                                     FontTypography="Caption"
@@ -80,7 +83,7 @@
                             </DataTemplate>
 
                             <!--  计时  -->
-                            <DataTemplate x:Key="Timing" DataType="{x:Type orderVm:OrderTimingViewModel}">
+                            <DataTemplate x:Key="Timing" DataType="{x:Type orderVm1:OrderTimingViewModel}">
 
                                 <ui:TextBlock
                                     FontTypography="Caption"
@@ -92,7 +95,7 @@
                             </DataTemplate>
 
                             <!--  计数  -->
-                            <DataTemplate x:Key="Counting" DataType="{x:Type orderVm:OrderCountingViewModel}">
+                            <DataTemplate x:Key="Counting" DataType="{x:Type orderVm1:OrderCountingViewModel}">
 
                                 <ui:TextBlock
                                     FontTypography="Caption"
@@ -131,14 +134,14 @@
         </DataTemplate>
 
         <!--  划扣列表元素  -->
-        <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type consume:ConsumeViewModel}">
+        <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type consume1:ConsumeViewModel}">
 
             <ui:CardControl Margin="0,2">
 
                 <ui:CardControl.Resources>
 
                     <!--  计时划扣  -->
-                    <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume:ConsumeTimingViewModel}">
+                    <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume1:ConsumeTimingViewModel}">
 
                         <StackPanel Orientation="Horizontal">
 
@@ -157,7 +160,7 @@
                     </DataTemplate>
 
                     <!--  计数划扣  -->
-                    <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume:ConsumeCountingViewModel}">
+                    <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume1:ConsumeCountingViewModel}">
 
                         <StackPanel Orientation="Horizontal">
 
@@ -176,7 +179,7 @@
                     </DataTemplate>
 
                     <!--  混合划扣  -->
-                    <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume:ConsumeMixingViewModel}">
+                    <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume1:ConsumeMixingViewModel}">
 
                         <StackPanel Orientation="Horizontal">
 
@@ -232,7 +235,7 @@
         </DataTemplate>
 
         <!--  销售选择器元素  -->
-        <DataTemplate x:Key="SalespersonSelectorItem" DataType="{x:Type staff:StaffViewModel}">
+        <DataTemplate x:Key="SalespersonSelectorItem" DataType="{x:Type staff1:StaffViewModel}">
 
             <ui:TextBlock Appearance="Primary" Text="{Binding Name}" />
 
@@ -281,12 +284,12 @@
 
                         <ui:AutoSuggestBox
                             DockPanel.Dock="Left"
-                            OriginalItemsSource="{Binding CustomerList, Mode=OneWay}"
+                            OriginalItemsSource="{Binding CustomerCollection, Mode=OneWay}"
                             PlaceholderText="搜索机构..."
                             SuggestionChosen="AutoSuggestBox_OnSuggestionChosen">
 
                             <ui:AutoSuggestBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type customerVm:CustomerViewModel}">
+                                <DataTemplate DataType="{x:Type customerVm1:CustomerViewModel}">
                                     <TextBlock>
                                         <Run Text="{Binding Area}" />
                                         <Run Text="{Binding Name}" />
@@ -306,13 +309,13 @@
 
                         <ui:CardControl Header="类型">
                             <ui:CardControl.Content>
-                                <order:OrderStateComboBox DataContext="{Binding Order}" />
+                                <order:OrderStateComboBox DataContext="{Binding SelectedOrder}" />
                             </ui:CardControl.Content>
                         </ui:CardControl>
 
                         <ui:CardControl Header="状态">
                             <ui:CardControl.Content>
-                                <order:OrderStateComboBox DataContext="{Binding Order}" />
+                                <order:OrderStateComboBox DataContext="{Binding SelectedOrder}" />
                             </ui:CardControl.Content>
                         </ui:CardControl>
 
@@ -326,9 +329,9 @@
                 <ui:ListView
                     d:ItemsSource="{d:SampleData ItemCount=5}"
                     ItemTemplate="{StaticResource CustomerListItem}"
-                    ItemsSource="{Binding CustomerList}"
+                    ItemsSource="{Binding CustomerCollection}"
                     SelectedIndex="0"
-                    SelectedItem="{Binding Customer}">
+                    SelectedItem="{Binding SelectedCustomer}">
 
                     <ui:ListView.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -353,7 +356,7 @@
             DockPanel.Dock="Left" />
 
         <!--  右侧布局  -->
-        <DockPanel Grid.Column="2" Visibility="{cb:Binding 'CustomerList.Count > 0'}">
+        <DockPanel Grid.Column="2" Visibility="{cb:Binding 'CustomerCollection.Count > 0'}">
 
             <!--  信息栏  -->
             <ui:CardControl
@@ -365,13 +368,13 @@
                     <StackPanel>
 
                         <ui:TextBlock d:Text="测试" FontTypography="Subtitle">
-                            <Run d:Text="区域" Text="{Binding Customer.Area}" />
-                            <Run d:Text="名称" Text="{Binding Customer.Name}" />
+                            <Run d:Text="区域" Text="{Binding SelectedCustomer.Area}" />
+                            <Run d:Text="名称" Text="{Binding SelectedCustomer.Name}" />
                         </ui:TextBlock>
 
-                        <ui:TextBlock FontTypography="Body" Visibility="{cb:Binding !Order.IsEmpty}">
-                            <Run d:Text="订单名称" Text="{Binding Order.Name}" />
-                            <Run d:Text="订单创建时间" Text="{Binding Order.SubscribeTime, StringFormat='开始时间: {0:yyyy-MM-dd}'}" />
+                        <ui:TextBlock FontTypography="Body" Visibility="{cb:Binding !SelectedOrder.IsDefault}">
+                            <Run d:Text="订单名称" Text="{Binding SelectedOrder.Name}" />
+                            <Run d:Text="订单创建时间" Text="{Binding SelectedOrder.SubscribeTime, StringFormat='开始时间: {0:yyyy-MM-dd}'}" />
                         </ui:TextBlock>
 
                     </StackPanel>
@@ -381,7 +384,7 @@
                     <StackPanel Orientation="Horizontal">
 
                         <!--  状态选择  -->
-                        <order:OrderStateComboBox DataContext="{Binding Order}" />
+                        <order:OrderStateComboBox DataContext="{Binding SelectedOrder}" />
 
                         <!--  新增任务  -->
                         <ui:Button
@@ -391,7 +394,7 @@
                             Command="{Binding AddConsumeCommand}"
                             Content="新增划扣"
                             Icon="{ui:SymbolIcon Symbol=NotepadEdit20}"
-                            Visibility="{cb:Binding !Order.IsEmpty}" />
+                            Visibility="{cb:Binding !SelectedOrder.IsDefault}" />
 
                         <!--  新增订单  -->
                         <ui:Button
@@ -401,7 +404,7 @@
                             Command="{Binding AddOrderCommand}"
                             Content="新增订单"
                             Icon="{ui:SymbolIcon Symbol=AddSquare20}"
-                            Visibility="{cb:Binding !Customer.IsEmpty}" />
+                            Visibility="{cb:Binding !SelectedCustomer.IsDefault}" />
 
                     </StackPanel>
                 </ui:CardControl.Content>
@@ -409,7 +412,7 @@
             </ui:CardControl>
 
             <!--  订单列表  -->
-            <StackPanel DockPanel.Dock="Left" Visibility="{cb:Binding 'OrderList.Count > 0'}">
+            <StackPanel DockPanel.Dock="Left" Visibility="{cb:Binding 'OrderCollection.Count > 0'}">
 
                 <ui:TextBlock
                     Margin="0,10"
@@ -421,9 +424,9 @@
                     <ui:ListView
                         d:ItemsSource="{d:SampleData ItemCount=3}"
                         ItemTemplate="{StaticResource OrderListItem}"
-                        ItemsSource="{Binding OrderList}"
+                        ItemsSource="{Binding OrderCollection}"
                         SelectedIndex="0"
-                        SelectedItem="{Binding Order}">
+                        SelectedItem="{Binding SelectedOrder}">
 
                         <ui:ListView.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -440,7 +443,7 @@
             </StackPanel>
 
             <!--  机构信息面板  -->
-            <DockPanel DockPanel.Dock="Right" Visibility="{Binding CustomerList.Count, Converter={StaticResource NullToVisibilityConverter}}">
+            <DockPanel DockPanel.Dock="Right" Visibility="{Binding CustomerCollection.Count, Converter={StaticResource NullToVisibilityConverter}}">
 
                 <!--  功能按键  -->
                 <StackPanel Margin="0,0,0,10" DockPanel.Dock="Bottom">
@@ -449,7 +452,7 @@
                         HorizontalAlignment="Stretch"
                         Appearance="Danger"
                         Command="{Binding RemoveCustomerCommand}"
-                        CommandParameter="{Binding Customer}"
+                        CommandParameter="{Binding SelectedCustomer}"
                         Content="删除机构" />
 
                 </StackPanel>
@@ -462,7 +465,7 @@
                         FontTypography="BodyStrong"
                         Text="机构信息" />
 
-                    <customer:CustomerEditView DataContext="{Binding Customer}" />
+                    <customer:CustomerEditView DataContext="{Binding SelectedCustomer}" />
 
                 </StackPanel>
 
@@ -474,7 +477,7 @@
                 Margin="5,0"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto"
-                Visibility="{cb:Binding !Order.IsEmpty}">
+                Visibility="{cb:Binding !SelectedOrder.IsDefault}">
 
                 <TabControl x:Name="OrderLayout" SelectedIndex="0">
 
@@ -483,7 +486,7 @@
 
                         <StackPanel>
 
-                            <order:OrderEditView DataContext="{Binding Order}" />
+                            <order:OrderEditView DataContext="{Binding SelectedOrder}" />
 
                             <ui:CardControl Header="销售">
 
@@ -492,8 +495,8 @@
                                     <ComboBox
                                         Margin="5,0,0,0"
                                         ItemTemplate="{StaticResource SalespersonSelectorItem}"
-                                        ItemsSource="{Binding SalespersonList}"
-                                        SelectedItem="{Binding Salesperson}"
+                                        ItemsSource="{Binding SalespersonCollection}"
+                                        SelectedItem="{Binding SelectedSalesperson}"
                                         ToolTip="订单销售" />
 
                                 </ui:CardControl.Content>
@@ -510,7 +513,7 @@
                                 HorizontalAlignment="Stretch"
                                 Appearance="Caution"
                                 Command="{Binding RemoveOrderCommand}"
-                                CommandParameter="{Binding Order}"
+                                CommandParameter="{Binding SelectedOrder}"
                                 Content="删除订单" />
 
                         </StackPanel>
@@ -519,12 +522,12 @@
 
 
                     <!--  划扣  -->
-                    <TabItem Header="划扣列表" Visibility="{cb:Binding 'ConsumeList.Count > 0'}">
+                    <TabItem Header="划扣列表" Visibility="{cb:Binding 'ConsumeCollection.Count > 0'}">
 
                         <ItemsControl
                             d:ItemsSource="{d:SampleData ItemCount=3}"
                             ItemTemplate="{StaticResource ConsumeListItem}"
-                            ItemsSource="{Binding ConsumeList}">
+                            ItemsSource="{Binding ConsumeCollection}">
 
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>

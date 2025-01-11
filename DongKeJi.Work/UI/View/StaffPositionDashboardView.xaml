@@ -6,12 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
-    xmlns:staff1="clr-namespace:DongKeJi.Work.UI.View.Common.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:ui1="clr-namespace:DongKeJi.Common.UI;assembly=DongKeJi"
-    xmlns:view="clr-namespace:DongKeJi.Common.UI.View;assembly=DongKeJi"
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
-    d:DataContext="{d:DesignInstance vm:StaffPositionDashboardViewModel,
+    xmlns:staff2="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    xmlns:staff1="clr-namespace:DongKeJi.Work.UI.View.Staff"
+    d:DataContext="{d:DesignInstance vm:StaffPositionDashboardObservableViewModel,
                                      IsDesignTimeCreatable=False}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
@@ -22,7 +22,7 @@
         <converter:StaffPositionTypeToSymbolConverter x:Key="StaffPositionTypeToSymbolConverter" />
 
         <!--  职位列表元素  -->
-        <DataTemplate x:Key="PositionListItem" DataType="{x:Type staff:StaffPositionViewModel}">
+        <DataTemplate x:Key="PositionListItem" DataType="{x:Type staff2:StaffPositionViewModel}">
 
             <ui:CardAction
                 d:Content="标题"
@@ -38,7 +38,7 @@
         </DataTemplate>
 
         <!--  员工列表元素  -->
-        <DataTemplate x:Key="StaffListItem" DataType="{x:Type staff:StaffViewModel}">
+        <DataTemplate x:Key="StaffListItem" DataType="{x:Type staff2:StaffViewModel}">
 
             <ui:CardControl d:Icon="{ui:SymbolIcon Symbol=Bug24}" Header="{Binding Name}">
 
@@ -98,7 +98,7 @@
                     SuggestionChosen="AutoSuggestBox_OnSuggestionChosen">
 
                     <ui:AutoSuggestBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type staff:StaffPositionViewModel}">
+                        <DataTemplate DataType="{x:Type staff2:StaffPositionViewModel}">
                             <TextBlock Text="{Binding Title}" />
                         </DataTemplate>
                     </ui:AutoSuggestBox.ItemTemplate>

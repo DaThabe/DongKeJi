@@ -1,4 +1,4 @@
-﻿using DongKeJi.Common.Database;
+﻿using DongKeJi.Database;
 using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.Model.Entity.Order;
@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Work.Model;
 
-internal class WorkDbContext() : DatabaseContext("PerformanceRecord")
+internal class WorkDbContext() : LocalDbContext("PerformanceRecord")
 {
     /// <summary>
     ///     员工
@@ -33,17 +33,17 @@ internal class WorkDbContext() : DatabaseContext("PerformanceRecord")
     /// <summary>
     ///     计时订单
     /// </summary>
-    public DbSet<TimingOrderEntity> TimingOrders { get; set; }
+    public DbSet<OrderTimingEntity> TimingOrders { get; set; }
 
     /// <summary>
     ///     计数订单
     /// </summary>
-    public DbSet<CountingOrderEntity> CountingOrders { get; set; }
+    public DbSet<OrderCountingEntity> CountingOrders { get; set; }
 
     /// <summary>
     ///     混合订单
     /// </summary>
-    public DbSet<MixingOrderEntity> MixingOrders { get; set; }
+    public DbSet<OrderMixingEntity> MixingOrders { get; set; }
 
 
     /// <summary>
@@ -54,17 +54,17 @@ internal class WorkDbContext() : DatabaseContext("PerformanceRecord")
     /// <summary>
     ///     计时订单划扣
     /// </summary>
-    public DbSet<TimingConsumeEntity> TimingConsumes { get; set; }
+    public DbSet<ConsumeTimingEntity> TimingConsumes { get; set; }
 
     /// <summary>
     ///     计数订单划扣
     /// </summary>
-    public DbSet<CountingConsumeEntity> CountingConsumes { get; set; }
+    public DbSet<ConsumeCountingEntity> CountingConsumes { get; set; }
 
     /// <summary>
     ///     混合订单划扣
     /// </summary>
-    public DbSet<MixingConsumeEntity> MixingConsumes { get; set; }
+    public DbSet<ConsumeMixingEntity> MixingConsumes { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
