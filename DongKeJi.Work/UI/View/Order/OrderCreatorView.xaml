@@ -76,7 +76,7 @@
             Fill="{DynamicResource StripedBackgroundBrush}" />
 
         <!--  订单信息  -->
-        <order:OrderEditView DataContext="{Binding SelectedOrder}" />
+        <order:OrderEditView DataContext="{Binding Order}" />
 
     </StackPanel>
 

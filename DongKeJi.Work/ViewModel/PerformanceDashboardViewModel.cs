@@ -30,8 +30,8 @@ namespace DongKeJi.Work.ViewModel;
 public partial class PerformanceDashboardViewModel(
     ILogger<PerformanceDashboardViewModel> logger,
     IContentDialogService contentDialogService,
-    IWorkDbService dbService,
     ISnackbarService snackbarService,
+    IWorkDbService dbService,
     ICoreContext coreContext,
     IWorkContext workContext,
     IStaffService staffService,
@@ -281,8 +281,9 @@ public partial class PerformanceDashboardViewModel(
             ArgumentNullException.ThrowIfNull(SelectedCustomer);
 
             var orderVMs = await orderService.GetAllByCustomerIdAsync(SelectedCustomer);
-
+            
             OrderCollection = orderVMs.ToObservableCollection();
+            OrderCollection.ForEach(x => dbService.AutoUpdate(x));
             SelectedOrder = OrderCollection.FirstOrDefault();
         }
         catch (Exception ex)
@@ -303,16 +304,15 @@ public partial class PerformanceDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedCustomer);
 
-
             var salespersonList = await staffService
                 .FindAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Salesperson);
 
-            var orderCreatorVm = new OrderCreatorObservableViewModel(salespersonList);
+            var creatorVm = new OrderCreatorObservableViewModel(salespersonList);
 
             var content = new SimpleContentDialogCreateOptions
             {
                 Title = "新增订单",
-                Content = new OrderCreatorView { DataContext = orderCreatorVm },
+                Content = new OrderCreatorView { DataContext = creatorVm },
                 PrimaryButtonText = "创建",
                 CloseButtonText = "取消"
             };
@@ -323,19 +323,20 @@ public partial class PerformanceDashboardViewModel(
             //等待确认
             if (dialogResult != ContentDialogResult.Primary) return;
 
-            if (orderCreatorVm.SelectedSalesperson is null)
+            if (creatorVm.SelectedSalesperson is null)
             {
                 throw new Exception("订单新增失败, 未设置订单关联销售");
             }
 
             //更新数据库
-            await orderService.AddAsync(orderCreatorVm.Order, orderCreatorVm.SelectedSalesperson, SelectedCustomer);
+            await orderService.AddAsync(creatorVm.Order, creatorVm.SelectedSalesperson, SelectedCustomer);
 
             //更新界面
-            OrderCollection.Add(orderCreatorVm.Order);
-            SelectedOrder = orderCreatorVm.Order;
+            OrderCollection.Add(creatorVm.Order);
+            dbService.AutoUpdate(creatorVm.Order);
+            SelectedOrder = creatorVm.Order;
 
-            snackbarService.ShowSuccess($"已添加订单: {orderCreatorVm.Order.Name} - {orderCreatorVm.Order.Id}");
+            snackbarService.ShowSuccess($"已添加订单: {creatorVm.Order.Name} - {creatorVm.Order.Id}");
         }
         catch (Exception ex)
         {
@@ -350,10 +351,13 @@ public partial class PerformanceDashboardViewModel(
     /// <param name="order"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemoveOrderAsync(OrderViewModel order)
+    private async Task RemoveOrderAsync(OrderViewModel? order)
     {
         try
         {
+            ArgumentNullException.ThrowIfNull(order);
+
+
             SimpleContentDialogCreateOptions dialog = new()
             {
                 Title = "是否删除订单",
@@ -443,6 +447,7 @@ public partial class PerformanceDashboardViewModel(
 
             //更新界面
             ConsumeCollection.Add(consumeVm);
+            dbService.AutoUpdate(consumeVm);
             SelectedConsume = consumeVm;
 
             snackbarService.ShowSuccess($"已创建划扣: {consumeVm.Title} - {consumeVm.Id}");

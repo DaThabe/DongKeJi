@@ -141,6 +141,22 @@
 
     <StackPanel>
 
+
+        <ItemsControl ItemsSource="{Binding Errors}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+
+                    <ui:InfoBar
+                        Title="参数错误"
+                        IsOpen="True"
+                        Message="{Binding ErrorMessage}"
+                        Severity="Error" />
+
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+
         <!--  基础信息  -->
         <Grid>
 

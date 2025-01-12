@@ -3,6 +3,7 @@ using DongKeJi.Database;
 using DongKeJi.Exceptions;
 using DongKeJi.Extensions;
 using DongKeJi.Inject;
+using DongKeJi.Validation;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Staff;
@@ -102,7 +103,7 @@ internal class ConsumeService(WorkDbContext dbContext, IMapper mapper) : IConsum
         try
         {
             //验证
-            consume.Validate();
+            consume.AssertValidate();
 
             //划扣
             var consumeEntity = await dbContext.Consumes

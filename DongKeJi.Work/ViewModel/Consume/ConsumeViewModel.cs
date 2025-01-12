@@ -7,7 +7,7 @@ namespace DongKeJi.Work.ViewModel.Consume;
 /// <summary>
 ///     划扣
 /// </summary>
-public abstract partial class ConsumeViewModel : EntityViewModel, IWorkEntityViewModel
+public abstract partial class ConsumeViewModel : EntityViewModel
 {
     /// <summary>
     ///     时间

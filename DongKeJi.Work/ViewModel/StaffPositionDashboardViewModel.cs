@@ -24,6 +24,7 @@ public partial class StaffPositionDashboardViewModel(
     ILogger<StaffDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IContentDialogService contentDialogService,
+    IWorkDbService dbService,
     IStaffService staffService,
     IStaffPositionService staffPositionService
 ) : LazyInitializeViewModel
@@ -71,43 +72,6 @@ public partial class StaffPositionDashboardViewModel(
     #region --职位--
 
     /// <summary>
-    ///     创建职位
-    /// </summary>
-    /// <returns></returns>
-    private async ValueTask<StaffPositionViewModel?> CreatePositionAsync()
-    {
-        var positionCreatorViewModel = new StaffPositionCreatorObservableViewModel();
-
-        var content = new SimpleContentDialogCreateOptions
-        {
-            Title = "新增职位",
-            Content = new StaffPositionCreatorView { DataContext = positionCreatorViewModel },
-            PrimaryButtonText = "创建",
-            CloseButtonText = "取消"
-        };
-
-        //弹窗
-
-        while (true)
-        {
-            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
-
-            if (dialogResult != ContentDialogResult.Primary) return null;
-
-            if (string.IsNullOrWhiteSpace(positionCreatorViewModel.Position.Title))
-            {
-                snackbarService.ShowWarning("标题不可为空");
-                continue;
-            }
-
-            break;
-        }
-
-        //等待确认
-        return positionCreatorViewModel.Position;
-    }
-
-    /// <summary>
     ///     刷新
     /// </summary>
     /// <returns></returns>
@@ -119,6 +83,7 @@ public partial class StaffPositionDashboardViewModel(
             var positions = await staffPositionService.GetAllAsync();
 
             PositionCollection = positions.ToObservableCollection();
+            PositionCollection.ForEach(x => dbService.AutoUpdate(x));
             SelectedPosition = PositionCollection.FirstOrDefault();
         }
         catch (Exception ex)
@@ -175,20 +140,31 @@ public partial class StaffPositionDashboardViewModel(
     [RelayCommand]
     private async Task AddPositionAsync()
     {
-        var position = await CreatePositionAsync();
-        if (position is null) return;
-
-
         try
         {
-            await staffPositionService.SetAsync(position);
-            PositionCollection.Add(position, x => x.Type != position.Type);
-            SelectedPosition = position;
+            var creatorVm = new StaffPositionCreatorObservableViewModel();
+
+            var content = new SimpleContentDialogCreateOptions
+            {
+                Title = "新增职位",
+                Content = new StaffPositionCreatorView { DataContext = creatorVm },
+                PrimaryButtonText = "创建",
+                CloseButtonText = "取消"
+            };
+
+            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
+            if (dialogResult != ContentDialogResult.Primary) return;
+
+
+            await staffPositionService.SetAsync(creatorVm.Position);
+            PositionCollection.Add(creatorVm.Position, x => x.Type != creatorVm.Position.Type);
+            dbService.AutoUpdate(creatorVm.Position);
+            SelectedPosition = creatorVm.Position;
         }
         catch (Exception ex)
         {
             snackbarService.ShowError(ex);
-            logger.LogError(ex, "职位添加失败, 类型:{type}", position);
+            logger.LogError(ex, "职位添加失败");
         }
     }
 
@@ -210,6 +186,7 @@ public partial class StaffPositionDashboardViewModel(
             var staffs = await staffService.FindAllByPositionTypeAsync(SelectedPosition.Type);
 
             StaffCollection = staffs.ToObservableCollection();
+            StaffCollection.ForEach(x => dbService.AutoUpdate(x));
             SelectedStaff = StaffCollection.FirstOrDefault();
         }
         catch (Exception ex)

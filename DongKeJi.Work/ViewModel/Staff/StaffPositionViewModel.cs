@@ -2,14 +2,13 @@
 using DongKeJi.ViewModel;
 using DongKeJi.Work.Model.Entity.Staff;
 using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace DongKeJi.Work.ViewModel.Staff;
 
 /// <summary>
 ///     员工职位
 /// </summary>
-public partial class StaffPositionViewModel : EntityViewModel, IWorkEntityViewModel
+public partial class StaffPositionViewModel : EntityViewModel
 {
     /// <summary>
     ///     标题

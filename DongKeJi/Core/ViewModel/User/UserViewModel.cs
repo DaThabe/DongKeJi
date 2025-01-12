@@ -23,4 +23,7 @@ public partial class UserViewModel : EntityViewModel
     {
         return $"用户: {Name}";
     }
+
+
+    partial void OnNameChanging(string value) => ValidateProperty(value, nameof(Name));
 }

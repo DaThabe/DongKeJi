@@ -7,7 +7,7 @@ namespace DongKeJi.Work.ViewModel.Staff;
 /// <summary>
 ///     员工
 /// </summary>
-public partial class StaffViewModel : EntityViewModel, IWorkEntityViewModel
+public partial class StaffViewModel : EntityViewModel
 {
     /// <summary>
     ///     用户名

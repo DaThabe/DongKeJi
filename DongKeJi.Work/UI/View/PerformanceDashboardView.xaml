@@ -20,6 +20,7 @@
     xmlns:viewModel="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance viewModel:PerformanceDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
+    d:State="Focused"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
@@ -403,6 +404,32 @@
                             Icon="{ui:SymbolIcon Symbol=AddSquare20}"
                             Visibility="{cb:Binding SelectedCustomer}" />
 
+                        <!--  隐藏菜单  -->
+                        <ui:DropDownButton
+                            Margin="10,0,0,0"
+                            Appearance="Danger"
+                            Foreground="#fff"
+                            Icon="{ui:SymbolIcon Options24}">
+                            <ui:DropDownButton.Flyout>
+                                <ContextMenu>
+
+                                    <MenuItem
+                                        Margin="0,3"
+                                        Command="{Binding RemoveCustomerCommand}"
+                                        CommandParameter="{Binding SelectedCustomer}"
+                                        Header="删除机构"
+                                        Icon="{ui:SymbolIcon Delete24}" />
+
+                                    <MenuItem
+                                        Margin="0,3"
+                                        Command="{Binding RemoveOrderCommand}"
+                                        CommandParameter="{Binding SelectedOrder}"
+                                        Header="删除订单"
+                                        Icon="{ui:SymbolIcon Delete24}" />
+                                </ContextMenu>
+                            </ui:DropDownButton.Flyout>
+                        </ui:DropDownButton>
+
                     </StackPanel>
                 </ui:CardControl.Content>
 
@@ -440,19 +467,11 @@
             </StackPanel>
 
             <!--  机构信息面板  -->
-            <DockPanel DockPanel.Dock="Right" Visibility="{Binding CustomerCollection.Count, Converter={StaticResource NullToVisibilityConverter}}">
-
-                <!--  功能按键  -->
-                <StackPanel Margin="0,0,0,10" DockPanel.Dock="Bottom">
-
-                    <ui:Button
-                        HorizontalAlignment="Stretch"
-                        Appearance="Danger"
-                        Command="{Binding RemoveCustomerCommand}"
-                        CommandParameter="{Binding SelectedCustomer}"
-                        Content="删除机构" />
-
-                </StackPanel>
+            <ScrollViewer
+                DockPanel.Dock="Right"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto"
+                Visibility="{Binding CustomerCollection.Count, Converter={StaticResource NullToVisibilityConverter}}">
 
                 <!--  信息编辑  -->
                 <StackPanel>
@@ -466,21 +485,19 @@
 
                 </StackPanel>
 
-            </DockPanel>
+            </ScrollViewer>
 
             <!--  订单和划扣  -->
-
-            <ScrollViewer
+            <TabControl
+                x:Name="OrderLayout"
                 Margin="5,0"
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Auto"
+                SelectedIndex="0"
                 Visibility="{cb:Binding SelectedOrder}">
 
-                <TabControl x:Name="OrderLayout" SelectedIndex="0">
+                <!--  订单  -->
+                <TabItem Header="订单信息">
 
-                    <!--  订单  -->
-                    <TabItem Header="订单信息">
-
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
 
                             <order:OrderEditView DataContext="{Binding SelectedOrder}" />
@@ -500,48 +517,26 @@
 
                             </ui:CardControl>
 
-                            <Rectangle
-                                Height="2"
-                                Margin="3"
-                                Fill="{DynamicResource StripedBackgroundBrush}" />
-
-
-                            <ui:Button
-                                HorizontalAlignment="Stretch"
-                                Appearance="Caution"
-                                Command="{Binding RemoveOrderCommand}"
-                                CommandParameter="{Binding SelectedOrder}"
-                                Content="删除订单" />
-
                         </StackPanel>
+                    </ScrollViewer>
 
-                    </TabItem>
-
-
-                    <!--  划扣  -->
-                    <TabItem Header="划扣列表" Visibility="{cb:Binding 'ConsumeCollection.Count > 0'}">
-
-                        <ItemsControl
-                            d:ItemsSource="{d:SampleData ItemCount=3}"
-                            ItemTemplate="{StaticResource ConsumeListItem}"
-                            ItemsSource="{Binding ConsumeCollection}">
-
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-
-                                    <StackPanel />
-
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-
-                        </ItemsControl>
-
-                    </TabItem>
+                </TabItem>
 
 
-                </TabControl>
+                <!--  划扣  -->
+                <TabItem Header="划扣列表" Visibility="{cb:Binding 'ConsumeCollection.Count > 0'}">
 
-            </ScrollViewer>
+                    <ItemsControl
+                        d:ItemsSource="{d:SampleData ItemCount=3}"
+                        ItemTemplate="{StaticResource ConsumeListItem}"
+                        ItemsSource="{Binding ConsumeCollection}" />
+
+                </TabItem>
+
+
+            </TabControl>
+
+
         </DockPanel>
 
     </Grid>

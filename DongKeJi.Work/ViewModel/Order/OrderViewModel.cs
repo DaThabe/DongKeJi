@@ -8,7 +8,7 @@ namespace DongKeJi.Work.ViewModel.Order;
 /// <summary>
 ///     订阅订单
 /// </summary>
-public abstract partial class OrderViewModel : EntityViewModel, IWorkEntityViewModel
+public abstract partial class OrderViewModel : EntityViewModel
 {
     /// <summary>
     /// 订单类型
@@ -55,7 +55,7 @@ public abstract partial class OrderViewModel : EntityViewModel, IWorkEntityViewM
 
     partial void OnDescribeChanging(string? value) => ValidateProperty(value, nameof(Describe));
 
-    partial void OnPriceChanging(double value) => ValidateProperty(value, nameof(Describe));
+    partial void OnPriceChanging(double value) => ValidateProperty(value, nameof(Price));
 
     partial void OnStateChanging(OrderState value) => ValidateProperty(value, nameof(State));
 

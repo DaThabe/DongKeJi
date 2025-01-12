@@ -23,7 +23,7 @@ public class EntityViewModel : ObservableValidator, IEntityViewModel
     /// </summary>
     public Guid Id { get; init; } = Guid.NewGuid();
 
-    public ObservableCollection<ValidationResult> Errors { get; }
+    public IEnumerable<ValidationResult> Errors { get; }
 
 
     public EntityViewModel()
@@ -31,15 +31,10 @@ public class EntityViewModel : ObservableValidator, IEntityViewModel
         Errors = new ErrorObservableCollection(this);
     }
 
-
-    public IEnumerable<ValidationResult> Validate()
+    public void Validate()
     {
-        ClearErrors();
         ValidateAllProperties();
-        return GetErrors();
     }
-
-
 
     public override string ToString()
     {
@@ -61,7 +56,7 @@ file class ErrorObservableCollection : ObservableCollection<ValidationResult>
 
     private void ViewModel_ErrorsChanged(object? sender, DataErrorsChangedEventArgs e)
     {
-        var errors = _viewModel.GetErrors().ToList();
+        var errors = _viewModel.GetErrors().ToArray();
 
         //添加新元素
         foreach (var item in errors.ToArray())

@@ -23,7 +23,8 @@ public partial class UserDashboardViewModel(
     ILogger<UserDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IUserService userService,
-    ICoreContext coreContext) : LazyInitializeViewModel
+    ICoreContext coreContext,
+    ICoreDbService dbService) : LazyInitializeViewModel
 {
     /// <summary>
     ///     当前登录用户
@@ -58,7 +59,10 @@ public partial class UserDashboardViewModel(
         try
         {
             var users = await userService.GetAllAsync();
+
+
             UserCollection = users.ToObservableCollection();
+            UserCollection.ForEach(x=> dbService.AutoUpdate(x));
             SelectedUser = UserCollection.FirstOrDefault();
         }
         catch (Exception ex)

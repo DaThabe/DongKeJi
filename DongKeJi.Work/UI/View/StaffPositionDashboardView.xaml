@@ -13,6 +13,7 @@
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance vm:StaffPositionDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
+    d:State="Focused"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
@@ -166,13 +167,25 @@
 
                 <ui:CardControl.Content>
 
-                    <ui:Button
+                    <!--  隐藏菜单  -->
+                    <ui:DropDownButton
+                        Margin="10,0,0,0"
                         Appearance="Danger"
-                        Command="{Binding RemovePositionCommand}"
-                        CommandParameter="{Binding SelectedPosition}"
-                        Content="删除职位"
                         Foreground="#fff"
-                        Icon="{ui:SymbolIcon Symbol=Delete24}" />
+                        Icon="{ui:SymbolIcon Options24}">
+                        <ui:DropDownButton.Flyout>
+                            <ContextMenu>
+
+                                <MenuItem
+                                    Margin="0,3"
+                                    Command="{Binding RemovePositionCommand}"
+                                    CommandParameter="{Binding SelectedPosition}"
+                                    Header="删除职位"
+                                    Icon="{ui:SymbolIcon Delete24}" />
+
+                            </ContextMenu>
+                        </ui:DropDownButton.Flyout>
+                    </ui:DropDownButton>
 
                 </ui:CardControl.Content>
 

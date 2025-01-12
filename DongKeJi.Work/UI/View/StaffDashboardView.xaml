@@ -14,6 +14,7 @@
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance vm:StaffDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
+    d:State="Focused"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 

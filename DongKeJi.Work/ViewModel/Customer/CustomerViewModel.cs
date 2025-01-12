@@ -7,7 +7,7 @@ namespace DongKeJi.Work.ViewModel.Customer;
 /// <summary>
 ///     机构
 /// </summary>
-public partial class CustomerViewModel : EntityViewModel, IWorkEntityViewModel
+public partial class CustomerViewModel : EntityViewModel
 {
     /// <summary>
     ///     名称

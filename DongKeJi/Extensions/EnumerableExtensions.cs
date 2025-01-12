@@ -10,6 +10,15 @@ public static class EnumerableExtensions
     }
 
 
+    public static void ForEach<T>(this IEnumerable<T> values, Action<T> action)
+    {
+        foreach (var i in values)
+        {
+            action(i);
+        }
+    }
+
+
     public static IEnumerable<TEntity> SkipAndTake<TEntity>(this IEnumerable<TEntity> values, int? skip = null,
         int? take = null)
     {

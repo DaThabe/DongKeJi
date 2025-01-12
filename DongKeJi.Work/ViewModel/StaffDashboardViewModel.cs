@@ -27,6 +27,7 @@ public partial class StaffDashboardViewModel(
     ILogger<StaffDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IContentDialogService contentDialogService,
+    IWorkDbService dbService,
     ICoreContext coreContext,
     IWorkContext workContext,
     IStaffService staffService,
@@ -80,43 +81,6 @@ public partial class StaffDashboardViewModel(
     #region --员工--
 
     /// <summary>
-    ///     创建员工
-    /// </summary>
-    /// <returns></returns>
-    private async Task<StaffViewModel?> CreateStaffAsync()
-    {
-        var staffCreatorViewModel = new StaffCreatorObservableViewModel();
-
-        var content = new SimpleContentDialogCreateOptions
-        {
-            Title = "新增员工",
-            Content = new StaffCreatorView { DataContext = staffCreatorViewModel },
-            PrimaryButtonText = "创建",
-            CloseButtonText = "取消"
-        };
-
-        //弹窗
-
-        while (true)
-        {
-            var dialogResult = await contentDialogService.ShowSimpleDialogAsync(content);
-
-            if (dialogResult != ContentDialogResult.Primary) return null;
-
-            if (string.IsNullOrWhiteSpace(staffCreatorViewModel.Staff.Name))
-            {
-                snackbarService.ShowWarning("名称不可为空");
-                continue;
-            }
-
-            break;
-        }
-
-        //等待确认
-        return staffCreatorViewModel.Staff;
-    }
-
-    /// <summary>
     ///     刷新员工
     /// </summary>
     /// <returns></returns>
@@ -128,6 +92,7 @@ public partial class StaffDashboardViewModel(
             var result = await staffService.FindAllByUserAsync(CurrentUser);
 
             StaffCollection = result.ToObservableCollection();
+            StaffCollection.ForEach(x => dbService.AutoUpdate(x));
             SelectedStaff = StaffCollection.FirstOrDefault();
         }
         catch (Exception ex)
@@ -188,12 +153,12 @@ public partial class StaffDashboardViewModel(
     {
         try
         {
-            var staffCreatorViewModel = new StaffCreatorObservableViewModel();
+            var creatorVm = new StaffCreatorObservableViewModel();
 
             var content = new SimpleContentDialogCreateOptions
             {
                 Title = "新增员工",
-                Content = new StaffCreatorView { DataContext = staffCreatorViewModel },
+                Content = new StaffCreatorView { DataContext = creatorVm },
                 PrimaryButtonText = "创建",
                 CloseButtonText = "取消"
             };
@@ -204,10 +169,11 @@ public partial class StaffDashboardViewModel(
 
 
             //更新数据库
-            await staffService.AddAsync(staffCreatorViewModel.Staff, CurrentUser);
+            await staffService.AddAsync(creatorVm.Staff, CurrentUser);
             
-            StaffCollection.Add(staffCreatorViewModel.Staff, x => x.Id != staffCreatorViewModel.Staff.Id);
-            SelectedStaff = staffCreatorViewModel.Staff;
+            StaffCollection.Add(creatorVm.Staff, x => x.Id != creatorVm.Staff.Id);
+            dbService.AutoUpdate(creatorVm.Staff);
+            SelectedStaff = creatorVm.Staff;
         }
         catch (Exception ex)
         {
@@ -234,6 +200,7 @@ public partial class StaffDashboardViewModel(
             var positions = await staffPositionService.FindAllByStaffAsync(SelectedStaff);
 
             PositionCollection = positions.ToObservableCollection();
+            PositionCollection.ForEach(x=>dbService.AutoUpdate(x));
             SelectedPosition = PositionCollection.FirstOrDefault();
         }
         catch (Exception ex)
@@ -302,6 +269,7 @@ public partial class StaffDashboardViewModel(
             var position = await staffPositionService.BindingAsync(type, SelectedStaff);
 
             PositionCollection.Add(position, x => x.Type != position.Type);
+            dbService.AutoUpdate(position);
             SelectedPosition = position;
         }
         catch (Exception ex)

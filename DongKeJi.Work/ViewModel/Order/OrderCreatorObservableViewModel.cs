@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.Extensions;
 using DongKeJi.Inject;
@@ -16,7 +17,7 @@ public partial class OrderCreatorObservableViewModel : ObservableViewModel
     /// <summary>
     ///     订单信息
     /// </summary>
-    [ObservableProperty] private OrderViewModel _order = null!;
+    [ObservableProperty] private OrderViewModel _order;
 
     /// <summary>
     ///     当前选择的销售
@@ -39,7 +40,18 @@ public partial class OrderCreatorObservableViewModel : ObservableViewModel
         SalespersonCollection = salespersonViewModels.ToObservableCollection();
         SelectedSalesperson = SalespersonCollection.FirstOrDefault();
 
-        CurrentType = OrderType.Timing;
+        _order = new OrderTimingViewModel
+        {
+            Name = "设计包月",
+            Describe = "",
+            Price = 3999,
+            State = OrderState.Ready,
+            SubscribeTime = DateTime.Now,
+            InitDays = 0,
+            TotalDays = 30
+        };
+
+        _currentType = OrderType.Timing;
     }
 
     partial void OnCurrentTypeChanged(OrderType value)

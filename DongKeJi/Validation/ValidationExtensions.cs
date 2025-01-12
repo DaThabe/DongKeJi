@@ -11,9 +11,9 @@ public static class ValidationExtensions
     /// <exception cref="ValidationException"></exception>
     public static void AssertValidate(this IValidation validation)
     {
-        var resultList = validation.Validate();
+        validation.Validate();
 
-        foreach (var i in resultList)
+        foreach (var i in validation.Errors)
         {
             if (i == ValidationResult.Success) continue;
             throw new ValidationException(i, null, validation);

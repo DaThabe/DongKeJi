@@ -12,6 +12,20 @@
 
     <StackPanel>
 
+        <ItemsControl ItemsSource="{Binding Errors}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+
+                    <ui:InfoBar
+                        Title="参数错误"
+                        IsOpen="True"
+                        Message="{Binding ErrorMessage}"
+                        Severity="Error" />
+
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <!--  内容  -->
         <ui:CardControl Header="名称">
 
@@ -28,28 +42,6 @@
             </ui:CardControl.Content>
 
         </ui:CardControl>
-
-        <ItemsControl ItemsSource="{Binding Errors}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-
-                    <ui:TextBlock
-                        Appearance="Primary"
-                        Foreground="#f00"
-                        Text="{Binding ErrorMessage}" />
-
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-
-                    <StackPanel Orientation="Vertical" />
-
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
-        </ItemsControl>
 
     </StackPanel>
 

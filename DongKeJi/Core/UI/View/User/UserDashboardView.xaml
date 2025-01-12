@@ -176,10 +176,25 @@
                 <ui:CardControl Header="用户名">
 
                     <ui:CardControl.Content>
-                        <ui:TextBox PlaceholderText="请输入用户名..." Text="{Binding SelectedUser.Name, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <ui:TextBox PlaceholderText="请输入用户名..." Text="{Binding SelectedUser.Name}" />
+
                     </ui:CardControl.Content>
 
                 </ui:CardControl>
+
+                <ItemsControl ItemsSource="{Binding SelectedUser.Errors}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+
+                            <ui:InfoBar
+                                Title="参数错误"
+                                Message="{Binding ErrorMessage}"
+                                Severity="Error" />
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
             </StackPanel>
 
