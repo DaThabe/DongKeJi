@@ -1,19 +1,16 @@
 ﻿using AutoMapper;
-using DongKeJi.Common.Extensions;
-using DongKeJi.Common.Inject;
 using DongKeJi.Database;
 using DongKeJi.Exceptions;
 using DongKeJi.Extensions;
+using DongKeJi.Inject;
 using DongKeJi.Validation;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.ViewModel.Common.Order;
-using DongKeJi.Work.ViewModel.Common.Staff;
+using DongKeJi.Work.ViewModel.Order;
+using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using OrderViewModel = DongKeJi.Work.ViewModel.Order.OrderViewModel;
-using StaffViewModel = DongKeJi.Work.ViewModel.Staff.StaffViewModel;
 
 namespace DongKeJi.Work.Service;
 
@@ -101,10 +98,7 @@ public interface IOrderService
 ///     订单服务
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IOrderService))]
-internal class OrderService(
-    IServiceProvider services,
-    WorkDbContext dbContext, 
-    IMapper mapper) : IOrderService
+internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderService
 {
     public async ValueTask AddAsync(
         OrderViewModel order,
@@ -128,7 +122,7 @@ internal class OrderService(
             //职位
             var positionEntity = await dbContext.StaffPositions
                 .Include(x => x.Staffs)
-                .FirstOrDefaultAsync(x => x.Type ==  StaffPositionType.Salesperson, cancellation);
+                .FirstOrDefaultAsync(x => x.Type == StaffPositionType.Salesperson, cancellation);
             positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "销售职位不存在");
 
 
@@ -137,11 +131,11 @@ internal class OrderService(
                 .Include(x => x.Positions)
                 .Where(x => x.Positions.Contains(positionEntity))
                 .FirstOrDefaultAsync(x => x.Id == salesperson.Id, cancellation);
-            salespersonEntity = DatabaseException.ThrowIfEntityNotFound(salespersonEntity,"销售员工不存在");
+            salespersonEntity = DatabaseException.ThrowIfEntityNotFound(salespersonEntity, "销售员工不存在");
 
             //机构
             var customerEntity = await dbContext.Customers
-                .Include(x=>x.Orders)
+                .Include(x => x.Orders)
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
             customerEntity = DatabaseException.ThrowIfEntityNotFound(customerEntity, "机构不存在");
 
@@ -157,8 +151,6 @@ internal class OrderService(
             //保存
             await dbContext.AddAsync(orderEntity, cancellation);
             await dbContext.AssertSaveSuccessAsync(cancellation);
-
-            dbContext.RegisterAutoUpdate<OrderEntity, OrderViewModel>(order, services);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -218,8 +210,7 @@ internal class OrderService(
                 .FirstOrDefault(x => x.Positions.Contains(positionEntity));
             salespersonStaff = DatabaseException.ThrowIfEntityNotFound(salespersonStaff, "销售不存在");
 
-            mapper.Map<StaffViewModel>(salespersonStaff);
-            return dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(salespersonStaff, services);
+            return mapper.Map<StaffViewModel>(salespersonStaff);
         }
         catch (Exception ex)
         {
@@ -253,7 +244,7 @@ internal class OrderService(
             //订单-销售
             var orderSalespersonSet = orderEntity.Staffs
                 .Where(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
-            
+
             foreach (var salespersonItem in orderSalespersonSet)
             {
                 orderEntity.Staffs.Remove(salespersonItem);
@@ -290,7 +281,7 @@ internal class OrderService(
                     .ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return orderEntityList.Select(x => dbContext.RegisterAutoUpdate<OrderEntity, OrderViewModel>(x, services));
+            return orderEntityList.Select(mapper.Map<OrderViewModel>);
         }
         catch (Exception ex)
         {
@@ -317,7 +308,7 @@ internal class OrderService(
                     .ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return orderEntityList.Select(x => dbContext.RegisterAutoUpdate<OrderEntity, OrderViewModel>(x, services));
+            return orderEntityList.Select(mapper.Map<OrderViewModel>);
         }
         catch (Exception ex)
         {

@@ -1,10 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.Inject;
 using DongKeJi.ViewModel;
-using DongKeJi.Work.ViewModel.Common.Staff;
+using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
-using StaffViewModel = DongKeJi.Work.ViewModel.Staff.StaffViewModel;
-
 namespace DongKeJi.Work;
 
 /// <summary>
@@ -20,7 +18,7 @@ public interface IWorkContext
 
 
 [Inject(ServiceLifetime.Singleton, typeof(IWorkContext))]
-internal partial class WorkContext : DongKeJi.ViewModel.ObservableViewModel, IWorkContext
+internal partial class WorkContext : ObservableViewModel, IWorkContext
 {
     [ObservableProperty] 
     private StaffViewModel? _currentStaff;

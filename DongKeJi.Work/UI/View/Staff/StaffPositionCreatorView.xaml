@@ -4,11 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:staff="clr-namespace:DongKeJi.Work.UI.View.Staff"
+    xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
-    xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Staff"
-    xmlns:staff1="clr-namespace:DongKeJi.Work.UI.View.Staff"
-    d:DataContext="{d:DesignInstance staff:StaffPositionCreatorObservableViewModel,
+    d:DataContext="{d:DesignInstance staffVm:StaffPositionCreatorObservableViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
@@ -21,7 +20,7 @@
                 <StackPanel Orientation="Horizontal">
 
                     <!--  类型选择器  -->
-                    <staff1:StaffPositionTypeComboBox DataContext="{Binding Position}" />
+                    <staff:StaffPositionTypeComboBox DataContext="{Binding Position}" />
 
                 </StackPanel>
             </ui:CardControl.Content>
@@ -32,7 +31,7 @@
         <Rectangle Height="3" Fill="{DynamicResource StripedBackgroundBrush}" />
 
         <!--  订单信息  -->
-        <staff1:StaffPositionEditView DataContext="{Binding Position}" />
+        <staff:StaffPositionEditView DataContext="{Binding Position}" />
 
     </StackPanel>
 

@@ -1,7 +1,7 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Threading;
 using DongKeJi.Core;
-using DongKeJi.Launcher.Service;
 using DongKeJi.Module;
 using DongKeJi.Work;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,25 +15,40 @@ namespace DongKeJi.Launcher;
 /// <summary>
 ///     Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App : Application, IApplication
 {
+    public IHost Host { get; }
+
+    /// <summary>
+    ///     程序根目录
+    /// </summary>
+    public string BaseDirectory { get; } 
+
+    /// <summary>
+    ///     数据库文件目录
+    /// </summary>
+    public string DatabaseDirectory { get; }
+
+
     public App()
     {
         var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-            .RegisterModule<LauncherModule>()
             .RegisterModule<CoreModule>()
+            .RegisterModule<LauncherModule>()
             .RegisterModule<WorkModule>()
             .ConfigureLogging(x => x.SetMinimumLevel(LogLevel.Trace))
             .ConfigureServices(services =>
             {
                 services.AddHostedService<HostedService>();
-                services.AddSingleton<Application>(this);
+                services.AddSingleton<IApplication>(this);
             });
 
         Host = builder.Build();
+        BaseDirectory = AppContext.BaseDirectory;
+        DatabaseDirectory = Path.Combine(BaseDirectory, "Database");
     }
 
-    public IHost Host { get; }
+    
 
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -60,4 +75,5 @@ public partial class App : Application
             new SymbolIcon(SymbolRegular.ErrorCircle16), TimeSpan.FromSeconds(5));
         e.Handled = true;
     }
+
 }

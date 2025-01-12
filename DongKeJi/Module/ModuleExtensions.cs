@@ -10,6 +10,12 @@ public static class ModuleExtensions
     /// </summary>
     private static Dictionary<AssemblyName, IModule> Modules { get; } = new();
 
+    /// <summary>
+    /// 已加载的模块元信息
+    /// </summary>
+    public static IEnumerable<IModuleMetaInfo> MetaInfos => Modules.Select(x => x.Value.MetaInfo);
+
+
 
     /// <summary>
     ///     注册模块信息

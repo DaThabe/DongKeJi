@@ -1,9 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using DongKeJi.Work.ViewModel.Common.Order;
-using OrderCountingViewModel = DongKeJi.Work.ViewModel.Order.OrderCountingViewModel;
-using OrderMixingViewModel = DongKeJi.Work.ViewModel.Order.OrderMixingViewModel;
-using OrderTimingViewModel = DongKeJi.Work.ViewModel.Order.OrderTimingViewModel;
+using DongKeJi.Work.ViewModel.Order;
 
 namespace DongKeJi.Work.UI.TemplateSelector;
 

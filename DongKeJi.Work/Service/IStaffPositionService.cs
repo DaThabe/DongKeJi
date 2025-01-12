@@ -1,7 +1,5 @@
-﻿using DongKeJi.Common.Inject;
-using DongKeJi.Work.Model;
+﻿using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.ViewModel.Common.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
@@ -9,9 +7,11 @@ using DongKeJi.Validation;
 using DongKeJi.Exceptions;
 using DongKeJi.Extensions;
 using DongKeJi.Database;
-using StaffPositionViewModel = DongKeJi.Work.ViewModel.Staff.StaffPositionViewModel;
+using DongKeJi.Inject;
+using DongKeJi.Work.ViewModel.Staff;
 
 namespace DongKeJi.Work.Service;
+
 
 public interface IStaffPositionService
 {
@@ -96,10 +96,7 @@ public interface IStaffPositionService
 }
 
 [Inject(ServiceLifetime.Transient, typeof(IStaffPositionService))]
-internal class StaffPositionService(
-    IServiceProvider services, 
-    IMapper mapper,
-    WorkDbContext dbContext) :  IStaffPositionService
+internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : IStaffPositionService
 {
     public async ValueTask<StaffPositionViewModel> BindingAsync(
         StaffPositionType positionType,
@@ -124,7 +121,7 @@ internal class StaffPositionService(
                 .Include(x => x.Staffs)
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
 
-            if (staffPositionEntity is null || staffPositionEntity.IsEmpty())
+            if (staffPositionEntity is null || staffPositionEntity.IsNullOrEmpty())
             {
                 staffPositionEntity = new StaffPositionEntity
                 {
@@ -141,7 +138,7 @@ internal class StaffPositionService(
             await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
 
-            return dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(staffPositionEntity, services);
+            return mapper.Map<StaffPositionViewModel>(staffPositionEntity);
         }
         catch (Exception ex)
         {
@@ -166,7 +163,7 @@ internal class StaffPositionService(
 
             //保存
             staffEntity.Positions.Remove(x => x.Type == positionType);
-            
+
             await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
@@ -217,7 +214,7 @@ internal class StaffPositionService(
             var positionEntity = await dbContext.StaffPositions
                 .FirstOrDefaultAsync(x => x.Type == position.Type, cancellation);
 
-            if (positionEntity is null || positionEntity.IsEmpty())
+            if (positionEntity is null || positionEntity.IsNullOrEmpty())
             {
                 //新增
                 positionEntity = mapper.Map<StaffPositionEntity>(position);
@@ -232,8 +229,6 @@ internal class StaffPositionService(
             //保存
             await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
-
-            dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(position, services);
         }
         catch (Exception ex)
         {
@@ -278,7 +273,7 @@ internal class StaffPositionService(
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
             positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
-            return dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(positionEntity, services);
+            return mapper.Map<StaffPositionViewModel>(positionEntity);
         }
         catch (Exception ex)
         {
@@ -303,7 +298,7 @@ internal class StaffPositionService(
                 .Select(x => x.Positions.SkipAndTake(skip, take).ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return positionEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(x, services));
+            return positionEntityList.Select(mapper.Map<StaffPositionViewModel>);
         }
         catch (Exception ex)
         {
@@ -323,7 +318,7 @@ internal class StaffPositionService(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return positionEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffPositionEntity, StaffPositionViewModel>(x, services));
+            return positionEntityList.Select(mapper.Map<StaffPositionViewModel>);
         }
         catch (Exception ex)
         {

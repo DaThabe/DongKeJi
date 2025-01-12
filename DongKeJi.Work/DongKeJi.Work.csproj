@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DongKeJi.Core\DongKeJi.Core.csproj" />
     <ProjectReference Include="..\DongKeJi\DongKeJi.csproj" />
   </ItemGroup>
 

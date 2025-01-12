@@ -6,10 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:staff="clr-namespace:DongKeJi.Work.Model.Entity.Staff"
+    xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
-    xmlns:staff1="clr-namespace:DongKeJi.Work.ViewModel.Staff"
-    d:DataContext="{d:DesignInstance staff1:StaffPositionViewModel,
+    d:DataContext="{d:DesignInstance staffVm:StaffPositionViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 

@@ -1,16 +1,14 @@
 ﻿using AutoMapper;
-using DongKeJi.Common.Extensions;
-using DongKeJi.Common.Inject;
 using DongKeJi.Database;
 using DongKeJi.Exceptions;
 using DongKeJi.Extensions;
+using DongKeJi.Inject;
 using DongKeJi.Validation;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Customer;
-using DongKeJi.Work.ViewModel.Common.Customer;
+using DongKeJi.Work.ViewModel.Customer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using CustomerViewModel = DongKeJi.Work.ViewModel.Customer.CustomerViewModel;
 
 namespace DongKeJi.Work.Service;
 
@@ -57,10 +55,7 @@ public interface ICustomerService
 }
 
 [Inject(ServiceLifetime.Singleton, typeof(ICustomerService))]
-internal class CustomerService(
-    IServiceProvider services,
-    IMapper mapper,
-    WorkDbContext dbContext) : ICustomerService
+internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICustomerService
 {
     public async ValueTask AddAsync(
         CustomerViewModel customer,
@@ -96,8 +91,6 @@ internal class CustomerService(
             //保存
             await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
-
-            dbContext.RegisterAutoUpdate<CustomerEntity, CustomerViewModel>(customer, services);
         }
         catch (Exception ex)
         {
@@ -149,8 +142,7 @@ internal class CustomerService(
                     .ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return customerEntityList.Select(x =>
-                dbContext.RegisterAutoUpdate<CustomerEntity, CustomerViewModel>(x, services));
+            return customerEntityList.Select(mapper.Map<CustomerViewModel>);
         }
         catch (Exception ex)
         {

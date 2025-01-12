@@ -1,19 +1,16 @@
 ﻿using AutoMapper;
-using DongKeJi.Common.Inject;
+using DongKeJi.Core.Service;
+using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Database;
 using DongKeJi.Exceptions;
 using DongKeJi.Extensions;
-using DongKeJi.Model;
-using DongKeJi.Model.Entity;
+using DongKeJi.Inject;
 using DongKeJi.Validation;
-using DongKeJi.ViewModel.User;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.ViewModel.Common.Staff;
+using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using StaffViewModel = DongKeJi.Work.ViewModel.Staff.StaffViewModel;
-using UserViewModel = DongKeJi.Core.ViewModel.User.UserViewModel;
 
 namespace DongKeJi.Work.Service;
 
@@ -112,9 +109,8 @@ public interface IStaffService
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IStaffService))]
 internal class StaffService(
-    IServiceProvider services,
+    IUserService userService,
     IMapper mapper,
-    CoreDbContext coreDbContext,
     WorkDbContext dbContext) : IStaffService
 {
     public async ValueTask<UserViewModel> FindUserByStaffAsync(
@@ -134,11 +130,11 @@ internal class StaffService(
             if (staffEntity.UserId is null) throw new DatabaseException("关联用户为空");
 
             //用户
-            var userEntity = await coreDbContext.Users
-                .FirstOrDefaultAsync(x => x.Id == staffEntity.UserId, cancellation);
-            userEntity = DatabaseException.ThrowIfEntityNotFound(userEntity, "用户不存在");
+            Identifiable id = staffEntity.UserId;
+            var userViewModel = await userService.FindByIdAsync(id, cancellation);
+            userViewModel = DatabaseException.ThrowIfEntityNotFound(userViewModel, "用户不存在");
 
-            return coreDbContext.RegisterAutoUpdate<UserEntity, UserViewModel>(userEntity, services);
+            return userViewModel;
         }
         catch (Exception ex)
         {
@@ -165,20 +161,17 @@ internal class StaffService(
             DatabaseException.ThrowIfEntityAlreadyExists(staffEntity, "员工已存在");
 
             //用户
-            var userEntity = await coreDbContext.Users
-                .FirstOrDefaultAsync(x => x.Id == user.Id, cancellation);
-            userEntity = DatabaseException.ThrowIfEntityNotFound(userEntity, "用户不存在");
+            var userViewModel = await userService.FindByIdAsync(user, cancellation);
+            userViewModel = DatabaseException.ThrowIfEntityNotFound(userViewModel, "用户不存在");
 
             //修改
             staffEntity = mapper.Map<StaffEntity>(staff);
-            staffEntity.UserId = userEntity.Id;
+            staffEntity.UserId = userViewModel.Id;
             dbContext.Add(staffEntity);
 
             //保存
             await dbContext.AssertSaveSuccessAsync(cancellation);
             await transaction.CommitAsync(cancellation);
-
-            dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(staff, services);
         }
         catch (Exception ex)
         {
@@ -199,7 +192,7 @@ internal class StaffService(
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
-            return dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(staffEntity, services);
+            return mapper.Map<StaffViewModel>(staffEntity);
         }
         catch (Exception ex)
         {
@@ -220,7 +213,7 @@ internal class StaffService(
                 .Where(x => x.UserId == user.Id)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+            return staffEntityList.Select(mapper.Map<StaffViewModel>);
         }
         catch (Exception ex)
         {
@@ -248,8 +241,7 @@ internal class StaffService(
                     .ToList())
                 .FirstOrDefaultAsync(cancellation) ?? [];
 
-            return staffPositionEntity.Select(x =>
-                dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+            return staffPositionEntity.Select(mapper.Map<StaffViewModel>);
         }
         catch (Exception ex)
         {
@@ -274,7 +266,7 @@ internal class StaffService(
                 .Where(x => x.Type == type)
                 .FirstOrDefaultAsync(cancellation);
 
-            if (positionEntity is null || positionEntity.IsEmpty()) return [];
+            if (positionEntity is null || positionEntity.IsNullOrEmpty()) return [];
 
             var staffEntityList = await dbContext.Staffs
                 .Include(x => x.Positions)
@@ -284,7 +276,7 @@ internal class StaffService(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+            return staffEntityList.Select(mapper.Map<StaffViewModel>);
         }
         catch (Exception ex)
         {
@@ -306,7 +298,7 @@ internal class StaffService(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return staffEntityList.Select(x => dbContext.RegisterAutoUpdate<StaffEntity, StaffViewModel>(x, services));
+            return staffEntityList.Select(mapper.Map<StaffViewModel>);
         }
         catch (Exception ex)
         {

@@ -10,17 +10,21 @@ namespace DongKeJi.Database;
 /// </summary>
 public class LocalDbContext : DbContext
 {
+    private readonly string _dbFolder;
+
     /// <summary>
     /// </summary>
+    /// <param name="application"></param>
     /// <param name="name">数据库名称 (建议使用大驼峰命名, 不需要加扩展名</param>
     /// <exception cref="Exception"></exception>
-    public LocalDbContext(string name)
+    public LocalDbContext(IApplication application, string name)
     {
+        _dbFolder = application.DatabaseDirectory;
         Name = name.Trim();
-        if (_contexts.TryGetValue(Name, out var value)) throw new Exception($"数据库名称冲突: {Name}");
+        if (ContextDictionary.TryGetValue(Name, out var _)) throw new Exception($"数据库名称冲突: {Name}");
 
         Database.EnsureCreated();
-        _contexts[name] = this;
+        ContextDictionary[name] = this;
     }
 
 
@@ -28,10 +32,10 @@ public class LocalDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!Directory.Exists(GlobalConfig.DatabaseDirectory))
-            Directory.CreateDirectory(GlobalConfig.DatabaseDirectory);
+        if (!Directory.Exists(_dbFolder))
+            Directory.CreateDirectory(_dbFolder);
 
-        var path = Path.Combine(GlobalConfig.DatabaseDirectory, $"{Name}.db");
+        var path = Path.Combine(_dbFolder, $"{Name}.db");
         optionsBuilder.UseSqlite($"Data Source={path}");
 
         base.OnConfiguring(optionsBuilder);
@@ -39,12 +43,12 @@ public class LocalDbContext : DbContext
 
     #region --静态--
 
-    private static readonly Dictionary<string, DbContext> _contexts = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, DbContext> ContextDictionary = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///     所有上下文
     /// </summary>
-    public static IEnumerable<DbContext> Contexts => _contexts.Values;
+    public static IEnumerable<DbContext> Contexts => ContextDictionary.Values;
 
     /// <summary>
     ///     获取指定类型的
@@ -54,7 +58,7 @@ public class LocalDbContext : DbContext
     public static DbContext? Get<TDbContext>()
         where TDbContext : DbContext
     {
-        return _contexts.Values.OfType<TDbContext>().FirstOrDefault();
+        return ContextDictionary.Values.OfType<TDbContext>().FirstOrDefault();
     }
 
 

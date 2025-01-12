@@ -4,19 +4,18 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:order="clr-namespace:DongKeJi.Work.ViewModel.Common.Order"
+    xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Order"
+    xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Order"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:order1="clr-namespace:DongKeJi.Work.ViewModel.Order"
-    xmlns:order2="clr-namespace:DongKeJi.Work.UI.View.Order"
-    d:DataContext="{d:DesignInstance order1:OrderViewModel,
+    d:DataContext="{d:DesignInstance orderVm:OrderViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
     <UserControl.Resources>
 
         <!--  混合  -->
-        <DataTemplate x:Key="MixingOrder" DataType="{x:Type order1:OrderMixingViewModel}">
+        <DataTemplate x:Key="MixingOrder" DataType="{x:Type orderVm:OrderMixingViewModel}">
             <UniformGrid Columns="2" Rows="2">
 
                 <ui:CardControl Header="起始天数">
@@ -71,7 +70,7 @@
         </DataTemplate>
 
         <!--  计时  -->
-        <DataTemplate x:Key="TimingOrder" DataType="{x:Type order1:OrderTimingViewModel}">
+        <DataTemplate x:Key="TimingOrder" DataType="{x:Type orderVm:OrderTimingViewModel}">
             <UniformGrid Columns="2">
 
                 <ui:CardControl Header="起始天数">
@@ -102,7 +101,7 @@
         </DataTemplate>
 
         <!--  计数  -->
-        <DataTemplate x:Key="CountingOrder" DataType="{x:Type order1:OrderCountingViewModel}">
+        <DataTemplate x:Key="CountingOrder" DataType="{x:Type orderVm:OrderCountingViewModel}">
             <UniformGrid Columns="2">
 
                 <ui:CardControl Header="起始张数">
@@ -180,7 +179,7 @@
                 Header="状态">
                 <ui:CardControl.Content>
 
-                    <order2:OrderStateComboBox DataContext="{Binding}" />
+                    <order:OrderStateComboBox DataContext="{Binding}" />
 
                 </ui:CardControl.Content>
             </ui:CardControl>

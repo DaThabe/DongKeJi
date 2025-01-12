@@ -5,14 +5,12 @@
     xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Order"
     xmlns:orderEntity="clr-namespace:DongKeJi.Work.Model.Entity.Order"
-    xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
+    xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Order"
+    xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Order"
-    xmlns:order="clr-namespace:DongKeJi.Work.ViewModel.Order"
-    xmlns:staff1="clr-namespace:DongKeJi.Work.ViewModel.Staff"
-    xmlns:order1="clr-namespace:DongKeJi.Work.UI.View.Order"
-    d:DataContext="{d:DesignInstance order:OrderCreatorObservableViewModel,
+    d:DataContext="{d:DesignInstance orderVm:OrderCreatorObservableViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
@@ -32,7 +30,7 @@
         </DataTemplate>
 
         <!--  员工选择器元素  -->
-        <DataTemplate x:Key="StaffSelectorItem" DataType="{x:Type staff1:StaffViewModel}">
+        <DataTemplate x:Key="StaffSelectorItem" DataType="{x:Type staffVm:StaffViewModel}">
 
             <ui:TextBlock Appearance="Primary" Text="{Binding Name}" />
 
@@ -61,9 +59,9 @@
                     <ComboBox
                         Margin="5,0,0,0"
                         ItemTemplate="{StaticResource StaffSelectorItem}"
-                        ItemsSource="{Binding SalespersonSet}"
+                        ItemsSource="{Binding SalespersonCollection}"
                         SelectedIndex="0"
-                        SelectedItem="{Binding Salesperson}"
+                        SelectedItem="{Binding SelectedSalesperson}"
                         ToolTip="订单销售" />
 
                 </StackPanel>
@@ -78,7 +76,7 @@
             Fill="{DynamicResource StripedBackgroundBrush}" />
 
         <!--  订单信息  -->
-        <order1:OrderEditView DataContext="{Binding SelectedOrder}" />
+        <order:OrderEditView DataContext="{Binding SelectedOrder}" />
 
     </StackPanel>
 

@@ -11,22 +11,22 @@ namespace DongKeJi.Work.ViewModel.Order;
 
 
 [Inject(ServiceLifetime.Transient)]
-public partial class OrderCreatorObservableViewModel : DongKeJi.ViewModel.ObservableViewModel
+public partial class OrderCreatorObservableViewModel : ObservableViewModel
 {
     /// <summary>
     ///     订单信息
     /// </summary>
-    [ObservableProperty] private OrderViewModel _order = OrderViewModel.Default;
+    [ObservableProperty] private OrderViewModel _order = null!;
 
     /// <summary>
     ///     当前选择的销售
     /// </summary>
-    [ObservableProperty] private StaffViewModel? _salesperson;
+    [ObservableProperty] private StaffViewModel? _selectedSalesperson;
 
     /// <summary>
     ///     销售列表
     /// </summary>
-    [ObservableProperty] private ObservableCollection<StaffViewModel> _salespersonSet;
+    [ObservableProperty] private ObservableCollection<StaffViewModel> _salespersonCollection;
 
     /// <summary>
     ///     当前订单类型
@@ -36,8 +36,8 @@ public partial class OrderCreatorObservableViewModel : DongKeJi.ViewModel.Observ
 
     public OrderCreatorObservableViewModel(IEnumerable<StaffViewModel> salespersonViewModels)
     {
-        SalespersonSet = salespersonViewModels.ToObservableCollection();
-        Salesperson = Enumerable.FirstOrDefault<StaffViewModel>(SalespersonSet);
+        SalespersonCollection = salespersonViewModels.ToObservableCollection();
+        SelectedSalesperson = SalespersonCollection.FirstOrDefault();
 
         CurrentType = OrderType.Timing;
     }

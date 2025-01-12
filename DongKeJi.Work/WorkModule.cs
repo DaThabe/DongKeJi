@@ -6,6 +6,7 @@ using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
 using DongKeJi.Work.UI.View;
+using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -26,14 +27,13 @@ public class WorkModule : IModule
         Title = "办公",
         Developers = ["DaThabe"],
         Describe = """
-                   办公模块
-                   -机构明细记录
+                   ### 办公模块
+                   - 机构明细记录
                    """,
         CreatedAt = new DateTime(2024, 9, 17),
         ReleaseDate = new DateTime(2025, 1, 12),
         Dependencies =
         [
-            typeof(BaseModule).Assembly.GetName(),
             typeof(CoreModule).Assembly.GetName(),
         ]
     };
@@ -104,14 +104,14 @@ file class HostedService(
         var result = await staffService.FindAllByUserAsync(coreContext.CurrentUser, cancellation);
         var staffs = result.ToList();
 
-        if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
-        {
-            var staff = new StaffViewModel { Name = coreContext.CurrentUser.Name, IsPrimaryAccount = true };
-            await staffService.AddAsync(staff, coreContext.CurrentUser, cancellation);
-            staffs.Add(staff);
-        }
+        //if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
+        //{
+        //    var staff = new StaffViewModel { Name = coreContext.CurrentUser.Name, IsPrimaryAccount = true };
+        //    await staffService.AddAsync(staff, coreContext.CurrentUser, cancellation);
+        //    staffs.Add(staff);
+        //}
 
-        var staffViewModel = staffs.Find(x => x.IsPrimaryAccount);
+        var staffViewModel = staffs.FirstOrDefault();
 
         workContext.CurrentStaff = staffViewModel ?? throw new Exception("未能创建或加载用户");
     }

@@ -3,21 +3,10 @@ using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.ViewModel.Common.Consume;
-using DongKeJi.Work.ViewModel.Common.Customer;
-using DongKeJi.Work.ViewModel.Common.Order;
-using DongKeJi.Work.ViewModel.Common.Staff;
-using ConsumeCountingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeCountingViewModel;
-using ConsumeMixingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeMixingViewModel;
-using ConsumeTimingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeTimingViewModel;
-using ConsumeViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeViewModel;
-using CustomerViewModel = DongKeJi.Work.ViewModel.Customer.CustomerViewModel;
-using OrderCountingViewModel = DongKeJi.Work.ViewModel.Order.OrderCountingViewModel;
-using OrderMixingViewModel = DongKeJi.Work.ViewModel.Order.OrderMixingViewModel;
-using OrderTimingViewModel = DongKeJi.Work.ViewModel.Order.OrderTimingViewModel;
-using OrderViewModel = DongKeJi.Work.ViewModel.Order.OrderViewModel;
-using StaffPositionViewModel = DongKeJi.Work.ViewModel.Staff.StaffPositionViewModel;
-using StaffViewModel = DongKeJi.Work.ViewModel.Staff.StaffViewModel;
+using DongKeJi.Work.ViewModel.Consume;
+using DongKeJi.Work.ViewModel.Customer;
+using DongKeJi.Work.ViewModel.Order;
+using DongKeJi.Work.ViewModel.Staff;
 
 namespace DongKeJi.Work.Model;
 

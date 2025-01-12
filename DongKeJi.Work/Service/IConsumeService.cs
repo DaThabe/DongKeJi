@@ -1,18 +1,14 @@
 ﻿using AutoMapper;
-using DongKeJi.Common.Inject;
 using DongKeJi.Database;
 using DongKeJi.Exceptions;
 using DongKeJi.Extensions;
+using DongKeJi.Inject;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.ViewModel.Common.Consume;
+using DongKeJi.Work.ViewModel.Consume;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using ConsumeCountingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeCountingViewModel;
-using ConsumeMixingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeMixingViewModel;
-using ConsumeTimingViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeTimingViewModel;
-using ConsumeViewModel = DongKeJi.Work.ViewModel.Consume.ConsumeViewModel;
 
 namespace DongKeJi.Work.Service;
 
@@ -93,11 +89,7 @@ public interface IConsumeService
 ///     划扣服务
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IConsumeService))]
-internal class ConsumeService(
-    IServiceProvider services,
-    IMapper mapper,
-    WorkDbContext dbContext) : 
-    IConsumeService
+internal class ConsumeService(WorkDbContext dbContext, IMapper mapper) : IConsumeService
 {
     public async ValueTask AddAsync(
         ConsumeViewModel consume,
@@ -134,8 +126,6 @@ internal class ConsumeService(
 
             await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
-
-            dbContext.RegisterAutoUpdate<ConsumeEntity, ConsumeViewModel>(consume, services);
         }
         catch (Exception ex)
         {
@@ -270,8 +260,7 @@ internal class ConsumeService(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(x =>
-                dbContext.RegisterAutoUpdate<ConsumeTimingEntity, ConsumeTimingViewModel>(x, services));
+            return entityList.Select(mapper.Map<ConsumeTimingViewModel>);
         }
         catch (Exception ex)
         {
@@ -296,8 +285,7 @@ internal class ConsumeService(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(x =>
-                dbContext.RegisterAutoUpdate<ConsumeCountingEntity, ConsumeCountingViewModel>(x, services));
+            return entityList.Select(mapper.Map<ConsumeCountingViewModel>);
         }
         catch (Exception ex)
         {
@@ -322,8 +310,7 @@ internal class ConsumeService(
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 
-            return entityList.Select(x =>
-                dbContext.RegisterAutoUpdate<ConsumeMixingEntity, ConsumeMixingViewModel>(x, services));
+            return entityList.Select(mapper.Map<ConsumeMixingViewModel>);
         }
         catch (Exception ex)
         {

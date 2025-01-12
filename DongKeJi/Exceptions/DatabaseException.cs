@@ -27,7 +27,7 @@ public class DatabaseException : Exception
     public static void ThrowIfEntityAlreadyExists<TEntity>(TEntity? entity, string? message = null)
         where TEntity : IIdentifiable
     {
-        if (entity is not null && !entity.IsEmpty())
+        if (entity is not null && !entity.IsNullOrEmpty())
         {
             throw new EntityAlreadyExistsException(message ?? $"实体已存在\nId: {entity.Id}");
         }
@@ -59,7 +59,7 @@ public class DatabaseException : Exception
     public static TEntity ThrowIfEntityNotFound<TEntity>(TEntity? entity, string? message = null)
         where TEntity : IIdentifiable
     {
-        if (entity is null || entity.IsEmpty())
+        if (entity is null || entity.IsNullOrEmpty())
         {
             throw new EntityNotFoundException(message ?? "实体不存在");
         }

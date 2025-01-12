@@ -2,7 +2,6 @@ using DongKeJi.Core;
 using DongKeJi.Core.UI.View;
 using DongKeJi.Inject;
 using DongKeJi.Module;
-using DongKeJi.Work;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -17,17 +16,16 @@ public class LauncherModule : IModule
         Title = "启动器",
         Developers = ["DaThabe"],
         Describe = """
-                   启动器模块
-                   -检测更新
-                   -加载功能
+                   ### 启动器模块
+                   - 检测更新
+                   - 加载功能
                    """,
         CreatedAt = new DateTime(2024, 10, 3),
         ReleaseDate = new DateTime(2025, 1, 2),
         Dependencies =
         [
-            typeof(BaseModule).Assembly.GetName(),
             typeof(CoreModule).Assembly.GetName(),
-            typeof(WorkModule).Assembly.GetName()
+            //typeof(WorkModule).Assembly.GetName()
         ]
     };
 

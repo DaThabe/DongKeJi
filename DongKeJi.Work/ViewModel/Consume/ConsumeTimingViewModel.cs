@@ -18,5 +18,5 @@ public partial class ConsumeTimingViewModel : ConsumeViewModel
 
 
     partial void OnConsumeDaysChanged(double value) =>
-        ValidateProperty(value, nameof(Common.Consume.ConsumeTimingViewModel.ConsumeDays));
+        ValidateProperty(value, nameof(ConsumeDays));
 }

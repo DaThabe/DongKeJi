@@ -1,34 +1,41 @@
-﻿using DongKeJi.Common.Inject;
-using DongKeJi.ViewModel;
-using DongKeJi.ViewModel.User;
+﻿using DongKeJi.Inject;
 using DongKeJi.Work.ViewModel;
-using DongKeJi.Work.ViewModel.Common.Staff;
+using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
-using StaffPositionViewModel = DongKeJi.Work.ViewModel.Staff.StaffPositionViewModel;
 
 namespace DongKeJi.Work.UI.View;
 
 [Inject(ServiceLifetime.Transient)]
 public partial class StaffPositionDashboardView
 {
-    public StaffPositionDashboardView(IServiceProvider services) : base(services)
+    private readonly IServiceProvider _services;
+
+    public StaffPositionDashboardView(IServiceProvider services)
     {
+        _services = services;
         InitializeComponent();
     }
 
-    protected override async ValueTask<IViewModel> OnLoadViewModelAsync(IServiceProvider services,
-        CancellationToken cancellation = default)
+    protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
     {
-        var vm = services.GetRequiredService<StaffPositionDashboardObservableViewModel>();
+        var vm = _services.GetRequiredService<StaffPositionDashboardViewModel>();
         await vm.InitializeAsync(cancellation);
 
-        return vm;
+        DataContext = vm;
+
+        await base.OnNavigatedToAsync(cancellation);
+    }
+
+    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
+    {
+        DataContext = null;
+        return base.OnNavigatedFromAsync(cancellation);
     }
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
-        if (DataContext is not StaffPositionDashboardObservableViewModel vm) return;
-        if (args.SelectedItem is StaffPositionViewModel customer) vm.Position = customer;
+        if (DataContext is not StaffPositionDashboardViewModel vm) return;
+        if (args.SelectedItem is StaffPositionViewModel customer) vm.SelectedPosition = customer;
     }
 }

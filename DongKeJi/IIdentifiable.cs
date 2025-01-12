@@ -26,6 +26,11 @@ public class Identifiable(Guid guid) : IIdentifiable
     {
         return new Identifiable(Guid.NewGuid());
     }
+
+    public static implicit operator Identifiable(Guid id)
+    {
+        return new Identifiable(id);
+    }
 }
 
 
@@ -36,7 +41,7 @@ public static class IdentifiableExtensions
     /// </summary>
     /// <param name="identifiable"></param>
     /// <returns></returns>
-    public static bool IsEmpty(this IIdentifiable? identifiable)
+    public static bool IsNullOrEmpty(this IIdentifiable? identifiable)
     {
         if (identifiable == null)
         {

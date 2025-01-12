@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using DongKeJi.Validation;
-using DongKeJi.Extensions;
+using System.ComponentModel;
 
 namespace DongKeJi.ViewModel;
 
@@ -23,15 +23,12 @@ public class EntityViewModel : ObservableValidator, IEntityViewModel
     /// </summary>
     public Guid Id { get; init; } = Guid.NewGuid();
 
-    /// <summary>
-    /// 验证错误信息
-    /// </summary>
     public ObservableCollection<ValidationResult> Errors { get; }
 
 
     public EntityViewModel()
     {
-        Errors = new DataViewModelObservableCollection<EntityViewModel>(this);
+        Errors = new ErrorObservableCollection(this);
     }
 
 
@@ -42,30 +39,42 @@ public class EntityViewModel : ObservableValidator, IEntityViewModel
         return GetErrors();
     }
 
+
+
     public override string ToString()
     {
-        return $"数据Id: {Id:N}";
+        //EntityViewModel - xxxx-xxxx-xxxx
+        return $"{GetType().Name} - {Id:N}";
     }
 }
 
-file class DataViewModelObservableCollection<TViewModel> : ObservableCollection<ValidationResult>
-    where TViewModel : IViewModel, IValidation
+
+file class ErrorObservableCollection : ObservableCollection<ValidationResult>
 {
-    public DataViewModelObservableCollection(TViewModel viewModel)
+    private readonly ObservableValidator _viewModel;
+
+    public ErrorObservableCollection(ObservableValidator viewModel)
     {
-        viewModel.PropertyChanging += (_, e) =>
+        _viewModel = viewModel;
+        viewModel.ErrorsChanged += ViewModel_ErrorsChanged;
+    }
+
+    private void ViewModel_ErrorsChanged(object? sender, DataErrorsChangedEventArgs e)
+    {
+        var errors = _viewModel.GetErrors().ToList();
+
+        //添加新元素
+        foreach (var item in errors.ToArray())
         {
-            var errors = viewModel.Validate().ToArray();
+            if (Contains(item)) continue;
+            Add(item);
+        }
 
-            foreach (var i in errors)
-            {
-                this.Add(i, x => x != i);
-            }
-
-            if (errors.Length > 0)
-            {
-                throw new ValidationException(errors.First(), null, viewModel);
-            }
-        };
+        //删除过时元素
+        var itemsToRemove = this.Except(errors).ToList();
+        foreach (var item in itemsToRemove)
+        {
+            Remove(item);
+        }
     }
 }

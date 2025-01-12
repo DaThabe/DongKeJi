@@ -1,40 +1,81 @@
 ﻿using System.Windows.Controls;
-using DongKeJi.UI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Wpf.Ui;
+using System.Windows;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.UI.View;
 
+
 /// <summary>
+/// 导航视图
 /// </summary>
-public abstract class NavigationView(IServiceProvider services) : ContentControl, INavigationAware, IInfrastructure
+public class NavigationView : ContentControl, INavigationAware
 {
     /// <summary>
-    ///     日志
+    /// 标题
     /// </summary>
-    private readonly ILogger<NavigationView> _logger = services.GetRequiredService<ILogger<NavigationView>>();
+    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
+        nameof(Title),
+        typeof(string),
+        typeof(NavigationView),
+        new PropertyMetadata(nameof(NavigationView)));
 
     /// <summary>
-    ///     底部弹窗
+    /// 状态
     /// </summary>
-    private readonly ISnackbarService _snackbarService = services.GetRequiredService<ISnackbarService>();
+    public static readonly DependencyProperty StateProperty = DependencyProperty.Register(
+            nameof(State),
+            typeof(NavigationViewState),
+            typeof(NavigationView),
+            new PropertyMetadata(NavigationViewState.None));
 
     /// <summary>
-    ///     异步导航取消
+    /// 错误
     /// </summary>
-    private CancellationTokenSource? _cancellationTokenSource;
+    public static readonly DependencyProperty ErrorProperty = DependencyProperty.Register(
+        nameof(Error),
+        typeof(Exception),
+        typeof(NavigationView),
+        new PropertyMetadata(null));
+
+
+    public NavigationView()
+    {
+        var resourceDictionary = new ResourceDictionary
+        {
+            Source = new Uri("pack://application:,,,/DongKeJi;component/UI/Themes/Generic.xaml")
+        };
+
+        Template = resourceDictionary["NavigationViewTemplate"] as ControlTemplate;
+    }
 
 
     /// <summary>
-    ///     是否加载完成
+    /// 状态
     /// </summary>
-    public new bool IsLoaded { get; private set; }
+    public string Title
+    {
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
+    }
 
     /// <summary>
+    /// 状态
     /// </summary>
-    public IServiceProvider ServiceProvider => services;
+    public NavigationViewState State
+    {
+        get => (NavigationViewState)GetValue(StateProperty);
+        set => SetValue(StateProperty, value);
+    }
+
+    /// <summary>
+    /// 加错误信息
+    /// </summary>
+    public Exception? Error
+    {
+        get => (Exception)GetValue(ErrorProperty);
+        private set => SetValue(ErrorProperty, value);
+    }
+
 
 
     /// <summary>
@@ -44,19 +85,20 @@ public abstract class NavigationView(IServiceProvider services) : ContentControl
     {
         try
         {
-            if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
+            State = NavigationViewState.Entering;
 
+            if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            await OnNavigatedToAsync(services, _cancellationTokenSource.Token);
-            IsLoaded = true;
+            await OnNavigatedToAsync(_cancellationTokenSource.Token);
+            
+            State = NavigationViewState.Focused;
+            Error = null;
         }
         catch (Exception ex)
         {
-            IsLoaded = false;
-
-            _logger.LogError(ex, "进入视图元素时发生错误");
-            _snackbarService.ShowError(ex);
+            State = NavigationViewState.Error;
+            Error = ex;
         }
     }
 
@@ -67,19 +109,20 @@ public abstract class NavigationView(IServiceProvider services) : ContentControl
     {
         try
         {
-            if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
+            State = NavigationViewState.Leaving;
 
+            if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            await OnNavigatedFromAsync(services, _cancellationTokenSource.Token);
-            IsLoaded = true;
+            await OnNavigatedFromAsync(_cancellationTokenSource.Token);
+            
+            State = NavigationViewState.Unfocused;
+            Error = null;
         }
         catch (Exception ex)
         {
-            IsLoaded = false;
-
-            _logger.LogError(ex, "离开视图元素时发生错误");
-            _snackbarService.ShowError(ex);
+            State = NavigationViewState.Error;
+            Error = ex;
         }
     }
 
@@ -87,18 +130,33 @@ public abstract class NavigationView(IServiceProvider services) : ContentControl
     /// <summary>
     ///     导航进入此控件
     /// </summary>
-    protected virtual Task OnNavigatedToAsync(IServiceProvider _, CancellationToken cancellation = default)
+    protected virtual ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
     {
-        _logger.LogTrace("已进入视图:{type}", GetType().Name);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
     ///     导航离开此控件
     /// </summary>
-    protected virtual Task OnNavigatedFromAsync(IServiceProvider _, CancellationToken cancellation = default)
+    protected virtual ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
     {
-        _logger.LogTrace("已离开视图:{type}", GetType().Name);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
+
+
+    /// <summary>
+    ///     异步导航取消
+    /// </summary>
+    private CancellationTokenSource? _cancellationTokenSource;
+}
+
+
+public enum NavigationViewState
+{
+    None,
+    Entering,
+    Leaving,
+    Focused,
+    Unfocused,
+    Error
 }

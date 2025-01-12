@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Work.Model;
 
-internal class WorkDbContext() : LocalDbContext("PerformanceRecord")
+internal class WorkDbContext(IApplication application) : LocalDbContext(application, "PerformanceRecord")
 {
     /// <summary>
     ///     员工

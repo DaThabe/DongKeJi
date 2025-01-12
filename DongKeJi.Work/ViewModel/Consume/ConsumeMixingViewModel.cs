@@ -27,8 +27,8 @@ public partial class ConsumeMixingViewModel : ConsumeViewModel
 
 
     partial void OnConsumeCountsChanged(double value) =>
-        ValidateProperty(value, nameof(Common.Consume.ConsumeMixingViewModel.ConsumeCounts));
+        ValidateProperty(value, nameof(ConsumeCounts));
 
     partial void OnConsumeDaysChanged(double value) =>
-        ValidateProperty(value, nameof(Common.Consume.ConsumeMixingViewModel.ConsumeDays));
+        ValidateProperty(value, nameof(ConsumeDays));
 }

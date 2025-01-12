@@ -1,16 +1,13 @@
 ﻿using AutoMapper;
-using DongKeJi.Core.Service;
 using DongKeJi.Database;
 using DongKeJi.Entity;
 using DongKeJi.Inject;
-using DongKeJi.Service;
 using DongKeJi.ViewModel;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.ViewModel;
 using DongKeJi.Work.ViewModel.Consume;
 using DongKeJi.Work.ViewModel.Customer;
 using DongKeJi.Work.ViewModel.Order;
@@ -19,12 +16,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DongKeJi.Work.Service;
 
-public interface IWorkDbService : IDbService
+public interface IWorkDbService
 {
     internal IServiceProvider ServiceProvider { get; }
 }
 
-[Inject(ServiceLifetime.Singleton, typeof(ICoreDbService))]
+[Inject(ServiceLifetime.Singleton, typeof(IWorkDbService))]
 internal class WorkDbService(IServiceProvider services) : IWorkDbService
 {
     public IServiceProvider ServiceProvider { get; } = services;
@@ -33,63 +30,29 @@ internal class WorkDbService(IServiceProvider services) : IWorkDbService
 
 public static class CoreDatabaseExtensions
 {
-    private static async ValueTask UpdateAsync<TEntity, TViewModel>(
-        this IWorkDbService dbService,
-        TViewModel viewModel, 
-        CancellationToken cancellation = default)
+    private static IAutoUpdateBuilder<TViewModel> AutoUpdate<TEntity, TViewModel>(this IWorkDbService dbService, TViewModel viewModel)
         where TEntity : EntityBase
-        where TViewModel : IWorkEntityViewModel
+        where TViewModel : IEntityViewModel
     {
-        var dbContext = dbService.ServiceProvider.GetRequiredService<WorkDbContext>();
         var mapper = dbService.ServiceProvider.GetRequiredService<IMapper>();
+        var dbContext = dbService.ServiceProvider.GetRequiredService<WorkDbContext>();
 
-        await dbContext.UpdateAsync<TEntity, TViewModel>(viewModel, mapper, cancellation);
-    }
-
-    public static void RegisterAutoUpdate<TEntity, TViewModel>(this IWorkDbService dbService, TViewModel viewModel)
-        where TViewModel : IWorkEntityViewModel
-    {
-        viewModel.PropertyChanged += async (_, _) =>
-        {
-            await dbService.UpdateAsync<TEntity, TViewModel>(viewModel);
-        };
+        return dbContext.AutoUpdate<TEntity, TViewModel>(viewModel, mapper);
     }
 
 
-    /// <summary>
-    /// 更新数据
-    /// </summary>
-    /// <param name="dbService"></param>
-    /// <param name="staff"></param>
-    /// <param name="cancellation"></param>
-    /// <returns></returns>
-    public static ValueTask UpdateAsync(this IWorkDbService dbService, StaffViewModel staff, CancellationToken cancellation = default)
-    {
-        return dbService.UpdateAsync<StaffEntity, StaffViewModel>(staff, cancellation);
-    }
+    public static IAutoUpdateBuilder<StaffViewModel> AutoUpdate(this IWorkDbService dbService, StaffViewModel vm)
+        => dbService.AutoUpdate<StaffEntity, StaffViewModel>(vm);
 
-    public static ValueTask UpdateAsync(this IWorkDbService dbService, StaffPositionViewModel position, CancellationToken cancellation = default)
-    {
-        return dbService.UpdateAsync<StaffPositionEntity, StaffPositionViewModel>(position, cancellation);
-    }
+    public static IAutoUpdateBuilder<StaffPositionViewModel> AutoUpdate(this IWorkDbService dbService, StaffPositionViewModel vm)
+        => dbService.AutoUpdate<StaffPositionEntity, StaffPositionViewModel>(vm);
 
-    public static ValueTask UpdateAsync(this IWorkDbService dbService, CustomerViewModel customer, CancellationToken cancellation = default)
-    {
-        return dbService.UpdateAsync<CustomerEntity, CustomerViewModel>(customer, cancellation);
-    }
+    public static IAutoUpdateBuilder<CustomerViewModel> AutoUpdate(this IWorkDbService dbService, CustomerViewModel vm)
+        => dbService.AutoUpdate<CustomerEntity, CustomerViewModel>(vm);
 
-    public static ValueTask UpdateAsync(this IWorkDbService dbService, OrderViewModel order, CancellationToken cancellation = default)
-    {
-        return dbService.UpdateAsync<OrderEntity, OrderViewModel>(order, cancellation);
-    }
+    public static IAutoUpdateBuilder<OrderViewModel> AutoUpdate(this IWorkDbService dbService, OrderViewModel vm)
+        => dbService.AutoUpdate<OrderEntity, OrderViewModel>(vm);
 
-    public static ValueTask UpdateAsync(this IWorkDbService dbService, ConsumeViewModel consume, CancellationToken cancellation = default)
-    {
-        return dbService.UpdateAsync<ConsumeEntity, ConsumeViewModel>(consume, cancellation);
-    }
-
-    public static ValueTask RegisterAutoUpdate(this IWorkDbService dbService, ConsumeViewModel consume, CancellationToken cancellation = default)
-    {
-        return dbService.UpdateAsync<ConsumeEntity, ConsumeViewModel>(consume, cancellation);
-    }
+    public static IAutoUpdateBuilder<ConsumeViewModel> AutoUpdate(this IWorkDbService dbService, ConsumeViewModel vm)
+        => dbService.AutoUpdate<ConsumeEntity, ConsumeViewModel>(vm);
 }

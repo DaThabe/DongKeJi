@@ -5,9 +5,8 @@
     xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel.Common.Staff"
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     d:DataContext="{d:DesignInstance staff:StaffPositionViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
