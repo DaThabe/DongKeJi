@@ -17,6 +17,5 @@ public partial class ConsumeCountingViewModel : ConsumeViewModel
     private double _consumeCounts;
 
 
-    partial void OnConsumeCountsChanged(double value) => 
-        ValidateProperty(value, nameof(ConsumeCounts));
+    partial void OnConsumeCountsChanged(double value) => ValidateProperty(value, nameof(ConsumeCounts));
 }

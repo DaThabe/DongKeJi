@@ -27,9 +27,7 @@ public abstract partial class ConsumeViewModel : EntityViewModel, IWorkEntityVie
 
 
 
-    partial void OnCreateTimeChanged(DateTime value) =>
-        ValidateProperty(value, nameof(CreateTime));
+    partial void OnCreateTimeChanged(DateTime value) => ValidateProperty(value, nameof(CreateTime));
 
-    partial void OnTitleChanged(string value) =>
-        ValidateProperty(value, nameof(Title));
+    partial void OnTitleChanged(string value) => ValidateProperty(value, nameof(Title));
 }

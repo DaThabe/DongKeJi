@@ -26,9 +26,7 @@ public partial class ConsumeMixingViewModel : ConsumeViewModel
     private double _consumeDays;
 
 
-    partial void OnConsumeCountsChanged(double value) =>
-        ValidateProperty(value, nameof(ConsumeCounts));
+    partial void OnConsumeCountsChanged(double value) => ValidateProperty(value, nameof(ConsumeCounts));
 
-    partial void OnConsumeDaysChanged(double value) =>
-        ValidateProperty(value, nameof(ConsumeDays));
+    partial void OnConsumeDaysChanged(double value) => ValidateProperty(value, nameof(ConsumeDays));
 }
