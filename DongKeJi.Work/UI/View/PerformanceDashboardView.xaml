@@ -253,19 +253,21 @@
         </Grid.ColumnDefinitions>
 
         <!--  机构布局  -->
-        <StackPanel Grid.Column="0" DockPanel.Dock="Left">
+        <DockPanel Grid.Column="0" DockPanel.Dock="Left">
 
             <!--  刷新  -->
             <ui:Button
                 HorizontalAlignment="Stretch"
                 Appearance="Primary"
                 Command="{Binding ReloadCustomerCommand}"
-                Content="刷新数据" />
+                Content="刷新数据"
+                DockPanel.Dock="Top" />
 
             <!--  搜索框  -->
             <ui:CardExpander
                 Margin="0,5,0,0"
                 Padding="0,0,10,0"
+                DockPanel.Dock="Top"
                 IsExpanded="False">
 
                 <ui:CardExpander.Header>
@@ -328,21 +330,9 @@
                 ItemTemplate="{StaticResource CustomerListItem}"
                 ItemsSource="{Binding CustomerCollection}"
                 SelectedIndex="0"
-                SelectedItem="{Binding SelectedCustomer}">
+                SelectedItem="{Binding SelectedCustomer}" />
 
-                <ui:ListView.Template>
-                    <ControlTemplate>
-
-                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                            <ItemsPresenter />
-                        </ScrollViewer>
-
-                    </ControlTemplate>
-                </ui:ListView.Template>
-
-            </ui:ListView>
-
-        </StackPanel>
+        </DockPanel>
 
         <!--  分界线  -->
         <GridSplitter
@@ -436,10 +426,11 @@
             </ui:CardControl>
 
             <!--  订单列表  -->
-            <StackPanel DockPanel.Dock="Left" Visibility="{cb:Binding 'OrderCollection.Count > 0'}">
+            <DockPanel DockPanel.Dock="Left" Visibility="{cb:Binding 'OrderCollection.Count > 0'}">
 
                 <ui:TextBlock
                     Margin="0,10"
+                    DockPanel.Dock="Top"
                     FontTypography="BodyStrong"
                     Text="所有订单" />
 
@@ -448,21 +439,9 @@
                     ItemTemplate="{StaticResource OrderListItem}"
                     ItemsSource="{Binding OrderCollection}"
                     SelectedIndex="0"
-                    SelectedItem="{Binding SelectedOrder}">
+                    SelectedItem="{Binding SelectedOrder}" />
 
-                    <ui:ListView.Template>
-                        <ControlTemplate>
-
-                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                <ItemsPresenter />
-                            </ScrollViewer>
-
-                        </ControlTemplate>
-                    </ui:ListView.Template>
-
-                </ui:ListView>
-
-            </StackPanel>
+            </DockPanel>
 
             <!--  机构信息面板  -->
             <ScrollViewer
