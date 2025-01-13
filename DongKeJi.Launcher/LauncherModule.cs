@@ -1,9 +1,13 @@
+using System.Windows.Controls;
 using DongKeJi.Core;
+using DongKeJi.Core.Service;
 using DongKeJi.Core.UI.View;
+using DongKeJi.Core.ViewModel.Setting;
 using DongKeJi.Inject;
 using DongKeJi.Module;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Wpf.Ui.Controls;
 
 namespace DongKeJi.Launcher;
 
@@ -40,12 +44,10 @@ public class LauncherModule : IModule
         });
     }
 }
-internal class HostedService(
-    MainFrame mainFrame) : IHostedService
+internal class HostedService(IMainFrameService mainFrameService) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        mainFrame.Show();
         return Task.CompletedTask;
     }
 

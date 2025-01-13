@@ -13,7 +13,7 @@ public partial class ConsumeMixingViewModel : ConsumeViewModel
     /// </summary>
     [ObservableProperty]
     [Required(ErrorMessage = "划扣张数不可为空")]
-    [Range(0.5, 99999, ErrorMessage = "划扣张数需要>=0.5 且 < 99999")]
+    [Range(0, 99999, ErrorMessage = "划扣张数需要>=0 且 < 99999")]
     
     private double _consumeCounts;
 

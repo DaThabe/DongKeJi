@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
 using DongKeJi.Core.UI.View;
 using DongKeJi.Inject;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,10 +25,15 @@ public interface IMainFrameService
     ///     页脚菜单
     /// </summary>
     ObservableCollection<NavigationViewItem> FooterMenuItems { get; }
+
+    /// <summary>
+    /// 显示
+    /// </summary>
+    void Show();
 }
 
 [Inject(ServiceLifetime.Singleton, typeof(IMainFrameService))]
-internal class MainFrameService(ICoreContext coreContext) : IMainFrameService
+internal class MainFrameService(MainFrame mainFrame, ICoreContext coreContext) : IMainFrameService
 {
     public string Title
     {
@@ -47,6 +51,11 @@ internal class MainFrameService(ICoreContext coreContext) : IMainFrameService
     {
         get => coreContext.MainFrame.FooterMenuItems;
         set => coreContext.MainFrame.FooterMenuItems = value;
+    }
+
+    public void Show()
+    {
+        mainFrame.Show();
     }
 }
 

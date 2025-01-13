@@ -323,24 +323,12 @@
             </ui:CardExpander>
 
             <!--  机构列表  -->
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <ui:ListView
-                    d:ItemsSource="{d:SampleData ItemCount=5}"
-                    ItemTemplate="{StaticResource CustomerListItem}"
-                    ItemsSource="{Binding CustomerCollection}"
-                    SelectedIndex="0"
-                    SelectedItem="{Binding SelectedCustomer}">
-
-                    <ui:ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-
-                            <StackPanel Orientation="Vertical" />
-
-                        </ItemsPanelTemplate>
-                    </ui:ListView.ItemsPanel>
-
-                </ui:ListView>
-            </ScrollViewer>
+            <ui:ListView
+                d:ItemsSource="{d:SampleData ItemCount=5}"
+                ItemTemplate="{StaticResource CustomerListItem}"
+                ItemsSource="{Binding CustomerCollection}"
+                SelectedIndex="0"
+                SelectedItem="{Binding SelectedCustomer}" />
 
         </StackPanel>
 
@@ -370,7 +358,7 @@
                             <Run d:Text="名称" Text="{Binding SelectedCustomer.Name}" />
                         </ui:TextBlock>
 
-                        <ui:TextBlock FontTypography="Body" Visibility="{cb:Binding !SelectedOrder.IsDefault}">
+                        <ui:TextBlock FontTypography="Body" Visibility="{cb:Binding 'SelectedOrder !=  null'}">
                             <Run d:Text="订单名称" Text="{Binding SelectedOrder.Name}" />
                             <Run d:Text="订单创建时间" Text="{Binding SelectedOrder.SubscribeTime, StringFormat='开始时间: {0:yyyy-MM-dd}'}" />
                         </ui:TextBlock>
@@ -382,7 +370,7 @@
                     <StackPanel Orientation="Horizontal">
 
                         <!--  状态选择  -->
-                        <order:OrderStateComboBox DataContext="{Binding SelectedOrder}" />
+                        <order:OrderStateComboBox DataContext="{Binding SelectedOrder}" Visibility="{cb:Binding 'Data.SelectedOrder != null', Source={StaticResource BindingProxy}}" />
 
                         <!--  新增任务  -->
                         <ui:Button
@@ -392,7 +380,7 @@
                             Command="{Binding AddConsumeCommand}"
                             Content="新增划扣"
                             Icon="{ui:SymbolIcon Symbol=NotepadEdit20}"
-                            Visibility="{cb:Binding SelectedOrder}" />
+                            Visibility="{cb:Binding 'SelectedOrder != null'}" />
 
                         <!--  新增订单  -->
                         <ui:Button
@@ -402,7 +390,7 @@
                             Command="{Binding AddOrderCommand}"
                             Content="新增订单"
                             Icon="{ui:SymbolIcon Symbol=AddSquare20}"
-                            Visibility="{cb:Binding SelectedCustomer}" />
+                            Visibility="{cb:Binding 'SelectedCustomer != null'}" />
 
                         <!--  隐藏菜单  -->
                         <ui:DropDownButton
@@ -443,26 +431,12 @@
                     FontTypography="BodyStrong"
                     Text="所有订单" />
 
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-
-                    <ui:ListView
-                        d:ItemsSource="{d:SampleData ItemCount=3}"
-                        ItemTemplate="{StaticResource OrderListItem}"
-                        ItemsSource="{Binding OrderCollection}"
-                        SelectedIndex="0"
-                        SelectedItem="{Binding SelectedOrder}">
-
-                        <ui:ListView.ItemsPanel>
-                            <ItemsPanelTemplate>
-
-                                <StackPanel Orientation="Vertical" />
-
-                            </ItemsPanelTemplate>
-                        </ui:ListView.ItemsPanel>
-
-                    </ui:ListView>
-
-                </ScrollViewer>
+                <ui:ListView
+                    d:ItemsSource="{d:SampleData ItemCount=3}"
+                    ItemTemplate="{StaticResource OrderListItem}"
+                    ItemsSource="{Binding OrderCollection}"
+                    SelectedIndex="0"
+                    SelectedItem="{Binding SelectedOrder}" />
 
             </StackPanel>
 
@@ -492,7 +466,7 @@
                 x:Name="OrderLayout"
                 Margin="5,0"
                 SelectedIndex="0"
-                Visibility="{cb:Binding SelectedOrder}">
+                Visibility="{cb:Binding 'SelectedOrder != null'}">
 
                 <!--  订单  -->
                 <TabItem Header="订单信息">

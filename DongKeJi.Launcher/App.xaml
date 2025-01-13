@@ -40,6 +40,35 @@
 
             </Style>
 
+            <!--  优化ListView性能  -->
+            <Style TargetType="ui:ListView">
+
+                <Setter Property="Background" Value="Brown" />
+
+                <Setter Property="ItemsPanel">
+                    <Setter.Value>
+                        <ItemsPanelTemplate>
+
+                            <VirtualizingStackPanel VirtualizationMode="Recycling" />
+
+                        </ItemsPanelTemplate>
+                    </Setter.Value>
+                </Setter>
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+
+            </Style>
+
         </ResourceDictionary>
 
     </Application.Resources>

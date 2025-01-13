@@ -87,13 +87,14 @@ file class HostedService(
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        // 动态加载样式
-        var resourceDictionary = new ResourceDictionary
-        {
-            Source = new Uri("pack://application:,,,/DongKeJi;component/UI/Themes/Generic.xaml")
-        };
-        application.Resources.MergedDictionaries.Add(resourceDictionary);
+        //// 动态加载样式
+        //var resourceDictionary = new ResourceDictionary
+        //{
+        //    Source = new Uri("pack://application:,,,/DongKeJi;component/UI/Themes/Generic.xaml")
+        //};
+        //application.Resources.MergedDictionaries.Add(resourceDictionary);
 
+        mainFrameService.Show();
         mainFrameService.AddFooterMenu<ModuleDashboardView>(SymbolRegular.DeveloperBoard16, "模块");
         mainFrameService.AddFooterMenu<UserDashboardView>(SymbolRegular.People20, "用户");
         mainFrameService.AddFooterMenu<SettingDashboardView>(SymbolRegular.Settings28, "设置");
