@@ -33,7 +33,8 @@ public class CoreModule : IModule
     private static readonly ModuleMetaInfo ModuleMetaInfo = new()
     {
         Id = Guid.NewGuid(),
-        Version = new Version(0, 0, 0),
+        Name = "DongKeJi.Core",
+        Version = new Version(0, 0, 1),
         Title = "ºËÐÄ",
         Developers = ["DaThabe"],
         Describe = """

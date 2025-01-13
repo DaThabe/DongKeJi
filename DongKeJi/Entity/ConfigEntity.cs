@@ -1,8 +1,7 @@
-﻿using DongKeJi.Entity;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace DongKeJi.Core.Model.Entity;
+namespace DongKeJi.Entity;
 
 /// <summary>
 ///     配置

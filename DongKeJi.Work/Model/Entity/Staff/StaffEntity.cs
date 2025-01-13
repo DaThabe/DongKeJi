@@ -28,13 +28,6 @@ internal class StaffEntity : EntityBase
     [Column("Name")]
     public required string Name { get; set; }
 
-    /// <summary>
-    ///     是否是主账户
-    /// </summary>
-    [Required]
-    [Column("IsPrimaryAccount")]
-    public required bool IsPrimaryAccount { get; set; }
-
 
     /// <summary>
     ///     所有职位

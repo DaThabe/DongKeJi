@@ -20,6 +20,40 @@ namespace DongKeJi.Work.Service;
 public interface IStaffService
 {
     /// <summary>
+    ///     设置为主员工
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="staff"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask BindingPrimaryAsync(
+        IIdentifiable user, 
+        IIdentifiable staff, 
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     获取主员工Id
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<IIdentifiable> GetBindingPrimaryIdAsync(
+        IIdentifiable user, 
+        CancellationToken cancellation = default);
+
+
+    /// <summary>
+    /// 设置当前员工
+    /// </summary>
+    /// <param name="staff"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask SetCurrentAsync(
+        IIdentifiable staff,
+        CancellationToken cancellation = default);
+
+
+    /// <summary>
     ///     根据员工查询用户
     /// </summary>
     /// <param name="staff"></param>
@@ -111,8 +145,62 @@ public interface IStaffService
 internal class StaffService(
     IUserService userService,
     IMapper mapper,
+    IWorkContext workContext,
+    IWorkConfigService workConfig,
+    IWorkDbService dbService,
     WorkDbContext dbContext) : IStaffService
 {
+
+    public async ValueTask BindingPrimaryAsync(IIdentifiable user, IIdentifiable staff, CancellationToken cancellation = default)
+    {
+        try
+        {
+            var ps = await workConfig.PrimaryStaff.GetAsync(cancellation: cancellation);
+            ps[user.Id] = staff.Id;
+            await workConfig.PrimaryStaff.UpdateAsync(cancellation);
+        }
+        catch
+        {
+            try
+            {
+                await workConfig.PrimaryStaff.SetAsync(new()
+                {
+                    { user.Id, staff.Id }
+
+                }, cancellation);
+            }
+            catch(Exception ex)
+            {
+                throw new ConfigException($"绑定用户主员工时发生错误\n用户Id: {user.Id}\n员工Id: {staff.Id}", ex);
+            }
+        }
+    }
+
+    public async ValueTask<IIdentifiable> GetBindingPrimaryIdAsync(IIdentifiable user, CancellationToken cancellation = default)
+    {
+        try
+        {
+            var ps = await workConfig.PrimaryStaff.GetAsync(cancellation: cancellation);
+
+            if (ps.TryGetValue(user.Id, out var staffId))
+            {
+                return Identifiable.Create(staffId);
+            }
+
+            throw new ArgumentNullException(nameof(user), "用户不存在或未关联员工");
+        }
+        catch (Exception ex)
+        {
+            throw new ConfigException($"获取用户绑定主员工时发生错误\n用户Id: {user.Id}", ex);
+        }
+    }
+
+    public async ValueTask SetCurrentAsync(IIdentifiable staff,CancellationToken cancellation = default)
+    {
+        var staffVm = await FindByIdAsync(staff, cancellation);
+        workContext.CurrentStaff = staffVm;
+    }
+
     public async ValueTask<UserViewModel> FindUserByStaffAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default)
@@ -271,7 +359,6 @@ internal class StaffService(
             var staffEntityList = await dbContext.Staffs
                 .Include(x => x.Positions)
                 .Where(x => x.UserId == user.Id)
-                .Where(x => !x.IsPrimaryAccount)
                 .Where(x => x.Positions.Contains(positionEntity))
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);

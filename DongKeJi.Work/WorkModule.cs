@@ -23,6 +23,7 @@ public class WorkModule : IModule
     private static readonly ModuleMetaInfo ModuleMetaInfo = new()
     {
         Id = Guid.NewGuid(),
+        Name = "DongKeJi.Work",
         Version = new Version(0, 0, 1),
         Title = "办公",
         Developers = ["DaThabe"],
@@ -60,6 +61,7 @@ file class HostedService(
     ILogger<HostedService> logger,
     IMainFrameService mainFrameService,
     ICoreContext coreContext,
+    IWorkDbService workDbService,
     IWorkContext workContext,
     IStaffService staffService,
     IStaffPositionService staffPositionService
@@ -101,19 +103,38 @@ file class HostedService(
             throw new Exception("未登录用户, 无法初始化明细页面");
         }
 
-        var result = await staffService.FindAllByUserAsync(coreContext.CurrentUser, cancellation);
-        var staffs = result.ToList();
+        try
+        {
+            var primaryStaff = await staffService.GetBindingPrimaryIdAsync(coreContext.CurrentUser, cancellation);
+            await staffService.SetCurrentAsync(primaryStaff, cancellation);
 
-        //if (staffs.Count <= 0 || !staffs.Any(x => x.IsPrimaryAccount))
-        //{
-        //    var staff = new StaffViewModel { Name = coreContext.CurrentUser.Name, IsPrimaryAccount = true };
-        //    await staffService.AddAsync(staff, coreContext.CurrentUser, cancellation);
-        //    staffs.Add(staff);
-        //}
+            var staffVm =  await staffService.FindByIdAsync(primaryStaff, cancellation);
+            await staffService.SetCurrentAsync(staffVm, cancellation);
+            workDbService.AutoUpdate(staffVm);
+        }
+        catch
+        {
+            try
+            {
+                var result = await staffService.FindAllByUserAsync(coreContext.CurrentUser, cancellation);
+                var staffVm = result.FirstOrDefault();
 
-        var staffViewModel = staffs.FirstOrDefault();
+                ArgumentNullException.ThrowIfNull(staffVm);
 
-        workContext.CurrentStaff = staffViewModel ?? throw new Exception("未能创建或加载用户");
+                await staffService.SetCurrentAsync(staffVm, cancellation);
+                await staffService.BindingPrimaryAsync(coreContext.CurrentUser, staffVm, cancellation);
+                workDbService.AutoUpdate(staffVm);
+            }
+            catch
+            {
+                var staffVm = new StaffViewModel { Name = coreContext.CurrentUser.Name };
+                await staffService.AddAsync(staffVm, coreContext.CurrentUser, cancellation);
+
+                await staffService.SetCurrentAsync(staffVm, cancellation);
+                await staffService.BindingPrimaryAsync(coreContext.CurrentUser, staffVm, cancellation);
+                workDbService.AutoUpdate(staffVm);
+            }
+        }
     }
 
     /// <summary>

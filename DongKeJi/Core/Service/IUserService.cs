@@ -88,18 +88,18 @@ public interface IUserService
 [Inject(ServiceLifetime.Singleton, typeof(IUserService))]
 internal class UserService(
     IMapper mapper,
-    IConfigService configService,
+    ICoreConfigService coreConfigService,
     CoreDbContext dbContext,
     ICoreContext coreContext) :  IUserService
 {
     public async ValueTask ClearRememberUserIdAsync(CancellationToken cancellation = default)
     {
-        await configService.RemoveAsync("RememberLoginUser", cancellation);
+        await coreConfigService.RememberUserId.SetAsync(Guid.Empty, cancellation);
     }
 
     public async ValueTask<IIdentifiable> GetRememberUserIdAsync(CancellationToken cancellation = default)
     {
-        var guid = await configService.GetAsync<Guid>("RememberLoginUser", cancellation);
+        var guid = await coreConfigService.RememberUserId.GetAsync(cancellation: cancellation);
         return Identifiable.Create(guid);
     }
 
@@ -107,7 +107,7 @@ internal class UserService(
     {
         if (isRemember)
         {
-            await configService.SetAsync("RememberLoginUser", user.Id, cancellation);
+            await coreConfigService.RememberUserId.SetAsync(user.Id, cancellation);
         }
         else
         {

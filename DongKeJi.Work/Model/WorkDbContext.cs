@@ -1,4 +1,6 @@
-﻿using DongKeJi.Database;
+﻿using DongKeJi.Config;
+using DongKeJi.Database;
+using DongKeJi.Entity;
 using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.Model.Entity.Order;
@@ -7,8 +9,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Work.Model;
 
-internal class WorkDbContext(IApplication application) : LocalDbContext(application, "PerformanceRecord")
+internal class WorkDbContext(IApplication application) : LocalDbContext(application, "PerformanceRecord"), IConfigDbContext
 {
+    /// <summary>
+    /// 配置
+    /// </summary>
+    public DbSet<ConfigEntity> Configs { get; set; }
+
+
     /// <summary>
     ///     员工
     /// </summary>
@@ -65,6 +73,8 @@ internal class WorkDbContext(IApplication application) : LocalDbContext(applicat
     ///     混合订单划扣
     /// </summary>
     public DbSet<ConsumeMixingEntity> MixingConsumes { get; set; }
+
+
 
 
     protected override void OnModelCreating(ModelBuilder builder)

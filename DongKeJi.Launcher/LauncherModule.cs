@@ -1,13 +1,9 @@
-using System.Windows.Controls;
 using DongKeJi.Core;
 using DongKeJi.Core.Service;
-using DongKeJi.Core.UI.View;
-using DongKeJi.Core.ViewModel.Setting;
 using DongKeJi.Inject;
 using DongKeJi.Module;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Wpf.Ui.Controls;
 
 namespace DongKeJi.Launcher;
 
@@ -16,7 +12,8 @@ public class LauncherModule : IModule
     private static readonly ModuleMetaInfo ModuleMetaInfo = new()
     {
         Id = Guid.NewGuid(),
-        Version = new Version(0, 0, 0),
+        Name = "DongKeJi.Launcher",
+        Version = new Version(0, 0, 1),
         Title = "Æô¶¯Æ÷",
         Developers = ["DaThabe"],
         Describe = """

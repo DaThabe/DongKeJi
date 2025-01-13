@@ -1,11 +1,13 @@
-﻿using DongKeJi.Core.Model.Entity;
+﻿using DongKeJi.Config;
+using DongKeJi.Core.Model.Entity;
 using DongKeJi.Database;
+using DongKeJi.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Core.Model;
 
 
-internal class CoreDbContext(IApplication application) : LocalDbContext(application, "Core")
+internal class CoreDbContext(IApplication application) : LocalDbContext(application, "Core"), IConfigDbContext
 {
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<ConfigEntity> Configs { get; set; }

@@ -14,6 +14,11 @@ public interface IModuleMetaInfo
     Guid Id { get; }
 
     /// <summary>
+    /// 和名字空间相同的命名方式名称
+    /// </summary>
+    string Name { get; }
+
+    /// <summary>
     /// 名称
     /// </summary>
     string Title { get; }
@@ -58,6 +63,7 @@ public interface IModuleMetaInfo
 public class ModuleMetaInfo : IModuleMetaInfo
 {
     public required Guid Id { get; set; }
+    public required string Name { get; set; }
     public required string Title { get; set; }
     public string? Describe { get; set; }
     public required Version Version { get; set; }
