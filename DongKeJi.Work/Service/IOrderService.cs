@@ -215,7 +215,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询订单销售时发生错误\n订单Id: {order}", ex);
+            throw new DatabaseException($"查询订单销售时发生错误\n订单Id: {order.Id}", ex);
         }
     }
 
@@ -243,7 +243,8 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
 
             //订单-销售
             var orderSalespersonSet = orderEntity.Staffs
-                .Where(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson));
+                .Where(x => x.Positions.Any(y => y.Type == StaffPositionType.Salesperson))
+                .ToArray();
 
             foreach (var salespersonItem in orderSalespersonSet)
             {

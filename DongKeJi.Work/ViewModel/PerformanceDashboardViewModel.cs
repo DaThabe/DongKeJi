@@ -122,7 +122,13 @@ public partial class PerformanceDashboardViewModel(
 
         if (SelectedOrder is not null)
         {
-            _selectedSalesperson = await orderService.FindSalespersonAsync(SelectedOrder);
+            OnPropertyChanging(nameof(SelectedSalesperson));
+
+            var salespersonVm = await orderService.FindSalespersonAsync(SelectedOrder);
+            _selectedSalesperson = SalespersonCollection.FirstOrDefault(x => x.Id == salespersonVm.Id);
+
+            //dbService.AutoUpdate(_selectedSalesperson);
+            OnPropertyChanged(nameof(SelectedSalesperson));
         }
 
         _ = ReloadConsumeCommand.ExecuteAsync(null);
@@ -148,9 +154,7 @@ public partial class PerformanceDashboardViewModel(
         try
         {
             var salespersonList = await staffService.FindAllByPositionTypeAsync(StaffPositionType.Salesperson);
-
             SalespersonCollection = salespersonList.ToObservableCollection();
-            SelectedSalesperson = SalespersonCollection.FirstOrDefault();
         }
         catch (Exception ex)
         {

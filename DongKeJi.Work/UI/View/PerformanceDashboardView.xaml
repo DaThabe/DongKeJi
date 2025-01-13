@@ -328,7 +328,19 @@
                 ItemTemplate="{StaticResource CustomerListItem}"
                 ItemsSource="{Binding CustomerCollection}"
                 SelectedIndex="0"
-                SelectedItem="{Binding SelectedCustomer}" />
+                SelectedItem="{Binding SelectedCustomer}">
+
+                <ui:ListView.Template>
+                    <ControlTemplate>
+
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+
+                    </ControlTemplate>
+                </ui:ListView.Template>
+
+            </ui:ListView>
 
         </StackPanel>
 
@@ -436,7 +448,19 @@
                     ItemTemplate="{StaticResource OrderListItem}"
                     ItemsSource="{Binding OrderCollection}"
                     SelectedIndex="0"
-                    SelectedItem="{Binding SelectedOrder}" />
+                    SelectedItem="{Binding SelectedOrder}">
+
+                    <ui:ListView.Template>
+                        <ControlTemplate>
+
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+
+                        </ControlTemplate>
+                    </ui:ListView.Template>
+
+                </ui:ListView>
 
             </StackPanel>
 
