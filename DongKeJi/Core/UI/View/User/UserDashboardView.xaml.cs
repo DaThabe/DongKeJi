@@ -1,6 +1,5 @@
 ﻿using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
-using DongKeJi.UI.View;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
 

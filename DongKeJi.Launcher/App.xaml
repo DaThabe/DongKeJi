@@ -43,8 +43,6 @@
             <!--  优化ListView性能  -->
             <Style TargetType="ui:ListView">
 
-                <Setter Property="Background" Value="Brown" />
-
                 <Setter Property="ItemsPanel">
                     <Setter.Value>
                         <ItemsPanelTemplate>

@@ -4,12 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cb="clr-namespace:CalcBinding;assembly=CalcBinding"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:DongKeJi.Core.UI.View.User"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:user="clr-namespace:DongKeJi.Core.ViewModel.User"
+    xmlns:userVm="clr-namespace:DongKeJi.Core.ViewModel.User"
     xmlns:view="clr-namespace:DongKeJi.UI.View"
     Title="用户面板"
-    d:DataContext="{d:DesignInstance user:UserDashboardViewModel,
+    d:DataContext="{d:DesignInstance userVm:UserDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
     d:State="Focused"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -17,7 +18,7 @@
 
     <view:NavigationView.Resources>
 
-        <DataTemplate x:Key="UserListItem" DataType="{x:Type user:UserViewModel}">
+        <DataTemplate x:Key="UserListItem" DataType="{x:Type userVm:UserViewModel}">
 
             <!--  用户元素模板  -->
             <ui:CardAction Content="{Binding Name}" IsHitTestVisible="False" />
@@ -66,7 +67,7 @@
                     SuggestionChosen="AutoSuggestBox_OnSuggestionChosen">
 
                     <ui:AutoSuggestBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type user:UserViewModel}">
+                        <DataTemplate DataType="{x:Type userVm:UserViewModel}">
                             <TextBlock Text="{Binding Name}" />
                         </DataTemplate>
                     </ui:AutoSuggestBox.ItemTemplate>
@@ -161,42 +162,10 @@
             </ui:CardControl>
 
             <!--  可编辑的选中用户信息  -->
-            <StackPanel Grid.Row="1" Margin="0,5,0,0">
-
-                <!--  头像  -->
-                <ui:CardControl Icon="{ui:SymbolIcon Symbol=People32}">
-
-                    <ui:CardControl.Content>
-                        <ui:Button Appearance="Primary" Content="更换头像" />
-                    </ui:CardControl.Content>
-
-                </ui:CardControl>
-
-                <!--  用户名  -->
-                <ui:CardControl Header="用户名">
-
-                    <ui:CardControl.Content>
-
-                        <ui:TextBox PlaceholderText="请输入用户名..." Text="{Binding SelectedUser.Name}" />
-
-                    </ui:CardControl.Content>
-
-                </ui:CardControl>
-
-                <ItemsControl ItemsSource="{Binding SelectedUser.Errors}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-
-                            <ui:InfoBar
-                                Title="参数错误"
-                                Message="{Binding ErrorMessage}"
-                                Severity="Error" />
-
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-            </StackPanel>
+            <local:UserEditView
+                Grid.Row="1"
+                Margin="0,5,0,0"
+                DataContext="{Binding SelectedUser}" />
 
         </Grid>
 
