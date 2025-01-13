@@ -17,17 +17,17 @@ public interface ICoreContext
     /// <summary>
     ///     主程序
     /// </summary>
-    ApplicationViewModel Application { get; internal set; }
+    ApplicationViewModel Application { get; }
 
     /// <summary>
     ///     主窗口信息
     /// </summary>
-    MainFrameViewModel MainFrame { get; internal set; }
+    MainFrameViewModel MainFrame { get;  }
 
     /// <summary>
     /// 当前用户
     /// </summary>
-    UserViewModel? CurrentUser { get; internal set; }
+    UserViewModel? CurrentUser { get;  }
 }
 
 

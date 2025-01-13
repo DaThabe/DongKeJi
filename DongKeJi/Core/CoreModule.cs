@@ -16,6 +16,7 @@ using DongKeJi.Service;
 using DongKeJi.UI.View;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui;
@@ -111,6 +112,14 @@ file class HostedService(
     {
         try
         {
+            var userId = await userService.GetRememberUserIdAsync(cancellationToken);
+            var user = await userService.FindByIdAsync(userId, cancellationToken);
+
+            await userService.LoginAsync(user, true, cancellation: cancellationToken);
+            dbService.AutoUpdate(user);
+        }
+        catch
+        {
             try
             {
                 var users = await userService.GetAllAsync(cancellation: cancellationToken);
@@ -118,22 +127,24 @@ file class HostedService(
 
                 if (currentUser is null)
                 {
-                    throw new DatabaseException("用户获取失败, 没有用户数据");
+                    throw new ArgumentNullException(nameof(currentUser), "用户获取失败, 没有用户数据");
                 }
 
-                coreContext.CurrentUser = dbService.AutoUpdate(currentUser).ViewModel;
+                await userService.LoginAsync(currentUser, cancellation: cancellationToken);
+                dbService.AutoUpdate(currentUser);
             }
-            catch (DatabaseException)
+            catch (ArgumentNullException)
             {
                 var user = new UserViewModel { Name = "Admin" };
                 await userService.AddAsync(user, cancellationToken);
 
-                coreContext.CurrentUser = dbService.AutoUpdate(user).ViewModel;
+                await userService.LoginAsync(user, true, cancellation: cancellationToken);
+                dbService.AutoUpdate(user);
             }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "用户初始化失败");
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "用户数据初始化失败!");
+            }
         }
     }
 }

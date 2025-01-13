@@ -18,17 +18,33 @@ namespace DongKeJi.Core.Service;
 public interface IUserService
 {
     /// <summary>
+    ///     获取"记住我"的用户Id
+    /// </summary>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<IIdentifiable> GetRememberUserIdAsync(CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     获取"记住我"的用户Id
+    /// </summary>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask ClearRememberUserIdAsync(CancellationToken cancellation = default);
+
+
+
+    /// <summary>
     ///     登录用户
     /// </summary>
     /// <param name="user"></param>
+    /// <param name="isRemember"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask LoginAsync(UserViewModel user, CancellationToken cancellation = default);
+    ValueTask LoginAsync(UserViewModel user, bool isRemember = false, CancellationToken cancellation = default);
 
     /// <summary>
     ///     注销用户
     /// </summary>
-    /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
     ValueTask LogoutAsync(CancellationToken cancellation = default);
@@ -72,18 +88,38 @@ public interface IUserService
 [Inject(ServiceLifetime.Singleton, typeof(IUserService))]
 internal class UserService(
     IMapper mapper,
+    IConfigService configService,
     CoreDbContext dbContext,
     ICoreContext coreContext) :  IUserService
 {
-    public ValueTask LoginAsync(UserViewModel user, CancellationToken cancellation = default)
+    public async ValueTask ClearRememberUserIdAsync(CancellationToken cancellation = default)
     {
-        coreContext.CurrentUser = user;
-        return ValueTask.CompletedTask;
+        await configService.RemoveAsync("RememberLoginUser", cancellation);
+    }
+
+    public async ValueTask<IIdentifiable> GetRememberUserIdAsync(CancellationToken cancellation = default)
+    {
+        var guid = await configService.GetAsync<Guid>("RememberLoginUser", cancellation);
+        return Identifiable.Create(guid);
+    }
+
+    public async ValueTask LoginAsync(UserViewModel user, bool isRemember = false, CancellationToken cancellation = default)
+    {
+        if (isRemember)
+        {
+            await configService.SetAsync("RememberLoginUser", user.Id, cancellation);
+        }
+        else
+        {
+            await ClearRememberUserIdAsync(cancellation);
+        }
+
+        (coreContext as CoreContext)!.CurrentUser = user;
     }
 
     public ValueTask LogoutAsync(CancellationToken cancellation = default)
     {
-        coreContext.CurrentUser = null;
+        (coreContext as CoreContext)!.CurrentUser = null;
         return ValueTask.CompletedTask;
     }
 
