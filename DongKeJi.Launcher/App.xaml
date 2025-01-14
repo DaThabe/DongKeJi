@@ -96,6 +96,60 @@
 
             </Style>
 
+            <!--  优化ToggleButton样式  -->
+            <Style TargetType="ToggleButton">
+
+                <Setter Property="Background" Value="{DynamicResource CardBackground}" />
+                <Setter Property="Height" Value="60" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+
+                            <Border
+                                Margin="{TemplateBinding Margin}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5">
+
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+
+                                    <Border
+                                        x:Name="AccentLine"
+                                        Width="3"
+                                        Height="20"
+                                        Margin="0,3,10,3"
+                                        Background="{DynamicResource AccentFillColorDefaultBrush}"
+                                        CornerRadius="3"
+                                        DockPanel.Dock="Left" />
+
+                                    <ContentPresenter />
+
+                                </StackPanel>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+
+                                <!--  鼠标进入  -->
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="AccentLine" Property="Visibility" Value="Visible" />
+                                </Trigger>
+
+                                <!--  鼠标离开  -->
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter TargetName="AccentLine" Property="Visibility" Value="Hidden" />
+                                </Trigger>
+
+                            </ControlTemplate.Triggers>
+
+                        </ControlTemplate>
+
+                    </Setter.Value>
+                </Setter>
+
+            </Style>
+
 
         </ResourceDictionary>
 

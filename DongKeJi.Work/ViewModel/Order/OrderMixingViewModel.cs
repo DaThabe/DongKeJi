@@ -52,4 +52,10 @@ public partial class OrderMixingViewModel : OrderViewModel
     partial void OnInitDaysChanging(double value) => ValidateProperty(value, nameof(InitDays));
 
     partial void OnTotalDaysChanging(double value) => ValidateProperty(value, nameof(TotalDays));
+
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, 初始{InitDays}天, {InitCounts}张, 总{TotalDays}天, {TotalCounts}张";
+    }
 }

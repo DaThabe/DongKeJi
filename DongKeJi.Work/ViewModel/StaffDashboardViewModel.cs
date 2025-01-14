@@ -65,7 +65,7 @@ public partial class StaffDashboardViewModel(
 
     #region --默认行为&初始化--
 
-    protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
+    protected override async ValueTask OnInitializationAsync(CancellationToken cancellation = default)
     {
         await ReloadStaffCommand.ExecuteAsync(null);
     }
@@ -113,6 +113,11 @@ public partial class StaffDashboardViewModel(
         try
         {
             ArgumentNullException.ThrowIfNull(SelectedStaff);
+
+            if (SelectedStaff.Id == CurrentStaff.Id)
+            {
+                throw new Exception("当前员工为主员工, 不可删除");
+            }
 
             SimpleContentDialogCreateOptions dialog = new()
             {

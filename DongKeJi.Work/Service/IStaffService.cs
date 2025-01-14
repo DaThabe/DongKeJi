@@ -209,7 +209,7 @@ internal class StaffService(
         try
         {
             //员工
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
@@ -243,7 +243,7 @@ internal class StaffService(
             staff.AssertValidate();
 
             //员工
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             DatabaseException.ThrowIfEntityAlreadyExists(staffEntity, "员工已存在");
 
@@ -257,7 +257,7 @@ internal class StaffService(
             dbContext.Add(staffEntity);
 
             //保存
-            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -275,7 +275,7 @@ internal class StaffService(
 
         try
         {
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
@@ -296,7 +296,7 @@ internal class StaffService(
 
         try
         {
-            var staffEntityList = await dbContext.Staffs
+            var staffEntityList = await dbContext.Staff
                 .Where(x => x.UserId == user.Id)
                 .ToListAsync(cancellation);
 
@@ -319,7 +319,7 @@ internal class StaffService(
 
         try
         {
-            var staffPositionEntity = await dbContext.StaffPositions
+            var staffPositionEntity = await dbContext.StaffPosition
                 .Include(x => x.Staffs)
                 .Where(x => x.Type == type)
                 .Select(x => x.Staffs
@@ -348,14 +348,14 @@ internal class StaffService(
 
         try
         {
-            var positionEntity = await dbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPosition
                 .Include(x => x.Staffs)
                 .Where(x => x.Type == type)
                 .FirstOrDefaultAsync(cancellation);
 
             if (positionEntity is null || positionEntity.IsNullOrEmpty()) return [];
 
-            var staffEntityList = await dbContext.Staffs
+            var staffEntityList = await dbContext.Staff
                 .Include(x => x.Positions)
                 .Where(x => x.UserId == user.Id)
                 .Where(x => x.Positions.Contains(positionEntity))
@@ -380,7 +380,7 @@ internal class StaffService(
 
         try
         {
-            var staffEntityList = await dbContext.Staffs
+            var staffEntityList = await dbContext.Staff
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 

@@ -43,7 +43,7 @@ public partial class UserDashboardViewModel(
     [ObservableProperty] private ObservableCollection<UserViewModel> _userCollection = [];
 
 
-    protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
+    protected override async ValueTask OnInitializationAsync(CancellationToken cancellation = default)
     {
         await ReloadCommand.ExecuteAsync(null);
     }

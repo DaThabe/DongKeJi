@@ -18,4 +18,9 @@ public partial class ConsumeCountingViewModel : ConsumeViewModel
 
 
     partial void OnConsumeCountsChanged(double value) => ValidateProperty(value, nameof(ConsumeCounts));
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, 划扣{ConsumeCounts}张";
+    }
 }

@@ -56,7 +56,7 @@ public partial class StaffPositionDashboardViewModel(
 
     #region --默认行为&初始化--
 
-    protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
+    protected override async ValueTask OnInitializationAsync(CancellationToken cancellation = default)
     {
         await ReloadPositionCommand.ExecuteAsync(null);
     }

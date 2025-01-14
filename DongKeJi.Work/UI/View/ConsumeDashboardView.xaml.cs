@@ -1,6 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
+using DongKeJi.Work.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
 
@@ -10,15 +13,24 @@ namespace DongKeJi.Work.UI.View;
 [Inject(ServiceLifetime.Singleton)]
 public partial class ConsumeDashboardView
 {
-    public ConsumeDashboardView()
+    private readonly IServiceProvider _services;
+
+    public ConsumeDashboardView(IServiceProvider services)
     {
+        _services = services;
         InitializeComponent();
     }
 
-    private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
     {
-        if (DataContext is not UserDashboardViewModel vm) return;
+        var vm = _services.GetRequiredService<ConsumeDashboardViewModel>();
+        await vm.InitializeAsync(cancellation);
 
-        if (args.SelectedItem is UserViewModel customer) vm.SelectedUser = customer;
+        DataContext = vm;
+    }
+    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
+    {
+        DataContext = null;
+        return ValueTask.CompletedTask;
     }
 }

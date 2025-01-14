@@ -14,65 +14,65 @@ internal class WorkDbContext(IApplication applicationContext) : LocalDbContext(a
     /// <summary>
     /// 配置
     /// </summary>
-    public DbSet<ConfigEntity> Configs { get; set; }
+    public DbSet<ConfigEntity> Config { get; set; }
 
 
     /// <summary>
     ///     员工
     /// </summary>
-    public DbSet<StaffEntity> Staffs { get; set; }
+    public DbSet<StaffEntity> Staff { get; set; }
 
     /// <summary>
     ///     员工职位
     /// </summary>
-    public DbSet<StaffPositionEntity> StaffPositions { get; set; }
+    public DbSet<StaffPositionEntity> StaffPosition { get; set; }
 
     /// <summary>
     ///     机构
     /// </summary>
-    public DbSet<CustomerEntity> Customers { get; set; }
+    public DbSet<CustomerEntity> Customer { get; set; }
 
 
     /// <summary>
     ///     所有订单
     /// </summary>
-    public DbSet<OrderEntity> Orders { get; set; }
+    public DbSet<OrderEntity> Order { get; set; }
 
     /// <summary>
     ///     计时订单
     /// </summary>
-    public DbSet<OrderTimingEntity> TimingOrders { get; set; }
+    public DbSet<OrderTimingEntity> OrderTiming { get; set; }
 
     /// <summary>
     ///     计数订单
     /// </summary>
-    public DbSet<OrderCountingEntity> CountingOrders { get; set; }
+    public DbSet<OrderCountingEntity> OrderCounting { get; set; }
 
     /// <summary>
     ///     混合订单
     /// </summary>
-    public DbSet<OrderMixingEntity> MixingOrders { get; set; }
+    public DbSet<OrderMixingEntity> OrderMixing { get; set; }
 
 
     /// <summary>
     ///     所有划扣
     /// </summary>
-    public DbSet<ConsumeEntity> Consumes { get; set; }
+    public DbSet<ConsumeEntity> Consume { get; set; }
 
     /// <summary>
     ///     计时订单划扣
     /// </summary>
-    public DbSet<ConsumeTimingEntity> TimingConsumes { get; set; }
+    public DbSet<ConsumeTimingEntity> ConsumeTiming { get; set; }
 
     /// <summary>
     ///     计数订单划扣
     /// </summary>
-    public DbSet<ConsumeCountingEntity> CountingConsumes { get; set; }
+    public DbSet<ConsumeCountingEntity> ConsumeCounting { get; set; }
 
     /// <summary>
     ///     混合订单划扣
     /// </summary>
-    public DbSet<ConsumeMixingEntity> MixingConsumes { get; set; }
+    public DbSet<ConsumeMixingEntity> ConsumeMixing { get; set; }
 
 
 

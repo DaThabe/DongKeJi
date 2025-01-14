@@ -31,4 +31,9 @@ public partial class OrderCountingViewModel : OrderViewModel
     partial void OnInitCountsChanging(double value) => ValidateProperty(value, nameof(InitCounts));
 
     partial void OnTotalCountsChanging(double value) => ValidateProperty(value, nameof(TotalCounts));
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, 初始{InitCounts}张, 总{TotalCounts}张";
+    }
 }

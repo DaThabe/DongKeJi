@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using DongKeJi.Inject;
 using DongKeJi.UI;
@@ -6,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+using Button = System.Windows.Controls.Button;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace DongKeJi.Launcher.UI.View.Color;
 
@@ -33,7 +38,6 @@ public partial class ColorView
         set => SetValue(SystemColorsProperty, value);
     }
     
-
     // CLR包装器
     public ColorItem? SelectedSystemColor
     {
@@ -64,6 +68,8 @@ public partial class ColorView
     {
         ColorItemList colors = [];
         GetAllResources(ref colors, _application.Resources);
+        _allColorItemList = colors;
+
         SystemColors = colors;
 
         await base.OnNavigatedToAsync(cancellation);
@@ -114,18 +120,12 @@ public partial class ColorView
         }
     }
 
-    private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
-    {
-        if (args.SelectedItem is ColorItem color) SelectedSystemColor = color;
-    }
-
-
 
 
     private readonly IApplication _application;
     private readonly ISnackbarService _snackbarService;
 
-    private void Selector_OnSelected(object sender, RoutedEventArgs e)
+    private void CopyColorClick(object sender, RoutedEventArgs e)
     {
         if (sender is not Button btn) return;
         var name = btn.Tag.ToString();
@@ -134,6 +134,23 @@ public partial class ColorView
         Clipboard.SetText(name);
         _snackbarService.ShowInfo($"已复制到剪切板: {name}");
     }
+
+
+    private void InputKeyDown(object sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox tb) return;
+        if (e.Key != Key.Enter) return;
+
+        if (string.IsNullOrWhiteSpace(tb.Text))
+        {
+            SystemColors = _allColorItemList;
+        }
+
+        var results = _allColorItemList.Where(x => x.Key.ToString()?.Contains(tb.Text, StringComparison.CurrentCultureIgnoreCase) == true);
+        SystemColors = [.. results];
+    }
+
+    private ColorItemList _allColorItemList = [];
 }
 
 

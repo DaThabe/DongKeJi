@@ -16,11 +16,29 @@ public static class DbContextExtensions
     /// <param name="cancellation"></param>
     /// <returns></returns>
     /// <exception cref="DbUpdateException"></exception>
-    public static async ValueTask AssertSaveSuccessAsync<TDbContext>(this TDbContext dbContext, CancellationToken cancellation = default)
+    public static async ValueTask AssertSaveChangesAsync<TDbContext>(this TDbContext dbContext, CancellationToken cancellation = default)
         where TDbContext : DbContext
     {
         var result = await dbContext.SaveChangesAsync(cancellation);
         if (result < 0) throw new DbUpdateException("数据未写入数据库");
+    }
+
+
+
+    /// <summary>
+    /// 释放自动更新
+    /// </summary>
+    /// <param name="entityViewModel"></param>
+    /// <returns></returns>
+    public static bool ReleaseAutoUpdate(this IEntityViewModel entityViewModel)
+    {
+        if(!_autoUpdatesDictionary.TryGetValue(entityViewModel, out var value ))
+        {
+            return false;
+        }
+
+        value.Dispose();
+        return true;
     }
 
 
@@ -37,7 +55,10 @@ public static class DbContextExtensions
         where TEntity : EntityBase
         where TViewModel : IEntityViewModel
     {
-        return new AutoUpdateBuilder<TEntity, TViewModel>(dbContext, mapper, viewModel);
+        var autoUpdate = new AutoUpdateBuilder<TEntity, TViewModel>(dbContext, mapper, viewModel);
+        _autoUpdatesDictionary[viewModel] = autoUpdate;
+
+        return autoUpdate;
     }
     
     /// <summary>
@@ -54,6 +75,7 @@ public static class DbContextExtensions
         where TViewModel : IEntityViewModel
     {
         var viewModel = mapper.Map<TViewModel>(entity);
+
         return dbContext.AutoUpdate<TEntity, TViewModel>(viewModel, mapper);
     }
 
@@ -112,4 +134,9 @@ public static class DbContextExtensions
             throw;
         }
     }
+
+
+
+
+    private static Dictionary<object, IAutoUpdateBuilder> _autoUpdatesDictionary = [];
 }

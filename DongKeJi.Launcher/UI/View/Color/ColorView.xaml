@@ -23,12 +23,11 @@
 
             <ui:CardControl.Header>
 
-                <ui:AutoSuggestBox
+                <ui:TextBox
                     Margin="0,0,0,5"
                     DockPanel.Dock="Left"
-                    OriginalItemsSource="{Binding SystemColors, RelativeSource={RelativeSource AncestorType={x:Type local:ColorView}}}"
-                    PlaceholderText="搜索颜色..."
-                    SuggestionChosen="AutoSuggestBox_OnSuggestionChosen" />
+                    KeyDown="InputKeyDown"
+                    PlaceholderText="搜索颜色..." />
 
             </ui:CardControl.Header>
 
@@ -52,12 +51,13 @@
             <ui:ListView.ItemTemplate>
                 <DataTemplate DataType="{x:Type local:ColorItem}">
 
-                    <Border
+                    <Button
                         Width="200"
                         Margin="3"
                         Padding="5"
                         HorizontalAlignment="Stretch"
                         Background="{DynamicResource ControlFillColorDefaultBrush}"
+                        Click="CopyColorClick"
                         Tag="{Binding Key}">
 
                         <DockPanel>
@@ -80,14 +80,14 @@
 
                         </DockPanel>
 
-                    </Border>
+                    </Button>
 
                 </DataTemplate>
             </ui:ListView.ItemTemplate>
 
             <ui:ListView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel />
+                    <ui:VirtualizingWrapPanel />
                 </ItemsPanelTemplate>
             </ui:ListView.ItemsPanel>
         </ui:ListView>

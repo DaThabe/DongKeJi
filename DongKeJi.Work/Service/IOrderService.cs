@@ -7,6 +7,7 @@ using DongKeJi.Validation;
 using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
+using DongKeJi.Work.ViewModel.Customer;
 using DongKeJi.Work.ViewModel.Order;
 using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.EntityFrameworkCore;
@@ -54,13 +55,23 @@ public interface IOrderService
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     更换销售
+    /// 查询订单的机构
+    /// </summary>
+    /// <param name="order"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<CustomerViewModel> FindCustomerAsync(
+        IIdentifiable order,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 设置销售
     /// </summary>
     /// <param name="order"></param>
     /// <param name="salesperson"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask ChangeSalespersonAsync(
+    ValueTask SetSalespersonAsync(
         IIdentifiable order,
         IIdentifiable salesperson,
         CancellationToken cancellation = default);
@@ -73,7 +84,7 @@ public interface IOrderService
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerIdAsync(
+    ValueTask<IEnumerable<OrderViewModel>> FindAllByCustomerIdAsync(
         IIdentifiable customer,
         int? skip = null,
         int? take = null,
@@ -87,7 +98,7 @@ public interface IOrderService
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<OrderViewModel>> GetAllByStaffIdAsync(
+    ValueTask<IEnumerable<OrderViewModel>> FindAllByStaffIdAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
@@ -114,27 +125,27 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
             order.AssertValidate();
 
             //订单
-            var orderEntity = await dbContext.Orders
+            var orderEntity = await dbContext.Order
                 .FirstOrDefaultAsync(x => x.Id == order.Id, cancellationToken: cancellation);
             DatabaseException.ThrowIfEntityAlreadyExists(orderEntity, "订单已存在");
 
 
             //职位
-            var positionEntity = await dbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPosition
                 .Include(x => x.Staffs)
                 .FirstOrDefaultAsync(x => x.Type == StaffPositionType.Salesperson, cancellation);
             positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "销售职位不存在");
 
 
             //员工
-            var salespersonEntity = await dbContext.Staffs
+            var salespersonEntity = await dbContext.Staff
                 .Include(x => x.Positions)
                 .Where(x => x.Positions.Contains(positionEntity))
                 .FirstOrDefaultAsync(x => x.Id == salesperson.Id, cancellation);
             salespersonEntity = DatabaseException.ThrowIfEntityNotFound(salespersonEntity, "销售员工不存在");
 
             //机构
-            var customerEntity = await dbContext.Customers
+            var customerEntity = await dbContext.Customer
                 .Include(x => x.Orders)
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
             customerEntity = DatabaseException.ThrowIfEntityNotFound(customerEntity, "机构不存在");
@@ -150,7 +161,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
 
             //保存
             await dbContext.AddAsync(orderEntity, cancellation);
-            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -169,13 +180,13 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         try
         {
             //订单
-            var orderEntity = await dbContext.Orders
+            var orderEntity = await dbContext.Order
                 .FirstOrDefaultAsync(x => x.Id == order.Id, cancellationToken: cancellation);
             orderEntity = DatabaseException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
 
             dbContext.Remove(orderEntity);
 
-            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -194,14 +205,14 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         try
         {
             //订单
-            var orderEntity = await dbContext.Orders
+            var orderEntity = await dbContext.Order
                 .Include(x => x.Staffs)
                 .ThenInclude(staffEntity => staffEntity.Positions)
                 .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
             orderEntity = DatabaseException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
 
             //职位
-            var positionEntity = await dbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPosition
                 .FirstOrDefaultAsync(x => x.Type == StaffPositionType.Salesperson, cancellationToken: cancellation);
             positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "销售职位不存在");
 
@@ -219,7 +230,28 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         }
     }
 
-    public async ValueTask ChangeSalespersonAsync(
+    public async ValueTask<CustomerViewModel> FindCustomerAsync(IIdentifiable order, CancellationToken cancellation = default)
+    {
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            //订单
+            var orderEntity = await dbContext.Order
+                .Include(x => x.Customer)
+                .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
+            orderEntity = DatabaseException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
+
+            return mapper.Map<CustomerViewModel>(orderEntity.Customer);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new DatabaseException($"查询订单销售时发生错误\n订单Id: {order.Id}", ex);
+        }
+    }
+
+    public async ValueTask SetSalespersonAsync(
         IIdentifiable order,
         IIdentifiable salesperson,
         CancellationToken cancellation = default)
@@ -229,14 +261,14 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         try
         {
             //订单
-            var orderEntity = await dbContext.Orders
+            var orderEntity = await dbContext.Order
                 .Include(x => x.Staffs)
                 .ThenInclude(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == order.Id, cancellation);
             orderEntity = DatabaseException.ThrowIfEntityNotFound(orderEntity, "订单不存在");
 
             //销售
-            var salespersonEntity = await dbContext.Staffs
+            var salespersonEntity = await dbContext.Staff
                 .Include(staffEntity => staffEntity.Orders)
                 .FirstOrDefaultAsync(x => x.Id == salesperson.Id, cancellation);
             salespersonEntity = DatabaseException.ThrowIfEntityNotFound(salespersonEntity, "销售不存在");
@@ -254,7 +286,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
             orderEntity.Staffs.Add(salespersonEntity, x => x.Id != salespersonEntity.Id);
             salespersonEntity.Orders.Add(orderEntity, x => x.Id != orderEntity.Id);
 
-            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -264,7 +296,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         }
     }
 
-    public async ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerIdAsync(
+    public async ValueTask<IEnumerable<OrderViewModel>> FindAllByCustomerIdAsync(
         IIdentifiable customer,
         int? skip = null,
         int? take = null,
@@ -274,7 +306,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
 
         try
         {
-            var orderEntityList = await dbContext.Customers
+            var orderEntityList = await dbContext.Customer
                 .Include(x => x.Orders)
                 .Where(x => x.Id == customer.Id)
                 .Select(x => x.Orders
@@ -291,7 +323,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         }
     }
 
-    public async ValueTask<IEnumerable<OrderViewModel>> GetAllByStaffIdAsync(
+    public async ValueTask<IEnumerable<OrderViewModel>> FindAllByStaffIdAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
@@ -301,7 +333,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
 
         try
         {
-            var orderEntityList = await dbContext.Staffs
+            var orderEntityList = await dbContext.Staff
                 .Include(x => x.Orders)
                 .Where(x => x.Id == staff.Id)
                 .Select(x => x.Orders

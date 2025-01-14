@@ -21,4 +21,10 @@ public partial class StaffViewModel : EntityViewModel
 
 
     partial void OnNameChanging(string value) => ValidateProperty(value, nameof(Name));
+
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }

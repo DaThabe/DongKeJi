@@ -20,7 +20,7 @@ public partial class CustomerDashboardView
 
     protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
     {
-        var vm = _services.GetRequiredService<PerformanceDashboardViewModel>();
+        var vm = _services.GetRequiredService<CustomerDashboardViewModel>();
         await vm.InitializeAsync(cancellation);
 
         DataContext = vm;

@@ -182,6 +182,7 @@
                 <ui:CardControl.Content>
                     <StackPanel Orientation="Horizontal">
 
+                        <!--  添加职位  -->
                         <ui:DropDownButton Appearance="Primary" Content="添加职位">
 
                             <ui:DropDownButton.Flyout>
@@ -202,6 +203,26 @@
 
                         </ui:DropDownButton>
 
+                        <!--  隐藏菜单  -->
+                        <ui:DropDownButton
+                            Margin="10,0,0,0"
+                            Appearance="Danger"
+                            Foreground="#fff"
+                            Icon="{ui:SymbolIcon Options24}">
+                            <ui:DropDownButton.Flyout>
+                                <ContextMenu>
+
+                                    <MenuItem
+                                        Margin="0,3"
+                                        Command="{Binding RemoveStaffCommand}"
+                                        CommandParameter="{Binding SelectedStaff}"
+                                        Header="删除员工"
+                                        Icon="{ui:SymbolIcon Delete24}" />
+
+                                </ContextMenu>
+                            </ui:DropDownButton.Flyout>
+                        </ui:DropDownButton>
+
                     </StackPanel>
                 </ui:CardControl.Content>
 
@@ -210,8 +231,8 @@
             <!--  底部  -->
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="127*"/>
-                    <RowDefinition Height="229*"/>
+                    <RowDefinition Height="127*" />
+                    <RowDefinition Height="229*" />
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -222,7 +243,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!--  职位信息  -->
-                <StackPanel Grid.Column="0" Grid.RowSpan="2">
+                <StackPanel Grid.RowSpan="2" Grid.Column="0">
 
                     <ui:TextBlock
                         Margin="0,10"
@@ -249,7 +270,7 @@
                 </StackPanel>
 
                 <!--  员工信息  -->
-                <StackPanel Grid.Column="1" Grid.RowSpan="2">
+                <StackPanel Grid.RowSpan="2" Grid.Column="1">
 
                     <!--  左栏  -->
                     <ui:TextBlock

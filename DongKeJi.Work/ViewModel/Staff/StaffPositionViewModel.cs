@@ -33,4 +33,10 @@ public partial class StaffPositionViewModel : EntityViewModel
 
 
     partial void OnTitleChanging(string value) => ValidateProperty(value, nameof(Title));
+
+
+    public override string ToString()
+    {
+        return $"{Type}, {Title}";
+    }
 }

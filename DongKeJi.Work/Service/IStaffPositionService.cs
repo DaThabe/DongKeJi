@@ -111,13 +111,13 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
             ValidationExtensions.AssertValidate(positionType, positionType == StaffPositionType.None, "职位不明确");
 
             //员工
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             //职位
-            var staffPositionEntity = await dbContext.StaffPositions
+            var staffPositionEntity = await dbContext.StaffPosition
                 .Include(x => x.Staffs)
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
 
@@ -135,7 +135,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
             staffEntity.Positions.Add(staffPositionEntity, x => x.Type != staffPositionEntity.Type);
 
             //保存
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
 
             return mapper.Map<StaffPositionViewModel>(staffPositionEntity);
@@ -156,7 +156,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
 
         try
         {
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
@@ -164,7 +164,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
             //保存
             staffEntity.Positions.Remove(x => x.Type == positionType);
 
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -182,14 +182,14 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
 
         try
         {
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .Include(x => x.Positions)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "员工不存在");
 
             staffEntity.Positions.Clear();
 
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -211,7 +211,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
             position.AssertValidate();
 
             //职位
-            var positionEntity = await dbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPosition
                 .FirstOrDefaultAsync(x => x.Type == position.Type, cancellation);
 
             if (positionEntity is null || positionEntity.IsNullOrEmpty())
@@ -227,7 +227,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
             }
 
             //保存
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -245,13 +245,13 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
 
         try
         {
-            var positionEntity = await dbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPosition
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
             positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
             dbContext.Remove(positionEntity);
 
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -269,7 +269,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
 
         try
         {
-            var positionEntity = await dbContext.StaffPositions
+            var positionEntity = await dbContext.StaffPosition
                 .FirstOrDefaultAsync(x => x.Type == positionType, cancellation);
             positionEntity = DatabaseException.ThrowIfEntityNotFound(positionEntity, "职位不存在");
 
@@ -292,7 +292,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
 
         try
         {
-            var positionEntityList = await dbContext.Staffs
+            var positionEntityList = await dbContext.Staff
                 .Include(x => x.Positions)
                 .Where(x => x.Id == staff.Id)
                 .Select(x => x.Positions.SkipAndTake(skip, take).ToList())
@@ -314,7 +314,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
     {
         try
         {
-            var positionEntityList = await dbContext.StaffPositions
+            var positionEntityList = await dbContext.StaffPosition
                 .SkipAndTake(skip, take)
                 .ToListAsync(cancellation);
 

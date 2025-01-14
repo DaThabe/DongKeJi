@@ -29,4 +29,10 @@ public partial class ConsumeMixingViewModel : ConsumeViewModel
     partial void OnConsumeCountsChanged(double value) => ValidateProperty(value, nameof(ConsumeCounts));
 
     partial void OnConsumeDaysChanged(double value) => ValidateProperty(value, nameof(ConsumeDays));
+
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, 划扣{ConsumeDays}天, {ConsumeCounts}张";
+    }
 }

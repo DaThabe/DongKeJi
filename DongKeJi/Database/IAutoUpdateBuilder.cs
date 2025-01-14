@@ -9,14 +9,18 @@ using DongKeJi.Exceptions;
 
 namespace DongKeJi.Database;
 
-public interface IAutoUpdateBuilder<out TViewModel> : IDisposable
-    where TViewModel : IViewModel, IIdentifiable
+
+public interface IAutoUpdateBuilder : IDisposable
 {
     /// <summary>
     /// 是否暂停更新
     /// </summary>
     bool IsStop { get; set; }
+}
 
+public interface IAutoUpdateBuilder<out TViewModel> : IAutoUpdateBuilder
+    where TViewModel : IViewModel, IIdentifiable
+{
     /// <summary>
     /// 视图模型
     /// </summary>

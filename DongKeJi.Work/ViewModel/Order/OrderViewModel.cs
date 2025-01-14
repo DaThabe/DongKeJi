@@ -60,4 +60,9 @@ public abstract partial class OrderViewModel : EntityViewModel
     partial void OnStateChanging(OrderState value) => ValidateProperty(value, nameof(State));
 
     partial void OnSubscribeTimeChanging(DateTime value) => ValidateProperty(value, nameof(SubscribeTime));
+
+    public override string ToString()
+    {
+        return $"{Type}-{SubscribeTime:yyyy-MM-dd}-{State}-{Name}";
+    }
 }

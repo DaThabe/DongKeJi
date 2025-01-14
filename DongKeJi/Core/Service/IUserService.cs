@@ -141,7 +141,7 @@ internal class UserService(
             userEntity = mapper.Map<UserEntity>(value);
             await dbContext.AddAsync(userEntity, cancellation);
 
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)

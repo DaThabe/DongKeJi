@@ -30,4 +30,9 @@ public abstract partial class ConsumeViewModel : EntityViewModel
     partial void OnCreateTimeChanged(DateTime value) => ValidateProperty(value, nameof(CreateTime));
 
     partial void OnTitleChanged(string value) => ValidateProperty(value, nameof(Title));
+
+    public override string ToString()
+    {
+        return $"{CreateTime:yyyy-MM-dd}, {Title}";
+    }
 }

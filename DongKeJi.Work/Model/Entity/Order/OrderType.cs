@@ -5,11 +5,11 @@
 /// </summary>
 public enum OrderType
 {
-    Unknown,
+    Unknown = 0,
 
-    Timing,
+    Timing = 100,
 
-    Counting,
+    Counting = 200,
 
-    Mixing
+    Mixing = 300
 }

@@ -12,13 +12,14 @@
     xmlns:dkjui="clr-namespace:DongKeJi.UI;assembly=DongKeJi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Order"
+    xmlns:orderEntity="clr-namespace:DongKeJi.Work.Model.Entity.Order"
     xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Order"
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:view="clr-namespace:DongKeJi.UI.View;assembly=DongKeJi"
     xmlns:viewModel="clr-namespace:DongKeJi.Work.ViewModel"
-    d:DataContext="{d:DesignInstance viewModel:PerformanceDashboardViewModel,
+    d:DataContext="{d:DesignInstance viewModel:CustomerDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
     d:State="Focused"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -26,8 +27,10 @@
 
     <view:NavigationView.Resources>
 
-        <converter:OrderTypeToSymbolConverter x:Key="OrderTypeToSymbolConverter" />
         <converter1:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converter:OrderTypeToSymbolConverter x:Key="OrderTypeToSymbolConverter" />
+        <converter:OrderStateToNameConverter x:Key="OrderStateToNameConverter" />
+        <converter:OrderStateToSymbolConverter x:Key="OrderStateToSymbolConverter" />
 
         <dkjui:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
 
@@ -74,12 +77,12 @@
         </DataTemplate>
 
         <!--  订单列表元素  -->
-        <DataTemplate x:Key="OrderListItem" DataType="{x:Type orderVm:OrderViewModel}">
+        <DataTemplate x:Key="OrderListItem" DataType="{x:Type orderVm:OrderSalespersonViewModel}">
 
             <ui:CardAction IsHitTestVisible="False">
 
                 <ui:CardAction.Icon>
-                    <ui:SymbolIcon Symbol="{Binding Type, Converter={StaticResource OrderTypeToSymbolConverter}}" />
+                    <ui:SymbolIcon Symbol="{Binding Order.Type, Converter={StaticResource OrderTypeToSymbolConverter}}" />
                 </ui:CardAction.Icon>
 
                 <ui:CardAction.Content>
@@ -138,11 +141,11 @@
                         <ui:TextBlock
                             d:Text="订单名称"
                             FontTypography="BodyStrong"
-                            Text="{Binding Name}" />
+                            Text="{Binding Order.Name}" />
 
                         <ContentControl
                             d:Content="{d:SampleData ItemCount=1}"
-                            Content="{Binding}"
+                            Content="{Binding Order}"
                             ContentTemplateSelector="{StaticResource OrderDataTemplateSelector}" />
 
                     </StackPanel>
@@ -153,7 +156,7 @@
         </DataTemplate>
 
         <!--  划扣列表元素  -->
-        <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type consume:ConsumeViewModel}">
+        <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type consume:ConsumeDesignerViewModel}">
 
             <ui:CardControl Margin="0,2">
 
@@ -161,10 +164,8 @@
 
                     <!--  计时划扣  -->
                     <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume:ConsumeTimingViewModel}">
-
                         <StackPanel Orientation="Horizontal">
 
-                            <DatePicker SelectedDate="{Binding CreateTime, StringFormat=yyyy-MM-dd}" ToolTip="创建时间" />
                             <ui:NumberBox
                                 ClearButtonEnabled="False"
                                 Icon="{ui:SymbolIcon Symbol=Clock24}"
@@ -172,18 +173,14 @@
                                 Minimum="0.5"
                                 ToolTip="请输入划扣天数"
                                 Value="{Binding ConsumeDays}" />
-                            <ui:TextBox PlaceholderText="备注..." Text="{Binding Title}" />
 
                         </StackPanel>
-
                     </DataTemplate>
 
                     <!--  计数划扣  -->
                     <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume:ConsumeCountingViewModel}">
-
                         <StackPanel Orientation="Horizontal">
 
-                            <DatePicker SelectedDate="{Binding CreateTime, StringFormat=yyyy-MM-dd}" ToolTip="创建时间" />
                             <ui:NumberBox
                                 ClearButtonEnabled="False"
                                 Icon="{ui:SymbolIcon Symbol=Layer20}"
@@ -191,18 +188,14 @@
                                 Minimum="0.5"
                                 ToolTip="请输入划扣张数"
                                 Value="{Binding ConsumeCounts}" />
-                            <ui:TextBox PlaceholderText="备注..." Text="{Binding Title}" />
 
                         </StackPanel>
-
                     </DataTemplate>
 
                     <!--  混合划扣  -->
                     <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume:ConsumeMixingViewModel}">
-
                         <StackPanel Orientation="Horizontal">
 
-                            <DatePicker SelectedDate="{Binding CreateTime, StringFormat=yyyy-MM-dd}" ToolTip="创建时间" />
                             <ui:NumberBox
                                 ClearButtonEnabled="False"
                                 Icon="{ui:SymbolIcon Symbol=Clock24}"
@@ -210,6 +203,7 @@
                                 Minimum="0"
                                 ToolTip="请输入划扣天数"
                                 Value="{Binding ConsumeDays}" />
+
                             <ui:NumberBox
                                 ClearButtonEnabled="False"
                                 Icon="{ui:SymbolIcon Symbol=Layer20}"
@@ -217,10 +211,8 @@
                                 Minimum="0"
                                 ToolTip="请输入划扣张数"
                                 Value="{Binding ConsumeCounts}" />
-                            <ui:TextBox PlaceholderText="备注..." Text="{Binding Title}" />
 
                         </StackPanel>
-
                     </DataTemplate>
 
                     <!--  划扣模板选择器  -->
@@ -234,19 +226,58 @@
 
                 <ui:CardControl.Header>
 
-                    <ContentPresenter Content="{Binding}" ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}" />
+                    <DockPanel>
+
+                        <DatePicker
+                            Background="Transparent"
+                            BorderThickness="0"
+                            DockPanel.Dock="Left"
+                            SelectedDate="{Binding Consume.CreateTime, StringFormat=yyyy-MM-dd}"
+                            ToolTip="创建时间" />
+                        <ui:TextBox
+                            Background="Transparent"
+                            BorderThickness="0"
+                            PlaceholderText="备注..."
+                            Text="{Binding Consume.Title}" />
+
+                    </DockPanel>
 
                 </ui:CardControl.Header>
 
                 <ui:CardControl.Content>
 
-                    <ui:Button
-                        Appearance="Danger"
-                        Command="{Binding Data.RemoveConsumeCommand, Source={StaticResource BindingProxy}}"
-                        CommandParameter="{Binding}"
-                        Foreground="#fff"
-                        Icon="{ui:SymbolIcon Symbol=Delete24}" />
+                    <DockPanel>
 
+                        <ui:Button
+                            Margin="5,0,0,0"
+                            Appearance="Danger"
+                            Command="{Binding Data.RemoveConsumeCommand, Source={StaticResource BindingProxy}}"
+                            CommandParameter="{Binding}"
+                            DockPanel.Dock="Right"
+                            Foreground="#fff"
+                            Icon="{ui:SymbolIcon Symbol=Delete24}" />
+
+                        <!--  设计选择器  -->
+                        <ComboBox
+                            Margin="5,0,0,0"
+                            DockPanel.Dock="Right"
+                            ItemsSource="{Binding Data.DesignerCollection, Source={StaticResource BindingProxy}}"
+                            SelectedIndex="0"
+                            SelectedItem="{Binding Designer}"
+                            ToolTip="划扣设计">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type staff:StaffViewModel}">
+                                    <ui:TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <ContentPresenter
+                            VerticalAlignment="Center"
+                            Content="{Binding Consume}"
+                            ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}" />
+
+                    </DockPanel>
                 </ui:CardControl.Content>
 
             </ui:CardControl>
@@ -353,8 +384,8 @@
                         </ui:TextBlock>
 
                         <ui:TextBlock FontTypography="Body" Visibility="{cb:Binding 'SelectedOrder !=  null'}">
-                            <Run d:Text="订单名称" Text="{Binding SelectedOrder.Name}" />
-                            <Run d:Text="订单创建时间" Text="{Binding SelectedOrder.SubscribeTime, StringFormat='开始时间: {0:yyyy-MM-dd}'}" />
+                            <Run d:Text="订单名称" Text="{Binding SelectedOrder.Order.Name}" />
+                            <Run d:Text="订单创建时间" Text="{Binding SelectedOrder.Order.SubscribeTime, StringFormat='开始时间: {0:yyyy-MM-dd}'}" />
                         </ui:TextBlock>
 
                     </StackPanel>
@@ -364,7 +395,26 @@
                     <StackPanel Orientation="Horizontal">
 
                         <!--  状态选择  -->
-                        <order:OrderStateComboBox DataContext="{Binding SelectedOrder}" Visibility="{cb:Binding 'Data.SelectedOrder != null', Source={StaticResource BindingProxy}}" />
+                        <ComboBox
+                            x:Name="ComboBox"
+                            ItemsSource="{Binding OrderStateCollection}"
+                            SelectedIndex="0"
+                            SelectedItem="{Binding SelectedOrder.Order.State}"
+                            ToolTip="订单状态"
+                            Visibility="{cb:Binding 'SelectedOrder != null'}">
+
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type orderEntity:OrderState}">
+
+                                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                        <ui:SymbolIcon Margin="0,0,5,0" Symbol="{Binding Converter={StaticResource OrderStateToSymbolConverter}}" />
+                                        <ui:TextBlock Text="{Binding Converter={StaticResource OrderStateToNameConverter}}" />
+                                    </StackPanel>
+
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
 
                         <!--  新增任务  -->
                         <ui:Button
@@ -469,7 +519,7 @@
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
 
-                            <order:OrderEditView DataContext="{Binding SelectedOrder}" />
+                            <order:OrderEditView DataContext="{Binding SelectedOrder.Order}" />
 
                             <ui:CardControl Header="销售">
 
@@ -479,7 +529,7 @@
                                         Margin="5,0,0,0"
                                         ItemTemplate="{StaticResource SalespersonSelectorItem}"
                                         ItemsSource="{Binding SalespersonCollection}"
-                                        SelectedItem="{Binding SelectedSalesperson}"
+                                        SelectedItem="{Binding SelectedOrder.Salesperson}"
                                         ToolTip="订单销售" />
 
                                 </ui:CardControl.Content>

@@ -32,4 +32,10 @@ public partial class OrderTimingViewModel : OrderViewModel
     partial void OnInitDaysChanging(double value) => ValidateProperty(value, nameof(InitDays));
 
     partial void OnTotalDaysChanging(double value) => ValidateProperty(value, nameof(TotalDays));
+
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, 初始{InitDays}天, 总{TotalDays}天";
+    }
 }

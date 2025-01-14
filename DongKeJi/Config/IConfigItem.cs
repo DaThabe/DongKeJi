@@ -93,7 +93,7 @@ public class ConfigItem<TDbContext, TValue>(string key, TDbContext dbContext) : 
         {
             var jsonStringValue = JsonConvert.SerializeObject(_value);
 
-            var configEntity = await dbContext.Configs.FirstOrDefaultAsync(x => x.Key == Key, cancellationToken: cancellation);
+            var configEntity = await dbContext.Config.FirstOrDefaultAsync(x => x.Key == Key, cancellationToken: cancellation);
 
             if (configEntity is null)
             {
@@ -110,7 +110,7 @@ public class ConfigItem<TDbContext, TValue>(string key, TDbContext dbContext) : 
                 configEntity.JsonStringValue = jsonStringValue;
             }
 
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -127,7 +127,7 @@ public class ConfigItem<TDbContext, TValue>(string key, TDbContext dbContext) : 
 
         try
         {
-            var configEntity = await dbContext.Configs.FirstOrDefaultAsync(x => x.Key == Key, cancellationToken: cancellation);
+            var configEntity = await dbContext.Config.FirstOrDefaultAsync(x => x.Key == Key, cancellationToken: cancellation);
             configEntity = DatabaseException.ThrowIfEntityNotFound(configEntity);
 
             var value = JsonConvert.DeserializeObject<TValue>(configEntity.JsonStringValue);

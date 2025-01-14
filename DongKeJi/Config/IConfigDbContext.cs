@@ -12,5 +12,5 @@ public interface IConfigDbContext
     /// <summary>
     /// 配置表
     /// </summary>
-    DbSet<ConfigEntity> Configs { get; }
+    DbSet<ConfigEntity> Config { get; }
 }

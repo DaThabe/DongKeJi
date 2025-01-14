@@ -9,7 +9,7 @@ public abstract class LazyInitializeViewModel : ObservableViewModel
 
     public bool IsInitialized { get; private set; }
 
-    public async Task InitializeAsync(CancellationToken cancellation = default)
+    public async ValueTask InitializeAsync(CancellationToken cancellation = default)
     {
         lock (_initializationLock)
         {
@@ -25,8 +25,8 @@ public abstract class LazyInitializeViewModel : ObservableViewModel
     /// </summary>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    protected virtual Task OnInitializationAsync(CancellationToken cancellation = default)
+    protected virtual ValueTask OnInitializationAsync(CancellationToken cancellation = default)
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

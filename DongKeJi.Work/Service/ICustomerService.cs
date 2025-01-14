@@ -70,12 +70,12 @@ internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICusto
             customer.AssertValidate();
 
             //机构
-            var customerEntity = await dbContext.Customers
+            var customerEntity = await dbContext.Customer
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
             DatabaseException.ThrowIfEntityAlreadyExists(customerEntity, "机构已存在");
 
             //员工
-            var staffEntity = await dbContext.Staffs
+            var staffEntity = await dbContext.Staff
                 .Include(x => x.Customers)
                 .FirstOrDefaultAsync(x => x.Id == staff.Id, cancellation);
             staffEntity = DatabaseException.ThrowIfEntityNotFound(staffEntity, "关联员工不存在");
@@ -89,7 +89,7 @@ internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICusto
             staffEntity.Customers.Add(customerEntity, x => x.Id == customer.Id);
 
             //保存
-            await dbContext.AssertSaveSuccessAsync(cancellation: cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation: cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -107,13 +107,13 @@ internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICusto
 
         try
         {
-            var orderEntity = await dbContext.Customers
+            var orderEntity = await dbContext.Customer
                 .FirstOrDefaultAsync(x => x.Id == customer.Id, cancellation);
             orderEntity = DatabaseException.ThrowIfEntityNotFound(orderEntity, "机构不存在");
 
             dbContext.Remove(orderEntity);
 
-            await dbContext.AssertSaveSuccessAsync(cancellation);
+            await dbContext.AssertSaveChangesAsync(cancellation);
             await transaction.CommitAsync(cancellation);
         }
         catch (Exception ex)
@@ -134,7 +134,7 @@ internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICusto
 
         try
         {
-            var customerEntityList = await dbContext.Staffs
+            var customerEntityList = await dbContext.Staff
                 .Include(x => x.Customers)
                 .Where(x => x.Id == staff.Id)
                 .Select(x => x.Customers

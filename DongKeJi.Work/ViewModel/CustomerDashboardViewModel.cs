@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Core;
@@ -7,6 +8,7 @@ using DongKeJi.Extensions;
 using DongKeJi.Inject;
 using DongKeJi.UI;
 using DongKeJi.ViewModel;
+using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
 using DongKeJi.Work.UI.View.Customer;
@@ -24,11 +26,11 @@ using Wpf.Ui.Extensions;
 namespace DongKeJi.Work.ViewModel;
 
 /// <summary>
-///     明细管理
+///     机构管理
 /// </summary>
 [Inject(ServiceLifetime.Transient)]
-public partial class PerformanceDashboardViewModel(
-    ILogger<PerformanceDashboardViewModel> logger,
+public partial class CustomerDashboardViewModel(
+    ILogger<CustomerDashboardViewModel> logger,
     IContentDialogService contentDialogService,
     ISnackbarService snackbarService,
     IWorkDatabase dbService,
@@ -53,11 +55,6 @@ public partial class PerformanceDashboardViewModel(
 
 
     /// <summary>
-    ///     当前选中销售
-    /// </summary>
-    [ObservableProperty] private StaffViewModel? _selectedSalesperson;
-
-    /// <summary>
     ///     当前选中机构
     /// </summary>
     [ObservableProperty] private CustomerViewModel? _selectedCustomer;
@@ -65,106 +62,98 @@ public partial class PerformanceDashboardViewModel(
     /// <summary>
     ///     当前选中订单
     /// </summary>
-    [ObservableProperty] private OrderViewModel? _selectedOrder;
+    [ObservableProperty] private OrderSalespersonViewModel? _selectedOrder;
 
     /// <summary>
     ///     当前选中划扣
     /// </summary>
-    [ObservableProperty] private ConsumeViewModel? _selectedConsume;
+    [ObservableProperty] private ConsumeDesignerViewModel? _selectedConsume;
 
 
     /// <summary>
-    /// 销售列表
+    /// 销售集合
     /// </summary>
     [ObservableProperty] private ObservableCollection<StaffViewModel> _salespersonCollection = [];
 
     /// <summary>
-    ///     机构列表
+    /// 设计集合
+    /// </summary>
+    [ObservableProperty] private ObservableCollection<StaffViewModel> _designerCollection = [];
+
+    /// <summary>
+    ///     订单状态集合
+    /// </summary>
+    [ObservableProperty] private ObservableCollection<OrderState> _orderStateCollection =
+    [
+        OrderState.Ready, OrderState.Active, OrderState.Paused, OrderState.Expired, OrderState.Cancel
+    ];
+
+    /// <summary>
+    ///     机构集合
     /// </summary>
     [ObservableProperty] private ObservableCollection<CustomerViewModel> _customerCollection = [];
 
     /// <summary>
-    ///     订单列表
+    ///     订单集合
     /// </summary>
-    [ObservableProperty] private ObservableCollection<OrderViewModel> _orderCollection = [];
+    [ObservableProperty] private ObservableCollection<OrderSalespersonViewModel> _orderCollection = [];
 
     /// <summary>
-    ///     划扣列表
+    ///     划扣集合
     /// </summary>
-    [ObservableProperty] private ObservableCollection<ConsumeViewModel> _consumeCollection = [];
+    [ObservableProperty] private ObservableCollection<ConsumeDesignerViewModel> _consumeCollection = [];
 
     #endregion
 
     #region --初始化&默认行为--
 
-    protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
+    protected override async ValueTask OnInitializationAsync(CancellationToken cancellation = default)
     {
-        await ReloadSalespersonCommand.ExecuteAsync(null);
+        try
+        {
+            var salespersonList = await staffService.FindAllByPositionTypeAsync(StaffPositionType.Salesperson, cancellation: cancellation);
+
+            SalespersonCollection = salespersonList.ToObservableCollection();
+            SalespersonCollection.ForEach(x => dbService.AutoUpdate(x));
+        }
+        catch (Exception ex)
+        {
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "加载销售时发生错误");
+            return;
+        }
+
+        try
+        {
+            var salespersonList = await staffService.FindAllByPositionTypeAsync(StaffPositionType.Designer, cancellation: cancellation);
+
+            DesignerCollection = salespersonList.ToObservableCollection();
+            DesignerCollection.ForEach(x => dbService.AutoUpdate(x));
+        }
+        catch (Exception ex)
+        {
+            snackbarService.ShowError(ex);
+            logger.LogError(ex, "加载设计时发生错误");
+            return;
+        }
+
         await ReloadCustomerCommand.ExecuteAsync(null);
     }
 
     partial void OnSelectedCustomerChanged(CustomerViewModel? value)
     {
-        SelectedOrder = null;
-        OrderCollection.Clear();
-
         if (value is null) return;
-
         _ = ReloadOrderCommand.ExecuteAsync(null);
     }
 
-    async partial void OnSelectedOrderChanged(OrderViewModel? value)
+    partial void OnSelectedOrderChanged(OrderSalespersonViewModel? value)
     {
-        SelectedConsume = null;
-        ConsumeCollection.Clear();
-
         if (value is null) return;
-
-        if (SelectedOrder is not null)
-        {
-            OnPropertyChanging(nameof(SelectedSalesperson));
-
-            var salespersonVm = await orderService.FindSalespersonAsync(SelectedOrder);
-            _selectedSalesperson = SalespersonCollection.FirstOrDefault(x => x.Id == salespersonVm.Id);
-
-            //dbService.AutoUpdate(_selectedSalesperson);
-            OnPropertyChanged(nameof(SelectedSalesperson));
-        }
-
         _ = ReloadConsumeCommand.ExecuteAsync(null);
     }
 
-    partial void OnSelectedSalespersonChanged(StaffViewModel? value)
-    {
-        if (value is null || SelectedOrder is null) return;
-        orderService.ChangeSalespersonAsync(SelectedOrder, value);
-    }
-
     #endregion
 
-    #region --销售--
-
-    /// <summary>
-    ///     刷新销售
-    /// </summary>
-    /// <returns></returns>
-    [RelayCommand]
-    private async Task ReloadSalespersonAsync()
-    {
-        try
-        {
-            var salespersonList = await staffService.FindAllByPositionTypeAsync(StaffPositionType.Salesperson);
-            SalespersonCollection = salespersonList.ToObservableCollection();
-        }
-        catch (Exception ex)
-        {
-            snackbarService.ShowError(ex);
-            logger.LogError(ex, "加载机构时发生错误");
-        }
-    }
-
-
-    #endregion
 
     #region --机构--
 
@@ -180,6 +169,7 @@ public partial class PerformanceDashboardViewModel(
             var customers = await customerService.GetAllByStaffIdAsync(CurrentStaff);
 
             CustomerCollection = customers.ToObservableCollection();
+            CustomerCollection.ForEach(x => dbService.AutoUpdate(x));
             SelectedCustomer = CustomerCollection.FirstOrDefault();
         }
         catch (Exception ex)
@@ -198,7 +188,7 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            var customerCreatorVm = new CustomerCreatorObservableViewModel();
+            var customerCreatorVm = new CustomerCreatorViewModel();
             var dialogContent = new SimpleContentDialogCreateOptions
             {
                 Title = "新增机构",
@@ -215,6 +205,7 @@ public partial class PerformanceDashboardViewModel(
 
             //更新数据库
             await customerService.AddAsync(customerCreatorVm.Customer, CurrentStaff);
+            dbService.AutoUpdate(customerCreatorVm.Customer);
 
             //更新界面
             CustomerCollection.Add(customerCreatorVm.Customer);
@@ -284,10 +275,29 @@ public partial class PerformanceDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedCustomer);
 
-            var orderVMs = await orderService.GetAllByCustomerIdAsync(SelectedCustomer);
-            
-            OrderCollection = orderVMs.ToObservableCollection();
-            OrderCollection.ForEach(x => dbService.AutoUpdate(x));
+            List<OrderSalespersonViewModel> orderSalespersons = [];
+
+            var orderVMs = await orderService.FindAllByCustomerIdAsync(SelectedCustomer);
+            foreach (var order in orderVMs)
+            {
+                var salesperson = await orderService.FindSalespersonAsync(order);
+
+                var existsSalesperson = SalespersonCollection.FirstOrDefault(x => x.Id == salesperson.Id);
+                if (existsSalesperson is null) continue;
+
+                var orderSalesperson = new OrderSalespersonViewModel(order, existsSalesperson);
+                orderSalesperson.SalespersonChanged += async e =>
+                {
+                    await orderService.SetSalespersonAsync(order, e);
+                };
+
+                orderSalespersons.Add(orderSalesperson);
+
+                dbService.AutoUpdate(salesperson);
+                dbService.AutoUpdate(order);
+            }
+
+            OrderCollection = orderSalespersons.ToObservableCollection();
             SelectedOrder = OrderCollection.FirstOrDefault();
         }
         catch (Exception ex)
@@ -334,11 +344,12 @@ public partial class PerformanceDashboardViewModel(
 
             //更新数据库
             await orderService.AddAsync(creatorVm.Order, creatorVm.SelectedSalesperson, SelectedCustomer);
+            var orderSalesperson = new OrderSalespersonViewModel(creatorVm.Order, creatorVm.SelectedSalesperson);
+            dbService.AutoUpdate(creatorVm.Order);
 
             //更新界面
-            OrderCollection.Add(creatorVm.Order);
-            dbService.AutoUpdate(creatorVm.Order);
-            SelectedOrder = creatorVm.Order;
+            OrderCollection.Add(orderSalesperson);
+            SelectedOrder = orderSalesperson;
 
             snackbarService.ShowSuccess($"已添加订单: {creatorVm.Order.Name} - {creatorVm.Order.Id}");
         }
@@ -352,20 +363,20 @@ public partial class PerformanceDashboardViewModel(
     /// <summary>
     ///     删除
     /// </summary>
-    /// <param name="order"></param>
+    /// <param name="orderSalesperson"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemoveOrderAsync(OrderViewModel? order)
+    private async Task RemoveOrderAsync(OrderSalespersonViewModel? orderSalesperson)
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(order);
+            ArgumentNullException.ThrowIfNull(orderSalesperson);
 
 
             SimpleContentDialogCreateOptions dialog = new()
             {
                 Title = "是否删除订单",
-                Content = $"订单名称: {order.Name}",
+                Content = $"订单名称: {orderSalesperson.Order.Name}",
                 PrimaryButtonText = "确认",
                 CloseButtonText = "取消"
             };
@@ -377,18 +388,18 @@ public partial class PerformanceDashboardViewModel(
             if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await orderService.RemoveAsync(order);
+            await orderService.RemoveAsync(orderSalesperson.Order);
 
             //删除
-            var index = OrderCollection.RemoveAtMatchedIndex(x => x.Id == order.Id);
+            var index = OrderCollection.RemoveAtMatchedIndex(x => x.Order.Id == orderSalesperson.Order.Id);
             SelectedOrder = OrderCollection.TryGetElementWithOffset(index, -1);
 
-            snackbarService.ShowSuccess($"已删除订单: {order.Name} - {order.Id}");
+            snackbarService.ShowSuccess($"已删除订单: {orderSalesperson.Order.Name} - {orderSalesperson.Order.Id}");
         }
         catch (Exception ex)
         {
             snackbarService.ShowError(ex);
-            logger.LogError(ex, "删除订单时发生错误\n订单信息: {order}", order);
+            logger.LogError(ex, "删除订单时发生错误\n订单信息: {order}", orderSalesperson);
         }
     }
 
@@ -405,22 +416,29 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            List<ConsumeViewModel> consumes = [];
+            ArgumentNullException.ThrowIfNull(SelectedOrder);
 
-            switch (SelectedOrder)
+            List<ConsumeDesignerViewModel> consumeDesigners = [];
+            var consumes = await consumeService.FindAllConsumeAsync(SelectedOrder.Order);
+
+            foreach (var consume in consumes)
             {
-                case OrderTimingViewModel:
-                    consumes.AddRange(await consumeService.GetAllByTimingOrderAsync(SelectedOrder)); break;
+                var designer = await consumeService.FindDesignerAsync(consume);
+                var existsDesigner = DesignerCollection.FirstOrDefault(x => x.Id == designer.Id);
+                if (existsDesigner == null) continue;
 
-                case OrderCountingViewModel:
-                    consumes.AddRange(await consumeService.GetAllByCountingOrderAsync(SelectedOrder)); break;
+                var consumeDesigner = new ConsumeDesignerViewModel(consume, existsDesigner);
+                consumeDesigner.DesignerChanged += e =>
+                {
+                    consumeService.SetDesignerAsync(consume, e);
+                };
 
-                case OrderMixingViewModel:
-                    consumes.AddRange(await consumeService.GetAllByMixingOrderAsync(SelectedOrder)); break;
+                consumeDesigners.Add(consumeDesigner);
+                dbService.AutoUpdate(designer);
             }
 
-            ConsumeCollection = consumes.ToObservableCollection();
-            SelectedConsume = consumes.FirstOrDefault();
+            ConsumeCollection = consumeDesigners.ToObservableCollection();
+            SelectedConsume = ConsumeCollection.FirstOrDefault();
         }
         catch (Exception ex)
         {
@@ -437,24 +455,21 @@ public partial class PerformanceDashboardViewModel(
     {
         try
         {
-            ConsumeViewModel consumeVm = SelectedOrder switch
-            {
-                OrderTimingViewModel => new ConsumeTimingViewModel { ConsumeDays = 1 },
-                OrderCountingViewModel => new ConsumeCountingViewModel { ConsumeCounts = 1 },
-                OrderMixingViewModel => new ConsumeMixingViewModel { ConsumeDays = 1, ConsumeCounts = 0 },
-                _ => throw new Exception($"未知订单类型, 订单信息: {SelectedOrder}")
-            };
+            ArgumentNullException.ThrowIfNull(SelectedOrder);
 
-            if (consumeVm is null) throw new Exception($"划扣创建失败, 订单类型不明确, 订单类型: {SelectedOrder.GetType()}");
+            var consume = SelectedOrder.Order.Type.CreateDefaultConsume(DateTime.Now);
+            if (consume is null) throw new Exception($"划扣创建失败, 订单类型不明确, 订单类型: {SelectedOrder.GetType()}");
 
-            await consumeService.AddAsync(consumeVm, SelectedOrder, CurrentStaff);
+            //更新数据库
+            await consumeService.AddAsync(consume, SelectedOrder.Order, CurrentStaff);
+            var consumeDesigner = new ConsumeDesignerViewModel(consume, CurrentStaff);
+            dbService.AutoUpdate(consume);
 
             //更新界面
-            ConsumeCollection.Add(consumeVm);
-            dbService.AutoUpdate(consumeVm);
-            SelectedConsume = consumeVm;
+            ConsumeCollection.Add(consumeDesigner);
+            SelectedConsume = consumeDesigner;
 
-            snackbarService.ShowSuccess($"已创建划扣: {consumeVm.Title} - {consumeVm.Id}");
+            snackbarService.ShowSuccess($"已创建划扣: {consume.Title} - {consume.Id}");
         }
         catch (Exception ex)
         {
@@ -466,21 +481,23 @@ public partial class PerformanceDashboardViewModel(
     /// <summary>
     ///     删除
     /// </summary>
-    /// <param name="consume"></param>
+    /// <param name="consumeDesigner"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemoveConsumeAsync(ConsumeViewModel consume)
+    private async Task RemoveConsumeAsync(ConsumeDesignerViewModel? consumeDesigner)
     {
         try
         {
+            ArgumentNullException.ThrowIfNull(consumeDesigner);
+
             //更新数据库
-            await consumeService.RemoveAsync(consume);
+            await consumeService.RemoveAsync(consumeDesigner.Consume);
 
             //删除
-            var index = ConsumeCollection.RemoveAtMatchedIndex(x => x.Id == consume.Id);
+            var index = ConsumeCollection.RemoveAtMatchedIndex(x => x.Consume.Id == consumeDesigner.Consume.Id);
             SelectedConsume = ConsumeCollection.TryGetElementWithOffset(index, -1);
 
-            snackbarService.ShowSuccess($"已删除划扣: {consume.Title} - {consume.Id}");
+            snackbarService.ShowSuccess($"已删除划扣: {consumeDesigner.Consume.Title} - {consumeDesigner.Consume.Id}");
         }
         catch (Exception ex)
         {

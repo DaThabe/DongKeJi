@@ -27,4 +27,10 @@ public partial class CustomerViewModel : EntityViewModel
 
 
     partial void OnNameChanging(string value) => ValidateProperty(value, nameof(Name));
+
+
+    public override string ToString()
+    {
+        return $"{Area}-{Name}";
+    }
 }
