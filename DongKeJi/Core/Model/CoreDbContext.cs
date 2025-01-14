@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DongKeJi.Core.Model;
 
 
-internal class CoreDbContext(IApplication application) : LocalDbContext(application, "Core"), IConfigDbContext
+internal class CoreDbContext(IApplication applicationContext) : LocalDbContext(applicationContext, "Core"), IConfigDbContext
 {
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<ConfigEntity> Configs { get; set; }

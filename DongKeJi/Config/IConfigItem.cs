@@ -50,7 +50,7 @@ public class ConfigItem<TDbContext, TValue>(string key, TDbContext dbContext) : 
     {
         try
         {
-            if (!useBuffer || _value is null)
+            if (useBuffer || _value is null)
             {
                 await ReloadAsync(cancellation);
             }

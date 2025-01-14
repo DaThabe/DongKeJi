@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:view="clr-namespace:DongKeJi.UI.View">
 
     <!--  导航视图模板  -->
@@ -24,11 +25,13 @@
                 VerticalAlignment="Center"
                 Orientation="Vertical"
                 Visibility="Collapsed">
+
                 <TextBlock
                     Margin="0,0,0,5"
                     Text="加载中..."
                     TextAlignment="Center" />
-                <ProgressBar IsIndeterminate="True" />
+                <ui:ProgressRing IsIndeterminate="True" />
+
             </StackPanel>
 
 
@@ -53,6 +56,38 @@
                 <Setter TargetName="ContentView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="LoadingView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="ErrorView" Property="Visibility" Value="Collapsed" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <!--  淡入  -->
+                            <DoubleAnimation
+                                Storyboard.TargetName="NoneView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="0"
+                                To="1"
+                                Duration="0:0:0.3" />
+                            <!--  其他部分淡出  -->
+                            <DoubleAnimation
+                                Storyboard.TargetName="ContentView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="LoadingView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="ErrorView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
             </Trigger>
 
             <!--  离开状态  -->
@@ -78,6 +113,36 @@
                 <Setter TargetName="NoneView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="ContentView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="ErrorView" Property="Visibility" Value="Collapsed" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="LoadingView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="0"
+                                To="1"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="ContentView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="NoneView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="ErrorView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
             </Trigger>
 
             <!--  聚焦状态  -->
@@ -86,6 +151,36 @@
                 <Setter TargetName="NoneView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="LoadingView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="ErrorView" Property="Visibility" Value="Collapsed" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="ContentView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="0"
+                                To="1"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="NoneView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="LoadingView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="ErrorView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
             </Trigger>
 
             <!--  错误状态  -->
@@ -94,6 +189,36 @@
                 <Setter TargetName="NoneView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="ContentView" Property="Visibility" Value="Collapsed" />
                 <Setter TargetName="LoadingView" Property="Visibility" Value="Collapsed" />
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetName="ErrorView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="0"
+                                To="1"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="NoneView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="ContentView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                            <DoubleAnimation
+                                Storyboard.TargetName="LoadingView"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.3" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
             </Trigger>
 
         </ControlTemplate.Triggers>

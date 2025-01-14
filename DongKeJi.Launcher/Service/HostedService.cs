@@ -1,16 +1,36 @@
-﻿using DongKeJi.UI.View;
+﻿using DongKeJi.Core;
+using DongKeJi.Core.Service;
+using DongKeJi.Core.UI.View;
+using DongKeJi.Launcher.UI.View.Color;
 using Microsoft.Extensions.Hosting;
-using MainFrame = DongKeJi.Core.UI.View.MainFrame;
+using Wpf.Ui.Appearance;
+using Wpf.Ui.Controls;
 
 namespace DongKeJi.Launcher.Service;
 
 internal class HostedService(
-    MainFrame mainFrame) : IHostedService
+    ICoreConfig coreConfig,
+    IApplication application,
+    IMainFrameService mainFrameService) : IHostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        mainFrame.Show();
-        return Task.CompletedTask;
+        try
+        {
+            application.Theme = await coreConfig.ApplicationTheme.GetAsync(cancellation: cancellationToken);
+        }
+        catch
+        {
+            application.Theme = ApplicationTheme.Light;
+            await coreConfig.ApplicationTheme.SetAsync(application.Theme, cancellationToken);
+        }
+
+        mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
+
+        var firstMenuItem = mainFrameService.MenuItems.FirstOrDefault();
+        if (firstMenuItem is not null) firstMenuItem.IsActive = true;
+
+        mainFrameService.Show();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

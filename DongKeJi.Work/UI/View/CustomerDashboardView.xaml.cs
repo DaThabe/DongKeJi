@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
-using DongKeJi.ViewModel;
 using DongKeJi.Work.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
@@ -9,11 +8,11 @@ using Wpf.Ui.Controls;
 namespace DongKeJi.Work.UI.View;
 
 [Inject(ServiceLifetime.Transient)]
-public partial class PerformanceDashboardView
+public partial class CustomerDashboardView
 {
     private readonly IServiceProvider _services;
 
-    public PerformanceDashboardView(IServiceProvider services)
+    public CustomerDashboardView(IServiceProvider services)
     {
         _services = services;
         InitializeComponent();
@@ -25,6 +24,7 @@ public partial class PerformanceDashboardView
         await vm.InitializeAsync(cancellation);
 
         DataContext = vm;
+        while (!IsLoaded) await Task.Delay(10, cancellation);
 
         await base.OnNavigatedToAsync(cancellation);
     }

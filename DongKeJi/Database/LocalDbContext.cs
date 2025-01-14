@@ -14,12 +14,12 @@ public class LocalDbContext : DbContext
 
     /// <summary>
     /// </summary>
-    /// <param name="application"></param>
+    /// <param name="applicationContext"></param>
     /// <param name="name">数据库名称 (建议使用大驼峰命名, 不需要加扩展名</param>
     /// <exception cref="Exception"></exception>
-    public LocalDbContext(IApplication application, string name)
+    public LocalDbContext(IApplication applicationContext, string name)
     {
-        _dbFolder = application.DatabaseDirectory;
+        _dbFolder = applicationContext.DatabaseDirectory;
         Name = name.Trim();
         if (ContextDictionary.TryGetValue(Name, out var _)) throw new Exception($"数据库名称冲突: {Name}");
 

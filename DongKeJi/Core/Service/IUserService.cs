@@ -88,9 +88,9 @@ public interface IUserService
 [Inject(ServiceLifetime.Singleton, typeof(IUserService))]
 internal class UserService(
     IMapper mapper,
-    ICoreConfigService coreConfigService,
+    ICoreConfig coreConfigService,
     CoreDbContext dbContext,
-    ICoreContext coreContext) :  IUserService
+    ICoreModule coreModule) :  IUserService
 {
     public async ValueTask ClearRememberUserIdAsync(CancellationToken cancellation = default)
     {
@@ -114,12 +114,12 @@ internal class UserService(
             await ClearRememberUserIdAsync(cancellation);
         }
 
-        (coreContext as CoreContext)!.CurrentUser = user;
+        (coreModule as CoreModule)!.CurrentUser = user;
     }
 
     public ValueTask LogoutAsync(CancellationToken cancellation = default)
     {
-        (coreContext as CoreContext)!.CurrentUser = null;
+        (coreModule as CoreModule)!.CurrentUser = null;
         return ValueTask.CompletedTask;
     }
 

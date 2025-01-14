@@ -1,68 +1,19 @@
 using DongKeJi.Core;
 using DongKeJi.Core.Service;
-using DongKeJi.Inject;
-using DongKeJi.Module;
-using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
-using DongKeJi.Work.Service;
 using DongKeJi.Work.UI.View;
 using DongKeJi.Work.ViewModel.Staff;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui.Controls;
 
-namespace DongKeJi.Work;
+namespace DongKeJi.Work.Service;
 
-
-/// <summary>
-/// 办公模块
-/// </summary>
-public class WorkModule : IModule
-{
-    private static readonly ModuleMetaInfo ModuleMetaInfo = new()
-    {
-        Id = Guid.NewGuid(),
-        Name = "DongKeJi.Work",
-        Version = new Version(0, 0, 1),
-        Title = "办公",
-        Developers = ["DaThabe"],
-        Describe = """
-                   ### 办公模块
-                   - 机构明细记录
-                   """,
-        CreatedAt = new DateTime(2024, 9, 17),
-        ReleaseDate = new DateTime(2025, 1, 12),
-        Dependencies =
-        [
-            typeof(CoreModule).Assembly.GetName(),
-        ]
-    };
-
-
-    public IModuleMetaInfo MetaInfo => ModuleMetaInfo;
-
-    public void Configure(IHostBuilder builder)
-    {
-        builder.ConfigureServices(services =>
-        {
-            services.AddAutoInject<WorkModule>();
-            services.AddHostedService<HostedService>();
-
-            //数据库
-            services.AddDbContext<WorkDbContext>();
-            //AutoMapper
-            services.AddAutoMapper(typeof(WorkMapperProfile));
-        });
-    }
-}
-
-file class HostedService(
+internal class HostedService(
     ILogger<HostedService> logger,
     IMainFrameService mainFrameService,
-    ICoreContext coreContext,
-    IWorkDbService workDbService,
-    IWorkContext workContext,
+    ICoreModule coreModule,
+    IWorkDatabase workDbService,
     IStaffService staffService,
     IStaffPositionService staffPositionService
 ) : IHostedService
@@ -71,9 +22,11 @@ file class HostedService(
     {
         try
         {
-            var menu = mainFrameService.AddMenu<PerformanceDashboardView>(SymbolRegular.Note24, "机构明细");
-            menu.AddChildMenu<StaffDashboardView>(SymbolRegular.People24, "员工管理");
-            menu.AddChildMenu<StaffPositionDashboardView>(SymbolRegular.VideoPeople32, "职位管理");
+            var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");
+            menu.AddChildMenu<ConsumeDashboardView>(SymbolRegular.NotepadEdit16, "划扣");
+            menu.AddChildMenu<CustomerDashboardView>(SymbolRegular.BuildingPeople24, "机构");
+            menu.AddChildMenu<StaffDashboardView>(SymbolRegular.People24, "员工");
+            menu.AddChildMenu<StaffPositionDashboardView>(SymbolRegular.VideoPerson16, "职位");
 
             await InitStaffAccount(cancellationToken);
             await InitStaffPosition(cancellationToken);
@@ -98,17 +51,17 @@ file class HostedService(
     /// <exception cref="Exception"></exception>
     private async Task InitStaffAccount(CancellationToken cancellation = default)
     {
-        if (coreContext.CurrentUser is null)
+        if (coreModule.CurrentUser is null)
         {
             throw new Exception("未登录用户, 无法初始化明细页面");
         }
 
         try
         {
-            var primaryStaff = await staffService.GetBindingPrimaryIdAsync(coreContext.CurrentUser, cancellation);
+            var primaryStaff = await staffService.GetBindingPrimaryIdAsync(coreModule.CurrentUser, cancellation);
             await staffService.SetCurrentAsync(primaryStaff, cancellation);
 
-            var staffVm =  await staffService.FindByIdAsync(primaryStaff, cancellation);
+            var staffVm = await staffService.FindByIdAsync(primaryStaff, cancellation);
             await staffService.SetCurrentAsync(staffVm, cancellation);
             workDbService.AutoUpdate(staffVm);
         }
@@ -116,22 +69,22 @@ file class HostedService(
         {
             try
             {
-                var result = await staffService.FindAllByUserAsync(coreContext.CurrentUser, cancellation);
+                var result = await staffService.FindAllByUserAsync(coreModule.CurrentUser, cancellation);
                 var staffVm = result.FirstOrDefault();
 
                 ArgumentNullException.ThrowIfNull(staffVm);
 
                 await staffService.SetCurrentAsync(staffVm, cancellation);
-                await staffService.BindingPrimaryAsync(coreContext.CurrentUser, staffVm, cancellation);
+                await staffService.BindingPrimaryAsync(coreModule.CurrentUser, staffVm, cancellation);
                 workDbService.AutoUpdate(staffVm);
             }
             catch
             {
-                var staffVm = new StaffViewModel { Name = coreContext.CurrentUser.Name };
-                await staffService.AddAsync(staffVm, coreContext.CurrentUser, cancellation);
+                var staffVm = new StaffViewModel { Name = coreModule.CurrentUser.Name };
+                await staffService.AddAsync(staffVm, coreModule.CurrentUser, cancellation);
 
                 await staffService.SetCurrentAsync(staffVm, cancellation);
-                await staffService.BindingPrimaryAsync(coreContext.CurrentUser, staffVm, cancellation);
+                await staffService.BindingPrimaryAsync(coreModule.CurrentUser, staffVm, cancellation);
                 workDbService.AutoUpdate(staffVm);
             }
         }
@@ -164,7 +117,7 @@ file class HostedService(
         {
             await staffPositionService.FindByTypeAsync(StaffPositionType.Designer, cancellation);
         }
-        catch 
+        catch
         {
             await staffPositionService.SetAsync(new StaffPositionViewModel
             {

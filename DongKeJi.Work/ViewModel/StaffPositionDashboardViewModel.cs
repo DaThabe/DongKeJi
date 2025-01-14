@@ -24,7 +24,7 @@ public partial class StaffPositionDashboardViewModel(
     ILogger<StaffDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IContentDialogService contentDialogService,
-    IWorkDbService dbService,
+    IWorkDatabase dbService,
     IStaffService staffService,
     IStaffPositionService staffPositionService
 ) : LazyInitializeViewModel

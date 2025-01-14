@@ -31,9 +31,9 @@ public partial class PerformanceDashboardViewModel(
     ILogger<PerformanceDashboardViewModel> logger,
     IContentDialogService contentDialogService,
     ISnackbarService snackbarService,
-    IWorkDbService dbService,
-    ICoreContext coreContext,
-    IWorkContext workContext,
+    IWorkDatabase dbService,
+    ICoreModule coreModule,
+    IWorkModule workModule,
     IStaffService staffService,
     ICustomerService customerService,
     IOrderService orderService,
@@ -46,10 +46,10 @@ public partial class PerformanceDashboardViewModel(
     ///     当前用户
     /// </summary>
     public UserViewModel CurrentUser =>
-        coreContext.CurrentUser ?? throw new ArgumentNullException(nameof(CurrentUser), "缺少必要参数: 当前用户实例为空");
+        coreModule.CurrentUser ?? throw new ArgumentNullException(nameof(CurrentUser), "缺少必要参数: 当前用户实例为空");
 
     public StaffViewModel CurrentStaff =>
-        workContext.CurrentStaff ?? throw new ArgumentNullException(nameof(CurrentUser), "缺少必要参数: 当前员工实例为空");
+        workModule.CurrentStaff ?? throw new ArgumentNullException(nameof(CurrentUser), "缺少必要参数: 当前员工实例为空");
 
 
     /// <summary>
@@ -99,8 +99,8 @@ public partial class PerformanceDashboardViewModel(
 
     protected override async Task OnInitializationAsync(CancellationToken cancellation = default)
     {
-        await ReloadCustomerCommand.ExecuteAsync(null);
         await ReloadSalespersonCommand.ExecuteAsync(null);
+        await ReloadCustomerCommand.ExecuteAsync(null);
     }
 
     partial void OnSelectedCustomerChanged(CustomerViewModel? value)

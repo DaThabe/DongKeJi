@@ -74,6 +74,7 @@ public static class SnackbarServiceExtensions
         snackbar.Show(x =>
         {
             x.Title = InfoTitle;
+            x.Message = message;
             x.Icon = new SymbolIcon(InfoSymbol);
             x.Appearance = ControlAppearance.Info;
             configAction?.Invoke(x);

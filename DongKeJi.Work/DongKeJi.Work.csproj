@@ -27,4 +27,8 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="UI\View\Consume\" />
+  </ItemGroup>
+
 </Project>

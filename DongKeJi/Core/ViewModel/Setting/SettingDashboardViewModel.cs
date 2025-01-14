@@ -1,9 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Inject;
 using DongKeJi.ViewModel;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.DependencyInjection;
-using Wpf.Ui.Controls;
+using Wpf.Ui.Appearance;
 
 namespace DongKeJi.Core.ViewModel.Setting;
 
@@ -12,20 +11,32 @@ namespace DongKeJi.Core.ViewModel.Setting;
 ///     设置
 /// </summary>
 [Inject(ServiceLifetime.Transient)]
-public partial class SettingDashboardViewModel : LazyInitializeViewModel
+public partial class SettingDashboardViewModel(IApplication application) : LazyInitializeViewModel
 {
     /// <summary>
-    ///     程序Vm
+    ///     程序
     /// </summary>
-    [ObservableProperty] private ApplicationViewModel _application;
+    public IApplication Application => application;
 
 
-    /// <summary>
-    ///     设置
-    /// </summary>
-    public SettingDashboardViewModel(IServiceProvider services)
+
+
+    [RelayCommand]
+    private void ChangeTheme(string name)
     {
-        var applicationContext = services.GetRequiredService<ICoreContext>();
-        Application = applicationContext.Application;
+        switch (name)
+        {
+            case nameof(ApplicationTheme.Light):
+                application.Theme = ApplicationTheme.Light;
+                return;
+
+            case nameof(ApplicationTheme.Dark):
+                application.Theme = ApplicationTheme.Dark;
+                return;
+
+            case nameof(ApplicationTheme.HighContrast):
+                application.Theme = ApplicationTheme.HighContrast;
+                return;
+        }
     }
 }

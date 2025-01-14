@@ -27,18 +27,18 @@ public partial class StaffDashboardViewModel(
     ILogger<StaffDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IContentDialogService contentDialogService,
-    IWorkDbService dbService,
-    ICoreContext coreContext,
-    IWorkContext workContext,
+    IWorkDatabase dbService,
+    ICoreModule coreModule,
+    IWorkModule workModule,
     IStaffService staffService,
     IStaffPositionService staffPositionService
 ) : LazyInitializeViewModel
 {
     #region --上下文属性--
 
-    public UserViewModel CurrentUser => coreContext.CurrentUser ?? throw new ArgumentNullException(nameof(CurrentUser), "当前用户实例为空");
+    public UserViewModel CurrentUser => coreModule.CurrentUser ?? throw new ArgumentNullException(nameof(CurrentUser), "当前用户实例为空");
 
-    public StaffViewModel CurrentStaff => workContext.CurrentStaff ?? throw new ArgumentNullException(nameof(CurrentUser), "当前员工实例为空");
+    public StaffViewModel CurrentStaff => workModule.CurrentStaff ?? throw new ArgumentNullException(nameof(CurrentUser), "当前员工实例为空");
 
 
     /// <summary>

@@ -7,11 +7,11 @@ public interface IModule
     /// <summary>
     /// 元信息
     /// </summary>
-    IModuleMetaInfo MetaInfo { get; }
+    static abstract IModuleMetaInfo MetaInfo { get; }
 
     /// <summary>
     /// 配置模块
     /// </summary>
     /// <param name="builder"></param>
-    void Configure(IHostBuilder builder);
+    static abstract void Configure(IHostBuilder builder);
 }

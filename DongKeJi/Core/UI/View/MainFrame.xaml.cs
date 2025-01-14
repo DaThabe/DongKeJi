@@ -11,14 +11,14 @@ namespace DongKeJi.Core.UI.View;
 [Inject(ServiceLifetime.Singleton)]
 partial class MainFrame : INavigationWindow
 {
-    public MainFrame(IServiceProvider services, ICoreContext context)
+    public MainFrame(IServiceProvider services, ICoreModule module)
     {
         InitializeComponent();
 
         SystemThemeWatcher.Watch(this);
 
         Services = services;
-        DataContext = context.MainFrame;
+        DataContext = module.MainFrame;
 
         //设置页面服务
         var pageService = services.GetRequiredService<IPageService>();

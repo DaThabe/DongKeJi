@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongKeJi.Work.Model;
 
-internal class WorkDbContext(IApplication application) : LocalDbContext(application, "PerformanceRecord"), IConfigDbContext
+internal class WorkDbContext(IApplication applicationContext) : LocalDbContext(applicationContext, "PerformanceRecord"), IConfigDbContext
 {
     /// <summary>
     /// 配置

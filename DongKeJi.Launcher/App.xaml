@@ -30,9 +30,23 @@
                     <Setter.Value>
                         <ControlTemplate>
 
-                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer x:Name="ScrollViewer">
                                 <ItemsPresenter />
                             </ScrollViewer>
+
+                            <ControlTemplate.Triggers>
+
+                                <!--  鼠标进入  -->
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Visible" />
+                                </Trigger>
+
+                                <!--  鼠标离开  -->
+                                <Trigger Property="IsMouseOver" Value="False">
+                                    <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Hidden" />
+                                </Trigger>
+
+                            </ControlTemplate.Triggers>
 
                         </ControlTemplate>
                     </Setter.Value>
@@ -57,15 +71,31 @@
                     <Setter.Value>
                         <ControlTemplate>
 
-                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer x:Name="ScrollViewer">
                                 <ItemsPresenter />
                             </ScrollViewer>
 
+                            <ControlTemplate.Triggers>
+
+                                <!--  鼠标进入  -->
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Visible" />
+                                </Trigger>
+
+                                <!--  鼠标离开  -->
+                                <Trigger Property="IsMouseOver" Value="False">
+                                    <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Hidden" />
+                                </Trigger>
+
+                            </ControlTemplate.Triggers>
+
                         </ControlTemplate>
+
                     </Setter.Value>
                 </Setter>
 
             </Style>
+
 
         </ResourceDictionary>
 

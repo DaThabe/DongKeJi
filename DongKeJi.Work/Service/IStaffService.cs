@@ -145,9 +145,8 @@ public interface IStaffService
 internal class StaffService(
     IUserService userService,
     IMapper mapper,
-    IWorkContext workContext,
-    IWorkConfigService workConfig,
-    IWorkDbService dbService,
+    IWorkModule workModule,
+    IWorkConfig workConfig,
     WorkDbContext dbContext) : IStaffService
 {
 
@@ -198,7 +197,7 @@ internal class StaffService(
     public async ValueTask SetCurrentAsync(IIdentifiable staff,CancellationToken cancellation = default)
     {
         var staffVm = await FindByIdAsync(staff, cancellation);
-        workContext.CurrentStaff = staffVm;
+        (workModule as WorkModule)!.CurrentStaff = staffVm;
     }
 
     public async ValueTask<UserViewModel> FindUserByStaffAsync(

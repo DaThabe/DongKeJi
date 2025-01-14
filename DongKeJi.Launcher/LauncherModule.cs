@@ -1,15 +1,23 @@
 using DongKeJi.Core;
-using DongKeJi.Core.Service;
 using DongKeJi.Inject;
+using DongKeJi.Launcher.Service;
 using DongKeJi.Module;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace DongKeJi.Launcher;
 
-public class LauncherModule : IModule
+
+/// <summary>
+/// 启动器模块
+/// </summary>
+public interface ILauncherModule : IModule;
+
+
+[Inject(ServiceLifetime.Singleton)]
+internal class LauncherModule : ILauncherModule
 {
-    private static readonly ModuleMetaInfo ModuleMetaInfo = new()
+    public static IModuleMetaInfo MetaInfo { get; } = new ModuleMetaInfo()
     {
         Id = Guid.NewGuid(),
         Name = "DongKeJi.Launcher",
@@ -23,33 +31,21 @@ public class LauncherModule : IModule
                    """,
         CreatedAt = new DateTime(2024, 10, 3),
         ReleaseDate = new DateTime(2025, 1, 2),
-        Dependencies =
-        [
-            typeof(CoreModule).Assembly.GetName(),
-            //typeof(WorkModule).Assembly.GetName()
-        ]
+        Dependencies = typeof(LauncherModule).Assembly.GetReferencedAssemblies()
     };
 
-    public IModuleMetaInfo MetaInfo => ModuleMetaInfo;
-
-    public void Configure(IHostBuilder builder)
+    public static void Configure(IHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
+            //反射注入
             services.AddAutoInject<LauncherModule>();
+            //启动后业务
             services.AddHostedService<HostedService>();
+            //数据库
+            //services.AddDbContext<CoreDbContext>();
+            //AutoMapper
+            //services.AddAutoMapper(typeof(CoreMapperProfile));
         });
-    }
-}
-internal class HostedService(IMainFrameService mainFrameService) : IHostedService
-{
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
     }
 }

@@ -23,14 +23,14 @@ public partial class UserDashboardViewModel(
     ILogger<UserDashboardViewModel> logger,
     ISnackbarService snackbarService,
     IUserService userService,
-    ICoreContext coreContext,
-    ICoreDbService dbService) : LazyInitializeViewModel
+    ICoreModule coreModule,
+    ICoreDatabase database) : LazyInitializeViewModel
 {
     /// <summary>
     ///     当前登录用户
     /// </summary>
     public UserViewModel CurrentUser => 
-        coreContext.CurrentUser ?? throw new ArgumentNullException(nameof(CurrentUser), "当前用户为空");
+        coreModule.CurrentUser ?? throw new ArgumentNullException(nameof(CurrentUser), "当前用户为空");
 
     /// <summary>
     ///     选中用户
@@ -62,7 +62,7 @@ public partial class UserDashboardViewModel(
 
 
             UserCollection = users.ToObservableCollection();
-            UserCollection.ForEach(x=> dbService.AutoUpdate(x));
+            UserCollection.ForEach(x=> database.AutoUpdate(x));
             SelectedUser = UserCollection.FirstOrDefault();
         }
         catch (Exception ex)

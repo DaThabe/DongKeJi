@@ -33,24 +33,24 @@ public interface IMainFrameService
 }
 
 [Inject(ServiceLifetime.Singleton, typeof(IMainFrameService))]
-internal class MainFrameService(MainFrame mainFrame, ICoreContext coreContext) : IMainFrameService
+internal class MainFrameService(MainFrame mainFrame, ICoreModule coreModule) : IMainFrameService
 {
     public string Title
     {
-        get => coreContext.MainFrame.Title;
-        set => coreContext.MainFrame.Title = value;
+        get => coreModule.MainFrame.Title;
+        set => coreModule.MainFrame.Title = value;
     }
 
     public ObservableCollection<NavigationViewItem> MenuItems
     {
-        get => coreContext.MainFrame.MenuItems;
-        set => coreContext.MainFrame.MenuItems = value;
+        get => coreModule.MainFrame.MenuItems;
+        set => coreModule.MainFrame.MenuItems = value;
     }
 
     public ObservableCollection<NavigationViewItem> FooterMenuItems
     {
-        get => coreContext.MainFrame.FooterMenuItems;
-        set => coreContext.MainFrame.FooterMenuItems = value;
+        get => coreModule.MainFrame.FooterMenuItems;
+        set => coreModule.MainFrame.FooterMenuItems = value;
     }
 
     public void Show()
@@ -108,6 +108,43 @@ public static class MainFrameServiceExtensions
 
         return childMenu;
     }
+
+
+    /// <summary>
+    ///     添加菜单
+    /// </summary>
+    /// <typeparam name="TPage"></typeparam>
+    /// <param name="vm"></param>
+    /// <param name="index"></param>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public static NavigationViewItem InsertMenu<TPage>(this IMainFrameService vm, int index, SymbolRegular icon, string title)
+    {
+        NavigationViewItem menu = new(title, icon, typeof(TPage));
+        vm.MenuItems.Insert(index, menu);
+
+        return menu;
+    }
+
+    /// <summary>
+    ///     添加页脚菜单
+    /// </summary>
+    /// <typeparam name="TPage"></typeparam>
+    /// <param name="vm"></param>
+    /// <param name="index"></param>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public static NavigationViewItem InsertFooterMenu<TPage>(this IMainFrameService vm, int index, SymbolRegular icon, string title)
+    {
+        NavigationViewItem menu = new(title, icon, typeof(TPage));
+        vm.FooterMenuItems.Insert(index, menu);
+
+        return menu;
+    }
+
+
 
 
     /// <summary>

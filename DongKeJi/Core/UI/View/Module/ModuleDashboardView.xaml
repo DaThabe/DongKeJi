@@ -144,7 +144,10 @@
                 Grid.Column="0"
                 Margin="5">
 
-                <wpf:MarkdownViewer d:Markdown="Test" Markdown="{Binding SelectedModule.Describe}" />
+                <wpf:MarkdownViewer
+                    d:Markdown="Test"
+                    Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"
+                    Markdown="{Binding SelectedModule.Describe}" />
 
             </ScrollViewer>
 
