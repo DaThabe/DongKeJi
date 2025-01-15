@@ -21,6 +21,11 @@ public partial class ConsumeDesignerCustomerOrderViewModel(
 ) : ObservableViewModel
 {
     /// <summary>
+    /// 设计师改变
+    /// </summary>
+    public event Action<StaffViewModel>? DesignerChanged;
+
+    /// <summary>
     /// 设计师
     /// </summary>
     [ObservableProperty] private StaffViewModel _designer = designer;
@@ -39,6 +44,12 @@ public partial class ConsumeDesignerCustomerOrderViewModel(
     /// 划扣
     /// </summary>
     [ObservableProperty] private ConsumeViewModel _consume = consume;
+
+
+    partial void OnDesignerChanged(StaffViewModel value)
+    {
+        DesignerChanged?.Invoke(value);
+    }
 
 
     public override string ToString()

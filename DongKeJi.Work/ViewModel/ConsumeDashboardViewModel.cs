@@ -19,6 +19,7 @@ using Wpf.Ui;
 
 namespace DongKeJi.Work.ViewModel;
 
+
 /// <summary>
 ///     明细管理
 /// </summary>
@@ -68,7 +69,7 @@ public partial class ConsumeDashboardViewModel(
     /// <summary>
     /// 当前时间
     /// </summary>
-    [ObservableProperty] private DateTime _currentDate;
+    [ObservableProperty] private DateTime _selectedDate;
 
 
     /// <summary>
@@ -105,12 +106,12 @@ public partial class ConsumeDashboardViewModel(
             logger.LogError(ex, "加载设计师时发生错误");
         }
 
-        CurrentDate = DateTime.Now;
-        DisplayDate = CurrentDate;
+        SelectedDate = DateTime.Now;
+        DisplayDate = SelectedDate;
 
     }
 
-    async partial void OnCurrentDateChanged(DateTime value)
+    async partial void OnSelectedDateChanged(DateTime value)
     {
         await ReloadConsumeCommand.ExecuteAsync(null);
     }
@@ -144,19 +145,25 @@ public partial class ConsumeDashboardViewModel(
                 var customer = await orderService.GetCustomerAsync(order);
 
                 //订单划扣
-                var consumes = (await consumeService.FindAllConsumeAsync(order))
-                    .Where(x => x.CreateTime.Date == CurrentDate.Date)
+                var consumes = (await consumeService.GetAllConsumeAsync(order))
+                    .Where(x => x.CreateTime.Date == SelectedDate.Date)
                     .ToList();
 
                 //没有划扣
                 if (consumes.Count <= 0)
                 {
-                    var todoConsume = order.Type.CreateConsume(CurrentDate);
+                    var todoConsume = order.Type.CreateConsume(SelectedDate);
                     if (todoConsume is null) continue;
 
+                    //设计师不存在
+                    var existsDesigner = DesignerCollection.FirstOrDefault(x => x.Id == CurrentStaff.Id);
+                    if (existsDesigner is null) continue;
+
+                    var consumeDesignerCustomerOrder = new ConsumeDesignerCustomerOrderViewModel(
+                        todoConsume, existsDesigner, customer, order);
+
                     //添加待办划扣
-                    todoConsumeCollection.Add(
-                        new ConsumeDesignerCustomerOrderViewModel(todoConsume, CurrentStaff, customer, order));
+                    todoConsumeCollection.Add(consumeDesignerCustomerOrder);
                 }
 
                 //遍历划扣
@@ -164,10 +171,14 @@ public partial class ConsumeDashboardViewModel(
                 {
                     //查询设计师
                     var designer = await consumeService.GetDesignerAsync(consume);
+                    
+                    //设计师不存在
+                    var existsDesigner = DesignerCollection.FirstOrDefault(x => x.Id == designer.Id);
+                    if (existsDesigner is null) continue;
 
                     //添加划扣元素
-                    consumeCollection.Add(
-                        new ConsumeDesignerCustomerOrderViewModel(consume, designer, customer, order));
+                    consumeCollection.Add(new ConsumeDesignerCustomerOrderViewModel(
+                        consume, existsDesigner, customer, order));
 
                     //注册划扣自动保存
                     dbService.AutoUpdate(consume);
@@ -245,8 +256,8 @@ public partial class ConsumeDashboardViewModel(
     [RelayCommand]
     private void PrevDate()
     {
-        CurrentDate -= TimeSpan.FromDays(1);
-        DisplayDate = CurrentDate;
+        SelectedDate -= TimeSpan.FromDays(1);
+        DisplayDate = SelectedDate;
     }
 
     /// <summary>
@@ -257,7 +268,7 @@ public partial class ConsumeDashboardViewModel(
     private void ToDayDate()
     {
         DisplayDate = DateTime.Now;
-        CurrentDate  = DateTime.Now;
+        SelectedDate  = DateTime.Now;
     }
 
     /// <summary>
@@ -267,8 +278,8 @@ public partial class ConsumeDashboardViewModel(
     [RelayCommand]
     private void NextDate( )
     {
-        CurrentDate += TimeSpan.FromDays(1);
-        DisplayDate = CurrentDate;
+        SelectedDate += TimeSpan.FromDays(1);
+        DisplayDate = SelectedDate;
     }
 
 

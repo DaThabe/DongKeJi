@@ -125,9 +125,9 @@ public partial class CustomerDashboardViewModel(
 
         try
         {
-            var salespersonList = await staffService.GetAllByPositionTypeAsync(StaffPositionType.Designer, cancellation: cancellation);
+            var designerList = await staffService.GetAllByPositionTypeAsync(StaffPositionType.Designer, cancellation: cancellation);
 
-            DesignerCollection = salespersonList.ToObservableCollection();
+            DesignerCollection = designerList.ToObservableCollection();
             DesignerCollection.ForEach(x => dbService.AutoUpdate(x));
         }
         catch (Exception ex)
@@ -153,7 +153,6 @@ public partial class CustomerDashboardViewModel(
     }
 
     #endregion
-
 
     #region --机构--
 
@@ -419,7 +418,7 @@ public partial class CustomerDashboardViewModel(
             ArgumentNullException.ThrowIfNull(SelectedOrder);
 
             List<ConsumeDesignerViewModel> consumeDesigners = [];
-            var consumes = await consumeService.FindAllConsumeAsync(SelectedOrder.Order);
+            var consumes = await consumeService.GetAllConsumeAsync(SelectedOrder.Order);
 
             foreach (var consume in consumes)
             {
@@ -428,13 +427,15 @@ public partial class CustomerDashboardViewModel(
                 if (existsDesigner == null) continue;
 
                 var consumeDesigner = new ConsumeDesignerViewModel(consume, existsDesigner);
-                consumeDesigner.DesignerChanged += e =>
+                consumeDesigner.DesignerChanged += async e =>
                 {
-                    consumeService.SetDesignerAsync(consume, e);
+                    await consumeService.SetDesignerAsync(consume, e);
                 };
 
                 consumeDesigners.Add(consumeDesigner);
+
                 dbService.AutoUpdate(designer);
+                dbService.AutoUpdate(consume);
             }
 
             ConsumeCollection = consumeDesigners.ToObservableCollection();

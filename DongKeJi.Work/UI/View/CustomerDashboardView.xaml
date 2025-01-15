@@ -262,7 +262,6 @@
                             Margin="5,0,0,0"
                             DockPanel.Dock="Right"
                             ItemsSource="{Binding Data.DesignerCollection, Source={StaticResource BindingProxy}}"
-                            SelectedIndex="0"
                             SelectedItem="{Binding Designer}"
                             ToolTip="划扣设计">
                             <ComboBox.ItemTemplate>

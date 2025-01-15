@@ -114,7 +114,7 @@ public static class ConsumeServiceExtensions
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    public static async ValueTask<IEnumerable<ConsumeViewModel>> FindAllConsumeAsync(
+    public static async ValueTask<IEnumerable<ConsumeViewModel>> GetAllConsumeAsync(
         this IConsumeService consumeService,
         OrderViewModel order,
         int? skip = null,
@@ -141,7 +141,7 @@ public static class ConsumeServiceExtensions
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    public static async ValueTask<IEnumerable<ConsumeViewModel>> FindAllConsumeAsync(
+    public static async ValueTask<IEnumerable<ConsumeViewModel>> GetAllConsumeAsync(
         this IConsumeService consumeService, 
         OrderViewModel order, 
         DateTime date, 

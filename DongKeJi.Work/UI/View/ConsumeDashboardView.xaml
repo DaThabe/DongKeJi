@@ -159,8 +159,7 @@
                         Margin="5,0,0,0"
                         DockPanel.Dock="Right"
                         ItemsSource="{Binding Data.DesignerCollection, Source={StaticResource BindingProxy}}"
-                        SelectedIndex="0"
-                        SelectedItem="{Binding Data.SelectedDesigner, Source={StaticResource BindingProxy}}"
+                        SelectedItem="{Binding Designer}"
                         ToolTip="划扣设计">
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type staffVm:StaffViewModel}">
@@ -256,7 +255,7 @@
             <Calendar
                 Margin="0,0,0,5"
                 DisplayDate="{Binding DisplayDate}"
-                SelectedDate="{Binding CurrentDate, Mode=TwoWay}" />
+                SelectedDate="{Binding SelectedDate, Mode=TwoWay}" />
 
             <UniformGrid Columns="3">
 
