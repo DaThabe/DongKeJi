@@ -2,6 +2,7 @@
 using DongKeJi.Core.UI.View;
 using DongKeJi.Inject;
 using Microsoft.Extensions.DependencyInjection;
+using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.Core.Service;
@@ -9,7 +10,7 @@ namespace DongKeJi.Core.Service;
 /// <summary>
 ///     主窗口服务
 /// </summary>
-public interface IMainFrameService
+public interface IMainFrameService : INavigationWindow
 {
     /// <summary>
     ///     标题
@@ -25,12 +26,8 @@ public interface IMainFrameService
     ///     页脚菜单
     /// </summary>
     ObservableCollection<NavigationViewItem> FooterMenuItems { get; }
-
-    /// <summary>
-    /// 显示
-    /// </summary>
-    void Show();
 }
+
 
 [Inject(ServiceLifetime.Singleton, typeof(IMainFrameService))]
 internal class MainFrameService(MainFrame mainFrame, ICoreModule coreModule) : IMainFrameService
@@ -53,10 +50,18 @@ internal class MainFrameService(MainFrame mainFrame, ICoreModule coreModule) : I
         set => coreModule.MainFrame.FooterMenuItems = value;
     }
 
-    public void Show()
-    {
-        mainFrame.Show();
-    }
+
+    public INavigationView GetNavigation() => mainFrame.GetNavigation();
+
+    public bool Navigate(Type pageType) => mainFrame.Navigate(pageType);
+
+    public void SetServiceProvider(IServiceProvider serviceProvider) => mainFrame.SetServiceProvider(serviceProvider);
+
+    public void SetPageService(IPageService pageService) => mainFrame.SetPageService(pageService);
+
+    public void ShowWindow() => mainFrame.ShowWindow();
+
+    public void CloseWindow() => mainFrame.CloseWindow();
 }
 
 public static class MainFrameServiceExtensions

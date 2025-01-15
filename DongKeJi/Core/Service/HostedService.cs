@@ -35,7 +35,8 @@ internal class HostedService(
         }
 
 
-        mainFrameService.Show();
+        mainFrameService.ShowWindow();
+
         mainFrameService.AddFooterMenu<ModuleDashboardView>(SymbolRegular.DeveloperBoard16, "模块");
         mainFrameService.AddFooterMenu<UserDashboardView>(SymbolRegular.People20, "用户");
         mainFrameService.AddFooterMenu<SettingDashboardView>(SymbolRegular.Settings28, "设置");

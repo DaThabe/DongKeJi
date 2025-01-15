@@ -40,10 +40,11 @@ internal class HostedService(
 
         try
         {
-            var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");
-            menu.AddChildMenu<WagesDashboardView>(SymbolRegular.ArrowTrendingLines24, "提成");
+            //var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");
+
+            var menu = mainFrameService.AddMenu<CustomerDashboardView>(SymbolRegular.BuildingPeople24, "机构");
             menu.AddChildMenu<ConsumeDashboardView>(SymbolRegular.NotepadEdit16, "划扣");
-            menu.AddChildMenu<CustomerDashboardView>(SymbolRegular.BuildingPeople24, "机构");
+            menu.AddChildMenu<WagesDashboardView>(SymbolRegular.ArrowTrendingLines24, "提成");
             menu.AddChildMenu<StaffDashboardView>(SymbolRegular.People24, "员工");
             menu.AddChildMenu<StaffPositionDashboardView>(SymbolRegular.VideoPerson16, "职位");
 

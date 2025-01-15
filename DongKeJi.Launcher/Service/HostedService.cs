@@ -2,6 +2,7 @@
 using DongKeJi.Core.Service;
 using DongKeJi.Core.UI.View;
 using DongKeJi.Launcher.UI.View.Color;
+using DongKeJi.Work.UI.View;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -25,12 +26,10 @@ internal class HostedService(
             await coreConfig.ApplicationTheme.SetAsync(application.Theme, cancellationToken);
         }
 
-        mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
+        // mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
 
-        var firstMenuItem = mainFrameService.MenuItems.FirstOrDefault();
-        if (firstMenuItem is not null) firstMenuItem.IsActive = true;
-
-        mainFrameService.Show();
+        mainFrameService.ShowWindow();
+        mainFrameService.Navigate(typeof(CustomerDashboardView));
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
