@@ -6,6 +6,11 @@ public static class EnumerableExtensions
 {
     public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> values)
     {
+        if (values is ObservableCollection<T> observableCollection)
+        {
+            return observableCollection;
+        }
+
         return new ObservableCollection<T>(values);
     }
 

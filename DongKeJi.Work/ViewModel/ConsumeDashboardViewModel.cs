@@ -11,6 +11,7 @@ using DongKeJi.ViewModel;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
+using DongKeJi.Work.ViewModel.Compose;
 using DongKeJi.Work.ViewModel.Consume;
 using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,17 +76,17 @@ public partial class ConsumeDashboardViewModel(
     /// <summary>
     /// 所有划扣
     /// </summary>
-    [ObservableProperty] private ConsumeDesignerCustomerOrderViewModel? _selectedConsume;
+    [ObservableProperty] private DesignerCustomerOrderConsumeViewModel? _selectedConsume;
 
     /// <summary>
     /// 所有待办划扣
     /// </summary>
-    [ObservableProperty] private ObservableCollection<ConsumeDesignerCustomerOrderViewModel> _todoConsumeCollection = [];
+    [ObservableProperty] private ObservableCollection<DesignerCustomerOrderConsumeViewModel> _todoConsumeCollection = [];
 
     /// <summary>
     /// 所有划扣
     /// </summary>
-    [ObservableProperty] private ObservableCollection<ConsumeDesignerCustomerOrderViewModel> _consumeCollection = [];
+    [ObservableProperty] private ObservableCollection<DesignerCustomerOrderConsumeViewModel> _consumeCollection = [];
 
     #endregion
 
@@ -131,8 +132,8 @@ public partial class ConsumeDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(CurrentStaff);
 
-            List<ConsumeDesignerCustomerOrderViewModel> consumeCollection = [];
-            List<ConsumeDesignerCustomerOrderViewModel> todoConsumeCollection = [];
+            List<DesignerCustomerOrderConsumeViewModel> consumeCollection = [];
+            List<DesignerCustomerOrderConsumeViewModel> todoConsumeCollection = [];
 
             //活跃订单
             var orders = (await orderService.GetAllAsync())
@@ -145,7 +146,7 @@ public partial class ConsumeDashboardViewModel(
                 var customer = await orderService.GetCustomerAsync(order);
 
                 //订单划扣
-                var consumes = (await consumeService.GetAllConsumeAsync(order))
+                var consumes = (await consumeService.GetAllByOrderAsync(order))
                     .Where(x => x.CreateTime.Date == SelectedDate.Date)
                     .ToList();
 
@@ -159,8 +160,8 @@ public partial class ConsumeDashboardViewModel(
                     var existsDesigner = DesignerCollection.FirstOrDefault(x => x.Id == CurrentStaff.Id);
                     if (existsDesigner is null) continue;
 
-                    var consumeDesignerCustomerOrder = new ConsumeDesignerCustomerOrderViewModel(
-                        todoConsume, existsDesigner, customer, order);
+                    var consumeDesignerCustomerOrder = new DesignerCustomerOrderConsumeViewModel(
+                        existsDesigner, customer, order, todoConsume);
 
                     //添加待办划扣
                     todoConsumeCollection.Add(consumeDesignerCustomerOrder);
@@ -177,8 +178,8 @@ public partial class ConsumeDashboardViewModel(
                     if (existsDesigner is null) continue;
 
                     //添加划扣元素
-                    consumeCollection.Add(new ConsumeDesignerCustomerOrderViewModel(
-                        consume, existsDesigner, customer, order));
+                    consumeCollection.Add(new DesignerCustomerOrderConsumeViewModel(
+                        existsDesigner, customer, order, consume));
 
                     //注册划扣自动保存
                     dbService.AutoUpdate(consume);
@@ -205,7 +206,7 @@ public partial class ConsumeDashboardViewModel(
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
-    private async Task FinishTodoConsumeAsync(ConsumeDesignerCustomerOrderViewModel viewModel)
+    private async Task FinishTodoConsumeAsync(DesignerCustomerOrderConsumeViewModel viewModel)
     {
         try
         {
@@ -225,18 +226,18 @@ public partial class ConsumeDashboardViewModel(
     /// <summary>
     /// 删除划扣
     /// </summary>
-    /// <param name="consumeDesignerCustomerOrder"></param>
+    /// <param name="designerCustomerOrderConsume"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemoveConsumeAsync(ConsumeDesignerCustomerOrderViewModel consumeDesignerCustomerOrder)
+    private async Task RemoveConsumeAsync(DesignerCustomerOrderConsumeViewModel designerCustomerOrderConsume)
     {
         try
         {
-            await consumeService.RemoveAsync(consumeDesignerCustomerOrder.Consume);
-            consumeDesignerCustomerOrder.Consume.ReleaseAutoUpdate();
+            await consumeService.RemoveAsync(designerCustomerOrderConsume.Consume);
+            designerCustomerOrderConsume.Consume.ReleaseAutoUpdate();
 
-            ConsumeCollection.Remove(consumeDesignerCustomerOrder);
-            TodoConsumeCollection.Add(consumeDesignerCustomerOrder);
+            ConsumeCollection.Remove(designerCustomerOrderConsume);
+            TodoConsumeCollection.Add(designerCustomerOrderConsume);
         }
         catch (Exception ex)
         {
@@ -244,6 +245,18 @@ public partial class ConsumeDashboardViewModel(
             logger.LogError(ex, "删除划扣时发生错误");
         }
     }
+
+    /// <summary>
+    /// 点击划扣
+    /// </summary>
+    /// <param name="designerCustomerOrderConsume"></param>
+    /// <returns></returns>
+    [RelayCommand]
+    private void ClickConsume(DesignerCustomerOrderConsumeViewModel designerCustomerOrderConsume)
+    {
+        SelectedConsume = designerCustomerOrderConsume;
+    }
+
 
     #endregion
 

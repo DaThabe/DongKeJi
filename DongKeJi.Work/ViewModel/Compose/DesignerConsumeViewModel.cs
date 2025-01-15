@@ -1,17 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.ViewModel;
+using DongKeJi.Work.ViewModel.Consume;
 using DongKeJi.Work.ViewModel.Staff;
 
-namespace DongKeJi.Work.ViewModel.Consume;
+namespace DongKeJi.Work.ViewModel.Compose;
 
 /// <summary>
 /// 设计师划扣
 /// </summary>
 /// <param name="designer"></param>
 /// <param name="consume"></param>
-public partial class ConsumeDesignerViewModel(
-    ConsumeViewModel consume,
-    StaffViewModel designer
+public partial class DesignerConsumeViewModel(
+    StaffViewModel designer,
+    ConsumeViewModel consume
 ) : ObservableViewModel
 {
     public event Action<StaffViewModel>? DesignerChanged;

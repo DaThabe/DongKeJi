@@ -5,19 +5,13 @@
 /// </summary>
 public abstract class LazyInitializeViewModel : ObservableViewModel
 {
-    private readonly object _initializationLock = new();
-
     public bool IsInitialized { get; private set; }
 
     public async ValueTask InitializeAsync(CancellationToken cancellation = default)
     {
-        lock (_initializationLock)
-        {
-            if (IsInitialized) return;
-            IsInitialized = true;
-        }
-
+        if (IsInitialized) return;
         await OnInitializationAsync(cancellation);
+        IsInitialized = true;
     }
 
     /// <summary>

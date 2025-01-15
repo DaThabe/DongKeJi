@@ -47,7 +47,7 @@ public interface ICustomerService
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
-    ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffIdAsync(
+    ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
@@ -130,7 +130,7 @@ internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICusto
     }
 
 
-    public async ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffIdAsync(
+    public async ValueTask<IEnumerable<CustomerViewModel>> GetAllByStaffAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,

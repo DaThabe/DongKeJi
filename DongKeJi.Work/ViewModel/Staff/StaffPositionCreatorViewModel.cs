@@ -8,7 +8,7 @@ namespace DongKeJi.Work.ViewModel.Staff;
 
 
 [Inject(ServiceLifetime.Transient)]
-public partial class StaffPositionCreatorObservableViewModel : ObservableViewModel
+public partial class StaffPositionCreatorViewModel : ObservableViewModel
 {
     /// <summary>
     ///     职位信息

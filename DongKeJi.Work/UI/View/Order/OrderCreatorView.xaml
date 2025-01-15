@@ -10,7 +10,7 @@
     xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Order"
     xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    d:DataContext="{d:DesignInstance orderVm:OrderCreatorObservableViewModel,
+    d:DataContext="{d:DesignInstance orderVm:OrderCreatorViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 

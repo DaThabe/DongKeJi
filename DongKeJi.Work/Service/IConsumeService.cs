@@ -22,6 +22,40 @@ namespace DongKeJi.Work.Service;
 public interface IConsumeService
 {
     /// <summary>
+    /// 获取划扣的设计师
+    /// </summary>
+    /// <param name="consume"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<StaffViewModel> GetDesignerAsync(
+        IIdentifiable consume,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 获取划扣的订单
+    /// </summary>
+    /// <param name="consume"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<OrderViewModel> GetOrderAsync(
+        IIdentifiable consume,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 设置划扣的设计师
+    /// </summary>
+    /// <param name="consume"></param>
+    /// <param name="designer"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask SetDesignerAsync(
+        IIdentifiable consume,
+        IIdentifiable designer,
+        CancellationToken cancellation = default);
+
+
+
+    /// <summary>
     ///     创建划扣且关联用户和订单
     /// </summary>
     /// <param name="consume"></param>
@@ -45,47 +79,38 @@ public interface IConsumeService
         IIdentifiable consume,
         CancellationToken cancellation = default);
 
-    /// <summary>
-    /// 获取划扣的设计师
-    /// </summary>
-    /// <param name="consume"></param>
-    /// <param name="cancellation"></param>
-    /// <returns></returns>
-    ValueTask<StaffViewModel> GetDesignerAsync(
-        IIdentifiable consume,
-        CancellationToken cancellation = default);
 
     /// <summary>
-    /// 设置划扣的设计师
+    /// 获取设计师关联的所有类型划扣
     /// </summary>
-    /// <param name="consume"></param>
     /// <param name="designer"></param>
-    /// <param name="cancellation"></param>
-    /// <returns></returns>
-    ValueTask SetDesignerAsync(
-        IIdentifiable consume,
-        IIdentifiable designer,
-        CancellationToken cancellation = default);
-
-    /// <summary>
-    /// 获取指定年月的所有划扣
-    /// </summary>
-    /// <typeparam name="TConsume">划扣类型-也对应订单类型</typeparam>
-    /// <param name="order"></param>
-    /// <param name="yearMonthly"></param>
     /// <param name="skip"></param>
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<TConsume>> GetAllByYearMonthlyAsync<TConsume>(
-        IIdentifiable order,
-        DateTime yearMonthly,
+    ValueTask<IEnumerable<ConsumeViewModel>> GetAllByDesignerAsync(
+        IIdentifiable designer,
+        int? skip = null,
+        int? take = null,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 获取设计师关联的所有指定类型划扣
+    /// </summary>
+    /// <typeparam name="TConsume">划扣类型-也对应订单类型</typeparam>
+    /// <param name="designer"></param>
+    /// <param name="skip"></param>
+    /// <param name="take"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<IEnumerable<TConsume>> GetAllByDesignerAsync<TConsume>(
+        IIdentifiable designer,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default) where TConsume : ConsumeViewModel;
 
     /// <summary>
-    /// 获取所有订单关联的划扣
+    /// 获取订单关联的所有划扣
     /// </summary>
     /// <typeparam name="TConsume">划扣类型-也对应订单类型</typeparam>
     /// <param name="order"></param>
@@ -106,6 +131,22 @@ public interface IConsumeService
 public static class ConsumeServiceExtensions
 {
     /// <summary>
+    /// 获取划扣对应的订单类型
+    /// </summary>
+    /// <param name="consume"></param>
+    /// <returns></returns>
+    public static OrderType GetOrderType(this ConsumeViewModel consume)
+    {
+        return consume switch
+        {
+            ConsumeTimingViewModel => OrderType.Timing,
+            ConsumeCountingViewModel => OrderType.Counting,
+            ConsumeMixingViewModel => OrderType.Mixing,
+            _ => OrderType.Unknown
+        };
+    }
+
+    /// <summary>
     /// 根据订单获取所有划扣
     /// </summary>
     /// <param name="consumeService"></param>
@@ -114,7 +155,7 @@ public static class ConsumeServiceExtensions
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    public static async ValueTask<IEnumerable<ConsumeViewModel>> GetAllConsumeAsync(
+    public static async ValueTask<IEnumerable<ConsumeViewModel>> GetAllByOrderAsync(
         this IConsumeService consumeService,
         OrderViewModel order,
         int? skip = null,
@@ -127,33 +168,6 @@ public static class ConsumeServiceExtensions
             OrderType.Timing => await consumeService.GetAllByOrderAsync<ConsumeTimingViewModel>(order, skip, take, cancellation),
             OrderType.Counting => await consumeService.GetAllByOrderAsync<ConsumeCountingViewModel>(order, skip, take, cancellation),
             OrderType.Mixing => await consumeService.GetAllByOrderAsync<ConsumeMixingViewModel>(order, skip, take, cancellation),
-            _ => []
-        };
-    }
-
-    /// <summary>
-    /// 根据订单获取指定日期下的所有划扣
-    /// </summary>
-    /// <param name="consumeService"></param>
-    /// <param name="order"></param>
-    /// <param name="date"></param>
-    /// <param name="skip"></param>
-    /// <param name="take"></param>
-    /// <param name="cancellation"></param>
-    /// <returns></returns>
-    public static async ValueTask<IEnumerable<ConsumeViewModel>> GetAllConsumeAsync(
-        this IConsumeService consumeService, 
-        OrderViewModel order, 
-        DateTime date, 
-        int? skip = null,
-        int? take = null,
-        CancellationToken cancellation = default)
-    {
-        return order.Type switch
-        {
-            OrderType.Timing => await consumeService.GetAllByYearMonthlyAsync<ConsumeTimingViewModel>(order, date, skip, take, cancellation),
-            OrderType.Counting => await consumeService.GetAllByYearMonthlyAsync<ConsumeCountingViewModel>(order, date, skip, take, cancellation),
-            OrderType.Mixing => await consumeService.GetAllByYearMonthlyAsync<ConsumeMixingViewModel>(order, date, skip, take, cancellation),
             _ => []
         };
     }
@@ -360,6 +374,43 @@ internal class ConsumeService(WorkDbContext dbContext, IMapper mapper) : IConsum
         }
     }
 
+    public async ValueTask<OrderViewModel> GetOrderAsync(IIdentifiable consume, CancellationToken cancellation = default)
+    {
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            var consumeEntity = await dbContext.Consume
+                .FirstOrDefaultAsync(x => x.Id == consume.Id, cancellation);
+            consumeEntity = DatabaseException.ThrowIfEntityNotFound(consumeEntity, "划扣不存在");
+
+            if (consumeEntity is ConsumeTimingEntity t)
+            {
+                 await dbContext.Entry(t).Reference(x => x.Order).LoadAsync(cancellation);
+                return mapper.Map<OrderViewModel>(t.Order);
+            }
+
+            if (consumeEntity is ConsumeCountingEntity c)
+            {
+                await dbContext.Entry(c).Reference(x => x.Order).LoadAsync(cancellation);
+                return mapper.Map<OrderViewModel>(c.Order);
+            }
+
+            if (consumeEntity is ConsumeMixingEntity m)
+            {
+                await dbContext.Entry(m).Reference(x => x.Order).LoadAsync(cancellation);
+                return mapper.Map<OrderViewModel>(m.Order);
+            }
+
+            throw new Exception("未知划扣类型");
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new DatabaseException($"获取划扣订单时发生错误\n划扣Id: {consume.Id}", ex);
+        }
+    }
+
     public async ValueTask SetDesignerAsync(
         IIdentifiable consume, 
         IIdentifiable designer, 
@@ -393,7 +444,7 @@ internal class ConsumeService(WorkDbContext dbContext, IMapper mapper) : IConsum
         }
     }
 
-    public async ValueTask<IEnumerable<TConsume>> GetAllByYearMonthlyAsync<TConsume>(
+    public async ValueTask<IEnumerable<TConsume>> GetAllByOrderAndYearMonthlyAsync<TConsume>(
         IIdentifiable order,
         DateTime yearMonthly,
         int? skip = null,
@@ -429,7 +480,7 @@ internal class ConsumeService(WorkDbContext dbContext, IMapper mapper) : IConsum
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"获取计时订单下所有划扣时发生错误\n订单Id: {order.Id}\nSkip: {skip}\nTake: {take}", ex);
+            throw new DatabaseException($"获取订单下所有划扣时发生错误\n订单Id: {order.Id}\nSkip: {skip}\nTake: {take}", ex);
         }
 
         async Task<List<ConsumeTimingEntity>> LoadTiming()
@@ -462,6 +513,97 @@ internal class ConsumeService(WorkDbContext dbContext, IMapper mapper) : IConsum
                 .ToListAsync(cancellation);
         }
     }
+
+    public async ValueTask<IEnumerable<ConsumeViewModel>> GetAllByDesignerAsync(IIdentifiable designer, int? skip = null, int? take = null,
+        CancellationToken cancellation = default)
+    {
+        try
+        {
+            var consume = await dbContext.Consume
+                .OrderBy(x => x.Id)
+                .Include(x => x.Staff)
+                .Where(x => x.Staff.Id == designer.Id)
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+
+            return consume.Select(mapper.Map<ConsumeViewModel>);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new DatabaseException($"获取设计师下所有划扣时发生错误\n设计师Id: {designer.Id}\nSkip: {skip}\nTake: {take}", ex);
+        }
+    }
+
+    public async ValueTask<IEnumerable<TConsume>> GetAllByDesignerAsync<TConsume>(
+        IIdentifiable designer, 
+        int? skip = null,
+        int? take = null, 
+        CancellationToken cancellation = default) where TConsume : ConsumeViewModel
+    {
+        //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            var consumeType = typeof(TConsume);
+
+            if (consumeType == typeof(ConsumeTimingViewModel))
+            {
+                var result = await LoadTiming();
+                return result.Select(mapper.Map<TConsume>);
+            }
+
+            if (consumeType == typeof(ConsumeCountingViewModel))
+            {
+                var result = await LoadCounting();
+                return result.Select(mapper.Map<TConsume>);
+            }
+
+            if (consumeType == typeof(ConsumeMixingViewModel))
+            {
+                var result = await LoadMixing();
+                return result.Select(mapper.Map<TConsume>);
+            }
+
+            return [];
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new DatabaseException($"获取设计师下所有划扣时发生错误\n设计师Id: {designer.Id}\nSkip: {skip}\nTake: {take}", ex);
+        }
+
+        async Task<List<ConsumeTimingEntity>> LoadTiming()
+        {
+            return await dbContext.ConsumeTiming
+                .OrderBy(x => x.Id)
+                .Include(x => x.Staff)
+                .Where(x => x.Staff.Id == designer.Id)
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+        }
+
+        async Task<List<ConsumeCountingEntity>> LoadCounting()
+        {
+            return await dbContext.ConsumeCounting
+                .OrderBy(x => x.Id)
+                .Include(x => x.Staff)
+                .Where(x => x.Staff.Id == designer.Id)
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+        }
+
+        async Task<List<ConsumeMixingEntity>> LoadMixing()
+        {
+            return await dbContext.ConsumeMixing
+                .OrderBy(x => x.Id)
+                .Include(x => x.Staff)
+                .Where(x => x.Staff.Id == designer.Id)
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+        }
+    }
+
 
     public async ValueTask<IEnumerable<TConsume>> GetAllByOrderAsync<TConsume>(
         IIdentifiable order, 

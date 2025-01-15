@@ -38,11 +38,19 @@
             <!--  错误消息  -->
             <StackPanel
                 x:Name="ErrorView"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Orientation="Vertical"
                 Visibility="Collapsed">
-                <TextBlock Foreground="Red" Text="发生错误!" />
-                <TextBlock Foreground="Red" Text="{TemplateBinding Error}" />
+                <TextBlock
+                    Foreground="Red"
+                    Text="发生错误!"
+                    TextAlignment="Center" />
+                <TextBlock
+                    DataContext="{TemplateBinding Error}"
+                    Foreground="Red"
+                    Text="{Binding Message}"
+                    TextAlignment="Center" />
             </StackPanel>
 
         </Grid>

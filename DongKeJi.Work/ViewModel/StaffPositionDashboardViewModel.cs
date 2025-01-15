@@ -142,7 +142,7 @@ public partial class StaffPositionDashboardViewModel(
     {
         try
         {
-            var creatorVm = new StaffPositionCreatorObservableViewModel();
+            var creatorVm = new StaffPositionCreatorViewModel();
 
             var content = new SimpleContentDialogCreateOptions
             {

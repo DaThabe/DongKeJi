@@ -37,35 +37,75 @@ partial class MainFrame : INavigationWindow
         contentDialogService.SetDialogHost(ContentPresenterForDialogs);
     }
 
+
     private IServiceProvider Services { get; set; }
 
     #region --事件--
 
-    private bool _isUserClosedPane;
-
-    private bool _isPaneOpenedOrClosedFromCode;
+    /// <summary>
+    /// 是否选中了子菜单元素
+    /// </summary>
+    private bool _isSelectedChildNavigationView;
 
     private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_isUserClosedPane) return;
+        if (_isSelectedChildNavigationView)
+        {
+            RootNavigation.IsPaneToggleVisible = false;
+            RootNavigation.IsPaneOpen = true;
+            return;
+        }
 
-        _isPaneOpenedOrClosedFromCode = true;
+        RootNavigation.IsPaneToggleVisible = e.NewSize.Width > 800 && !_isSelectedChildNavigationView;
         RootNavigation.IsPaneOpen = e.NewSize.Width > 800;
-        _isPaneOpenedOrClosedFromCode = false;
     }
 
-    private void NavigationView_OnPaneOpened(NavigationView sender, RoutedEventArgs args)
+    /// <summary>
+    /// 选中顶级导航会触发
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
+    private void RootNavigation_OnSelectionChanged(NavigationView sender, RoutedEventArgs args)
     {
-        if (_isPaneOpenedOrClosedFromCode) return;
-
-        _isUserClosedPane = false;
+        RootNavigation.IsPaneToggleVisible = true;
+        _isSelectedChildNavigationView = false;
     }
 
-    private void NavigationView_OnPaneClosed(NavigationView sender, RoutedEventArgs args)
+    /// <summary>
+    /// 选中所有导航都会触发
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
+    private void RootNavigation_OnNavigated(NavigationView sender, NavigatedEventArgs args)
     {
-        if (_isPaneOpenedOrClosedFromCode) return;
+        var isSelectedChildMenu = true;
 
-        _isUserClosedPane = true;
+        foreach (var i in GetTopMenus())
+        {
+            if (!i.IsActive) continue;
+
+            _isSelectedChildNavigationView = false;
+            break;
+        }
+
+        _isSelectedChildNavigationView = isSelectedChildMenu;
+        RootNavigation.IsPaneToggleVisible = !_isSelectedChildNavigationView;
+        return;
+
+        IEnumerable<NavigationViewItem> GetTopMenus()
+        {
+            foreach (var i in sender.MenuItems)
+            {
+                if (i is not NavigationViewItem nav) continue;
+                yield return nav;
+            }
+
+            foreach (var i in sender.FooterMenuItems)
+            {
+                if (i is not NavigationViewItem nav) continue;
+                yield return nav;
+            }
+        }
     }
 
     #endregion
@@ -123,4 +163,6 @@ partial class MainFrame : INavigationWindow
     }
 
     #endregion
+
+    
 }

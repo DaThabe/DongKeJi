@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.Extensions;
 using DongKeJi.Inject;
@@ -12,7 +11,7 @@ namespace DongKeJi.Work.ViewModel.Order;
 
 
 [Inject(ServiceLifetime.Transient)]
-public partial class OrderCreatorObservableViewModel : ObservableViewModel
+public partial class OrderCreatorViewModel : ObservableViewModel
 {
     /// <summary>
     ///     订单信息
@@ -35,7 +34,7 @@ public partial class OrderCreatorObservableViewModel : ObservableViewModel
     [ObservableProperty] private OrderType _currentType;
 
 
-    public OrderCreatorObservableViewModel(IEnumerable<StaffViewModel> salespersonViewModels)
+    public OrderCreatorViewModel(IEnumerable<StaffViewModel> salespersonViewModels)
     {
         SalespersonCollection = salespersonViewModels.ToObservableCollection();
         SelectedSalesperson = SalespersonCollection.FirstOrDefault();

@@ -32,12 +32,11 @@
             Padding="42,0,42,0"
             BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
             FooterMenuItemsSource="{Binding FooterMenuItems}"
-            IsBackButtonVisible="Visible"
             IsPaneToggleVisible="True"
             MenuItemsSource="{Binding MenuItems}"
+            Navigated="RootNavigation_OnNavigated"
             OpenPaneLength="150"
-            PaneClosed="NavigationView_OnPaneClosed"
-            PaneOpened="NavigationView_OnPaneOpened"
+            SelectionChanged="RootNavigation_OnSelectionChanged"
             Transition="FadeInWithSlide">
 
             <ui:NavigationView.Header>

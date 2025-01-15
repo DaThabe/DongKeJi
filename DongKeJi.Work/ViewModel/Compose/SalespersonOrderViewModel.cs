@@ -1,16 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.ViewModel;
+using DongKeJi.Work.ViewModel.Order;
 using DongKeJi.Work.ViewModel.Staff;
 
-namespace DongKeJi.Work.ViewModel.Order;
+namespace DongKeJi.Work.ViewModel.Compose;
 
 
 /// <summary>
-///     订单销售
+///  销售订单
 /// </summary>
-public partial class OrderSalespersonViewModel(
-    OrderViewModel order, 
-    StaffViewModel salesperson) : ObservableViewModel
+public partial class SalespersonOrderViewModel(
+    StaffViewModel salesperson,
+    OrderViewModel order
+    ) : ObservableViewModel
 {
     public event Action<StaffViewModel>?  SalespersonChanged; 
 

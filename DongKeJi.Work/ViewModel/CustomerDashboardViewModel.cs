@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Core;
@@ -13,7 +12,7 @@ using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.Service;
 using DongKeJi.Work.UI.View.Customer;
 using DongKeJi.Work.UI.View.Order;
-using DongKeJi.Work.ViewModel.Consume;
+using DongKeJi.Work.ViewModel.Compose;
 using DongKeJi.Work.ViewModel.Customer;
 using DongKeJi.Work.ViewModel.Order;
 using DongKeJi.Work.ViewModel.Staff;
@@ -62,12 +61,12 @@ public partial class CustomerDashboardViewModel(
     /// <summary>
     ///     当前选中订单
     /// </summary>
-    [ObservableProperty] private OrderSalespersonViewModel? _selectedOrder;
+    [ObservableProperty] private SalespersonOrderViewModel? _selectedOrder;
 
     /// <summary>
     ///     当前选中划扣
     /// </summary>
-    [ObservableProperty] private ConsumeDesignerViewModel? _selectedConsume;
+    [ObservableProperty] private DesignerConsumeViewModel? _selectedConsume;
 
 
     /// <summary>
@@ -96,12 +95,12 @@ public partial class CustomerDashboardViewModel(
     /// <summary>
     ///     订单集合
     /// </summary>
-    [ObservableProperty] private ObservableCollection<OrderSalespersonViewModel> _orderCollection = [];
+    [ObservableProperty] private ObservableCollection<SalespersonOrderViewModel> _orderCollection = [];
 
     /// <summary>
     ///     划扣集合
     /// </summary>
-    [ObservableProperty] private ObservableCollection<ConsumeDesignerViewModel> _consumeCollection = [];
+    [ObservableProperty] private ObservableCollection<DesignerConsumeViewModel> _consumeCollection = [];
 
     #endregion
 
@@ -146,7 +145,7 @@ public partial class CustomerDashboardViewModel(
         _ = ReloadOrderCommand.ExecuteAsync(null);
     }
 
-    partial void OnSelectedOrderChanged(OrderSalespersonViewModel? value)
+    partial void OnSelectedOrderChanged(SalespersonOrderViewModel? value)
     {
         if (value is null) return;
         _ = ReloadConsumeCommand.ExecuteAsync(null);
@@ -165,7 +164,7 @@ public partial class CustomerDashboardViewModel(
     {
         try
         {
-            var customers = await customerService.GetAllByStaffIdAsync(CurrentStaff);
+            var customers = await customerService.GetAllByStaffAsync(CurrentStaff);
 
             CustomerCollection = customers.ToObservableCollection();
             CustomerCollection.ForEach(x => dbService.AutoUpdate(x));
@@ -274,7 +273,7 @@ public partial class CustomerDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedCustomer);
 
-            List<OrderSalespersonViewModel> orderSalespersons = [];
+            List<SalespersonOrderViewModel> orderSalespersons = [];
 
             var orderVMs = await orderService.GetAllByCustomerAsync(SelectedCustomer);
             foreach (var order in orderVMs)
@@ -284,7 +283,7 @@ public partial class CustomerDashboardViewModel(
                 var existsSalesperson = SalespersonCollection.FirstOrDefault(x => x.Id == salesperson.Id);
                 if (existsSalesperson is null) continue;
 
-                var orderSalesperson = new OrderSalespersonViewModel(order, existsSalesperson);
+                var orderSalesperson = new SalespersonOrderViewModel(existsSalesperson, order);
                 orderSalesperson.SalespersonChanged += async e =>
                 {
                     await orderService.SetSalespersonAsync(order, e);
@@ -320,7 +319,7 @@ public partial class CustomerDashboardViewModel(
             var salespersonList = await staffService
                 .GetAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Salesperson);
 
-            var creatorVm = new OrderCreatorObservableViewModel(salespersonList);
+            var creatorVm = new OrderCreatorViewModel(salespersonList);
 
             var content = new SimpleContentDialogCreateOptions
             {
@@ -343,7 +342,7 @@ public partial class CustomerDashboardViewModel(
 
             //更新数据库
             await orderService.AddAsync(creatorVm.Order, creatorVm.SelectedSalesperson, SelectedCustomer);
-            var orderSalesperson = new OrderSalespersonViewModel(creatorVm.Order, creatorVm.SelectedSalesperson);
+            var orderSalesperson = new SalespersonOrderViewModel(creatorVm.SelectedSalesperson, creatorVm.Order);
             dbService.AutoUpdate(creatorVm.Order);
 
             //更新界面
@@ -365,7 +364,7 @@ public partial class CustomerDashboardViewModel(
     /// <param name="orderSalesperson"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemoveOrderAsync(OrderSalespersonViewModel? orderSalesperson)
+    private async Task RemoveOrderAsync(SalespersonOrderViewModel? orderSalesperson)
     {
         try
         {
@@ -417,8 +416,8 @@ public partial class CustomerDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedOrder);
 
-            List<ConsumeDesignerViewModel> consumeDesigners = [];
-            var consumes = await consumeService.GetAllConsumeAsync(SelectedOrder.Order);
+            List<DesignerConsumeViewModel> consumeDesigners = [];
+            var consumes = await consumeService.GetAllByOrderAsync(SelectedOrder.Order);
 
             foreach (var consume in consumes)
             {
@@ -426,7 +425,7 @@ public partial class CustomerDashboardViewModel(
                 var existsDesigner = DesignerCollection.FirstOrDefault(x => x.Id == designer.Id);
                 if (existsDesigner == null) continue;
 
-                var consumeDesigner = new ConsumeDesignerViewModel(consume, existsDesigner);
+                var consumeDesigner = new DesignerConsumeViewModel(existsDesigner, consume);
                 consumeDesigner.DesignerChanged += async e =>
                 {
                     await consumeService.SetDesignerAsync(consume, e);
@@ -463,7 +462,7 @@ public partial class CustomerDashboardViewModel(
 
             //更新数据库
             await consumeService.AddAsync(consume, SelectedOrder.Order, CurrentStaff);
-            var consumeDesigner = new ConsumeDesignerViewModel(consume, CurrentStaff);
+            var consumeDesigner = new DesignerConsumeViewModel(CurrentStaff, consume);
             dbService.AutoUpdate(consume);
 
             //更新界面
@@ -485,7 +484,7 @@ public partial class CustomerDashboardViewModel(
     /// <param name="consumeDesigner"></param>
     /// <returns></returns>
     [RelayCommand]
-    private async Task RemoveConsumeAsync(ConsumeDesignerViewModel? consumeDesigner)
+    private async Task RemoveConsumeAsync(DesignerConsumeViewModel? consumeDesigner)
     {
         try
         {

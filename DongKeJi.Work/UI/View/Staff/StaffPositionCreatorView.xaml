@@ -7,7 +7,7 @@
     xmlns:staff="clr-namespace:DongKeJi.Work.UI.View.Staff"
     xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    d:DataContext="{d:DesignInstance staffVm:StaffPositionCreatorObservableViewModel,
+    d:DataContext="{d:DesignInstance staffVm:StaffPositionCreatorViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 

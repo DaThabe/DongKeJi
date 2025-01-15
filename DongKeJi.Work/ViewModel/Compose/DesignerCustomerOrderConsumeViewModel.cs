@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.ViewModel;
+using DongKeJi.Work.ViewModel.Consume;
 using DongKeJi.Work.ViewModel.Customer;
 using DongKeJi.Work.ViewModel.Order;
 using DongKeJi.Work.ViewModel.Staff;
 
-namespace DongKeJi.Work.ViewModel.Consume;
+namespace DongKeJi.Work.ViewModel.Compose;
 
 /// <summary>
 /// 设计师机构订单划扣
@@ -13,11 +14,11 @@ namespace DongKeJi.Work.ViewModel.Consume;
 /// <param name="order"></param>
 /// <param name="designer"></param>
 /// <param name="consume"></param>
-public partial class ConsumeDesignerCustomerOrderViewModel(
-    ConsumeViewModel consume,
+public partial class DesignerCustomerOrderConsumeViewModel(
     StaffViewModel designer, 
     CustomerViewModel customer, 
-    OrderViewModel order
+    OrderViewModel order,
+    ConsumeViewModel consume
 ) : ObservableViewModel
 {
     /// <summary>
