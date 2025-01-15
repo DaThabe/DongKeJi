@@ -1,8 +1,11 @@
 using DongKeJi.Core;
 using DongKeJi.Core.Service;
+using DongKeJi.Database;
+using DongKeJi.Work.Model;
 using DongKeJi.Work.Model.Entity.Staff;
 using DongKeJi.Work.UI.View;
 using DongKeJi.Work.ViewModel.Staff;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui.Controls;
@@ -15,11 +18,26 @@ internal class HostedService(
     ICoreModule coreModule,
     IWorkDatabase workDbService,
     IStaffService staffService,
+    WorkDbContext dbContext,
     IStaffPositionService staffPositionService
 ) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        try
+        {
+            await dbContext.UnitOfWorkAsync(async t =>
+            {
+                await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
+
+            }, cancellationToken);
+
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "办公数据库迁移失败, 已回滚");
+        }
+
         try
         {
             var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");

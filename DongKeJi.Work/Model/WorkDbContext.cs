@@ -1,4 +1,5 @@
-﻿using DongKeJi.Config;
+﻿using System.IO;
+using DongKeJi.Config;
 using DongKeJi.Database;
 using DongKeJi.Entity;
 using DongKeJi.Work.Model.Entity.Consume;
@@ -6,10 +7,11 @@ using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace DongKeJi.Work.Model;
 
-internal class WorkDbContext(IApplication applicationContext) : LocalDbContext(applicationContext, "PerformanceRecord"), IConfigDbContext
+internal class WorkDbContext(string dbFolder) : LocalDbContext(dbFolder, "PerformanceRecord"), IConfigDbContext
 {
     /// <summary>
     /// 配置
@@ -75,11 +77,24 @@ internal class WorkDbContext(IApplication applicationContext) : LocalDbContext(a
     public DbSet<ConsumeMixingEntity> ConsumeMixing { get; set; }
 
 
+    public WorkDbContext(IApplication applicationContext) : this(applicationContext.DatabaseDirectory)
+    {
+
+    }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(WorkDbContext).Assembly);
+    }
+}
+
+
+internal class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<WorkDbContext>
+{
+    public WorkDbContext CreateDbContext(string[] args)
+    {
+        return new WorkDbContext(Path.Combine(AppContext.BaseDirectory, "Database"));
     }
 }

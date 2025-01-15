@@ -1,7 +1,10 @@
+using DongKeJi.Core.Model;
 using DongKeJi.Core.UI.View.Module;
 using DongKeJi.Core.UI.View.Setting;
 using DongKeJi.Core.UI.View.User;
 using DongKeJi.Core.ViewModel.User;
+using DongKeJi.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui.Controls;
@@ -12,10 +15,26 @@ internal class HostedService(
     ILogger<HostedService> logger,
     IMainFrameService mainFrameService,
     ICoreDatabase database,
+    CoreDbContext dbContext,
     IUserService userService) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        try
+        {
+            await dbContext.UnitOfWorkAsync(async t =>
+            {
+                await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
+
+            }, cancellationToken);
+
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "核心数据库迁移失败, 已回滚");
+        }
+
+
         mainFrameService.Show();
         mainFrameService.AddFooterMenu<ModuleDashboardView>(SymbolRegular.DeveloperBoard16, "模块");
         mainFrameService.AddFooterMenu<UserDashboardView>(SymbolRegular.People20, "用户");
