@@ -111,7 +111,7 @@ public partial class CustomerDashboardViewModel(
     {
         try
         {
-            var salespersonList = await staffService.FindAllByPositionTypeAsync(StaffPositionType.Salesperson, cancellation: cancellation);
+            var salespersonList = await staffService.GetAllByPositionTypeAsync(StaffPositionType.Salesperson, cancellation: cancellation);
 
             SalespersonCollection = salespersonList.ToObservableCollection();
             SalespersonCollection.ForEach(x => dbService.AutoUpdate(x));
@@ -125,7 +125,7 @@ public partial class CustomerDashboardViewModel(
 
         try
         {
-            var salespersonList = await staffService.FindAllByPositionTypeAsync(StaffPositionType.Designer, cancellation: cancellation);
+            var salespersonList = await staffService.GetAllByPositionTypeAsync(StaffPositionType.Designer, cancellation: cancellation);
 
             DesignerCollection = salespersonList.ToObservableCollection();
             DesignerCollection.ForEach(x => dbService.AutoUpdate(x));
@@ -277,10 +277,10 @@ public partial class CustomerDashboardViewModel(
 
             List<OrderSalespersonViewModel> orderSalespersons = [];
 
-            var orderVMs = await orderService.FindAllByCustomerIdAsync(SelectedCustomer);
+            var orderVMs = await orderService.GetAllByCustomerAsync(SelectedCustomer);
             foreach (var order in orderVMs)
             {
-                var salesperson = await orderService.FindSalespersonAsync(order);
+                var salesperson = await orderService.GetSalespersonAsync(order);
 
                 var existsSalesperson = SalespersonCollection.FirstOrDefault(x => x.Id == salesperson.Id);
                 if (existsSalesperson is null) continue;
@@ -319,7 +319,7 @@ public partial class CustomerDashboardViewModel(
             ArgumentNullException.ThrowIfNull(SelectedCustomer);
 
             var salespersonList = await staffService
-                .FindAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Salesperson);
+                .GetAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Salesperson);
 
             var creatorVm = new OrderCreatorObservableViewModel(salespersonList);
 
@@ -423,7 +423,7 @@ public partial class CustomerDashboardViewModel(
 
             foreach (var consume in consumes)
             {
-                var designer = await consumeService.FindDesignerAsync(consume);
+                var designer = await consumeService.GetDesignerAsync(consume);
                 var existsDesigner = DesignerCollection.FirstOrDefault(x => x.Id == designer.Id);
                 if (existsDesigner == null) continue;
 
@@ -457,7 +457,7 @@ public partial class CustomerDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedOrder);
 
-            var consume = SelectedOrder.Order.Type.CreateDefaultConsume(DateTime.Now);
+            var consume = SelectedOrder.Order.Type.CreateConsume(DateTime.Now);
             if (consume is null) throw new Exception($"划扣创建失败, 订单类型不明确, 订单类型: {SelectedOrder.GetType()}");
 
             //更新数据库

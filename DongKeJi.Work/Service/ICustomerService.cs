@@ -54,6 +54,12 @@ public interface ICustomerService
         CancellationToken cancellation = default);
 }
 
+
+/// <summary>
+/// 机构服务默认实现
+/// </summary>
+/// <param name="dbContext"></param>
+/// <param name="mapper"></param>
 [Inject(ServiceLifetime.Singleton, typeof(ICustomerService))]
 internal class CustomerService(WorkDbContext dbContext, IMapper mapper) : ICustomerService
 {

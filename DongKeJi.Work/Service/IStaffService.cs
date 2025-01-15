@@ -15,51 +15,50 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DongKeJi.Work.Service;
 
 /// <summary>
-///     员工出储存库
+/// 员工服务
 /// </summary>
 public interface IStaffService
 {
     /// <summary>
-    ///     设置为主员工
+    /// 将指定员工设置为用户的主员工
     /// </summary>
-    /// <param name="user"></param>
     /// <param name="staff"></param>
+    /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask BindingPrimaryAsync(
-        IIdentifiable user, 
+    ValueTask SetPrimaryToUserAsync(
         IIdentifiable staff, 
+        IIdentifiable user, 
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     获取主员工Id
+    /// 获取主员工
     /// </summary>
     /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IIdentifiable> GetBindingPrimaryIdAsync(
+    ValueTask<IIdentifiable> GetPrimaryIdAsync(
         IIdentifiable user, 
         CancellationToken cancellation = default);
 
-
     /// <summary>
-    /// 设置当前员工
+    /// 设置指定员工为活跃状态  (办公环境下的默认员工
     /// </summary>
     /// <param name="staff"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask SetCurrentAsync(
+    ValueTask SetPrimaryAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default);
 
 
     /// <summary>
-    ///     根据员工查询用户
+    ///     根据员工获取用户
     /// </summary>
     /// <param name="staff"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<UserViewModel> FindUserByStaffAsync(
+    ValueTask<UserViewModel> GetUserByStaffAsync(
         IIdentifiable staff, 
         CancellationToken cancellation = default);
 
@@ -76,41 +75,41 @@ public interface IStaffService
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     根据Id查询员工
+    ///     根据Id获取员工
     /// </summary>
     /// <param name="staff"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<StaffViewModel> FindByIdAsync(
+    ValueTask<StaffViewModel> GetByIdAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     根据用户查询所有员工
+    ///     根据用户获取所有员工
     /// </summary>
     /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
+    ValueTask<IEnumerable<StaffViewModel>> GetAllByUserAsync(
         IIdentifiable user,
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     查询某个职位类型的所有员工
+    ///     获取某个职位类型的所有员工
     /// </summary>
     /// <param name="type"></param>
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(
+    ValueTask<IEnumerable<StaffViewModel>> GetAllByPositionTypeAsync(
         StaffPositionType type, 
         int? skip = null,
         int? take = null, 
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     查询符合职位和用户的所有员工
+    ///     获取符合职位和用户的所有员工
     /// </summary>
     /// <param name="user"></param>
     /// <param name="type"></param>
@@ -118,7 +117,7 @@ public interface IStaffService
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(
+    ValueTask<IEnumerable<StaffViewModel>> GetAllByUserAndPositionTypeAsync(
         IIdentifiable user, 
         StaffPositionType type,
         int? skip = null,
@@ -139,7 +138,7 @@ public interface IStaffService
 }
 
 /// <summary>
-///     员工服务
+/// 员工服务默认实现
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IStaffService))]
 internal class StaffService(
@@ -150,7 +149,10 @@ internal class StaffService(
     WorkDbContext dbContext) : IStaffService
 {
 
-    public async ValueTask BindingPrimaryAsync(IIdentifiable user, IIdentifiable staff, CancellationToken cancellation = default)
+    public async ValueTask SetPrimaryToUserAsync(
+        IIdentifiable staff,
+        IIdentifiable user,
+        CancellationToken cancellation = default)
     {
         try
         {
@@ -168,14 +170,16 @@ internal class StaffService(
 
                 }, cancellation);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ConfigException($"绑定用户主员工时发生错误\n用户Id: {user.Id}\n员工Id: {staff.Id}", ex);
             }
         }
     }
 
-    public async ValueTask<IIdentifiable> GetBindingPrimaryIdAsync(IIdentifiable user, CancellationToken cancellation = default)
+    public async ValueTask<IIdentifiable> GetPrimaryIdAsync(
+        IIdentifiable user,
+        CancellationToken cancellation = default)
     {
         try
         {
@@ -194,13 +198,15 @@ internal class StaffService(
         }
     }
 
-    public async ValueTask SetCurrentAsync(IIdentifiable staff,CancellationToken cancellation = default)
+    public async ValueTask SetPrimaryAsync(
+        IIdentifiable staff,
+        CancellationToken cancellation = default)
     {
-        var staffVm = await FindByIdAsync(staff, cancellation);
+        var staffVm = await GetByIdAsync(staff, cancellation);
         (workModule as WorkModule)!.CurrentStaff = staffVm;
     }
 
-    public async ValueTask<UserViewModel> FindUserByStaffAsync(
+    public async ValueTask<UserViewModel> GetUserByStaffAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
@@ -218,7 +224,7 @@ internal class StaffService(
 
             //用户
             Identifiable id = staffEntity.UserId;
-            var userViewModel = await userService.FindByIdAsync(id, cancellation);
+            var userViewModel = await userService.GetByIdAsync(id, cancellation);
             userViewModel = DatabaseException.ThrowIfEntityNotFound(userViewModel, "用户不存在");
 
             return userViewModel;
@@ -226,7 +232,7 @@ internal class StaffService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询员工关联用户时发生错误\n员工信息: {staff}", ex);
+            throw new DatabaseException($"获取员工关联用户时发生错误\n员工信息: {staff}", ex);
         }
     }
 
@@ -248,7 +254,7 @@ internal class StaffService(
             DatabaseException.ThrowIfEntityAlreadyExists(staffEntity, "员工已存在");
 
             //用户
-            var userViewModel = await userService.FindByIdAsync(user, cancellation);
+            var userViewModel = await userService.GetByIdAsync(user, cancellation);
             userViewModel = DatabaseException.ThrowIfEntityNotFound(userViewModel, "用户不存在");
 
             //修改
@@ -267,7 +273,7 @@ internal class StaffService(
         }
     }
 
-    public async ValueTask<StaffViewModel> FindByIdAsync(
+    public async ValueTask<StaffViewModel> GetByIdAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
@@ -284,11 +290,11 @@ internal class StaffService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询员工时发生错误\n员工Id: {staff.Id}", ex);
+            throw new DatabaseException($"获取员工时发生错误\n员工Id: {staff.Id}", ex);
         }
     }
 
-    public async ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAsync(
+    public async ValueTask<IEnumerable<StaffViewModel>> GetAllByUserAsync(
         IIdentifiable user,
         CancellationToken cancellation = default)
     {
@@ -305,11 +311,11 @@ internal class StaffService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"根据用户查询所有员工时发生错误\n用户Id: {user}", ex);
+            throw new DatabaseException($"根据用户获取所有员工时发生错误\n用户Id: {user}", ex);
         }
     }
 
-    public async ValueTask<IEnumerable<StaffViewModel>> FindAllByPositionTypeAsync(
+    public async ValueTask<IEnumerable<StaffViewModel>> GetAllByPositionTypeAsync(
         StaffPositionType type,
         int? skip = null,
         int? take = null,
@@ -333,11 +339,11 @@ internal class StaffService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"根据职位查询所有员工时发生错误\n职位类型: {type}", ex);
+            throw new DatabaseException($"根据职位获取所有员工时发生错误\n职位类型: {type}\nSkip: {skip}\nTake: {take}", ex);
         }
     }
 
-    public async ValueTask<IEnumerable<StaffViewModel>> FindAllByUserAndPositionTypeAsync(
+    public async ValueTask<IEnumerable<StaffViewModel>> GetAllByUserAndPositionTypeAsync(
         IIdentifiable user,
         StaffPositionType type,
         int? skip = null,
@@ -367,7 +373,7 @@ internal class StaffService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"根据职位和用户查询所有员工时发生错误\n用户Id: {user.Id}\n职位类型: {type}", ex);
+            throw new DatabaseException($"根据职位和用户获取所有员工时发生错误\n用户Id: {user.Id}\n职位类型: {type}\nSkip: {skip}\nTake: {take}", ex);
         }
     }
 
@@ -389,7 +395,7 @@ internal class StaffService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException("获取所有员工时发生错误", ex);
+            throw new DatabaseException($"获取所有员工时发生错误\nSkip: {skip}\nTake: {take}", ex);
         }
     }
 }

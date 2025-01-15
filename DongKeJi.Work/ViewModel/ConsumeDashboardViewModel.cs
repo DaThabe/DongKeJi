@@ -95,7 +95,7 @@ public partial class ConsumeDashboardViewModel(
         try
         {
             //加载所有设计师
-            var designer = await staffService.FindAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Designer, cancellation: cancellation);
+            var designer = await staffService.GetAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Designer, cancellation: cancellation);
             DesignerCollection = designer.ToObservableCollection();
             DesignerCollection.ForEach(x => dbService.AutoUpdate(x));
         }
@@ -134,14 +134,14 @@ public partial class ConsumeDashboardViewModel(
             List<ConsumeDesignerCustomerOrderViewModel> todoConsumeCollection = [];
 
             //活跃订单
-            var orders = (await orderService.FindAllByStaffIdAsync(CurrentStaff))
+            var orders = (await orderService.GetAllAsync())
                 .Where(x => x.State == OrderState.Active);
 
             //遍历订单
             foreach (var order in orders)
             {
                 //查询订单机构
-                var customer = await orderService.FindCustomerAsync(order);
+                var customer = await orderService.GetCustomerAsync(order);
 
                 //订单划扣
                 var consumes = (await consumeService.FindAllConsumeAsync(order))
@@ -151,7 +151,7 @@ public partial class ConsumeDashboardViewModel(
                 //没有划扣
                 if (consumes.Count <= 0)
                 {
-                    var todoConsume = order.Type.CreateDefaultConsume(CurrentDate);
+                    var todoConsume = order.Type.CreateConsume(CurrentDate);
                     if (todoConsume is null) continue;
 
                     //添加待办划扣
@@ -163,7 +163,7 @@ public partial class ConsumeDashboardViewModel(
                 foreach (var consume in consumes)
                 {
                     //查询设计师
-                    var designer = await consumeService.FindDesignerAsync(consume);
+                    var designer = await consumeService.GetDesignerAsync(consume);
 
                     //添加划扣元素
                     consumeCollection.Add(

@@ -89,7 +89,7 @@ public partial class StaffDashboardViewModel(
     {
         try
         {
-            var result = await staffService.FindAllByUserAsync(CurrentUser);
+            var result = await staffService.GetAllByUserAsync(CurrentUser);
 
             StaffCollection = result.ToObservableCollection();
             StaffCollection.ForEach(x => dbService.AutoUpdate(x));
@@ -202,7 +202,7 @@ public partial class StaffDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedStaff);
 
-            var positions = await staffPositionService.FindAllByStaffAsync(SelectedStaff);
+            var positions = await staffPositionService.GetAllByStaffAsync(SelectedStaff);
 
             PositionCollection = positions.ToObservableCollection();
             PositionCollection.ForEach(x=>dbService.AutoUpdate(x));
@@ -243,7 +243,7 @@ public partial class StaffDashboardViewModel(
             if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await staffPositionService.UnbindingAsync(position.Type, SelectedStaff);
+            await staffPositionService.RemoveStaffAsync(position.Type, SelectedStaff);
 
             //删除
             var index = PositionCollection.RemoveAtMatchedIndex(x => x.Type == position.Type);
@@ -271,7 +271,7 @@ public partial class StaffDashboardViewModel(
             ArgumentNullException.ThrowIfNull(SelectedStaff);
 
             //更新数据库
-            var position = await staffPositionService.BindingAsync(type, SelectedStaff);
+            var position = await staffPositionService.SetStaffAsync(type, SelectedStaff);
 
             PositionCollection.Add(position, x => x.Type != position.Type);
             dbService.AutoUpdate(position);

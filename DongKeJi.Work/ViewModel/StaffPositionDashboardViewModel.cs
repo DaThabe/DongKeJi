@@ -183,7 +183,7 @@ public partial class StaffPositionDashboardViewModel(
         {
             ArgumentNullException.ThrowIfNull(SelectedPosition);
 
-            var staffs = await staffService.FindAllByPositionTypeAsync(SelectedPosition.Type);
+            var staffs = await staffService.GetAllByPositionTypeAsync(SelectedPosition.Type);
 
             StaffCollection = staffs.ToObservableCollection();
             StaffCollection.ForEach(x => dbService.AutoUpdate(x));
@@ -225,7 +225,7 @@ public partial class StaffPositionDashboardViewModel(
             if (dialogResult != ContentDialogResult.Primary) return;
 
             //更新数据库
-            await staffPositionService.UnbindingAsync(SelectedPosition.Type, SelectedStaff);
+            await staffPositionService.RemoveStaffAsync(SelectedPosition.Type, SelectedStaff);
 
             //删除
             var index = StaffCollection.RemoveAtMatchedIndex(x => x.Id == staff.Id);

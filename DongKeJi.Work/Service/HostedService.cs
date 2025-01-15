@@ -58,24 +58,24 @@ internal class HostedService(
 
         try
         {
-            var primaryStaff = await staffService.GetBindingPrimaryIdAsync(coreModule.CurrentUser, cancellation);
-            await staffService.SetCurrentAsync(primaryStaff, cancellation);
+            var primaryStaff = await staffService.GetPrimaryIdAsync(coreModule.CurrentUser, cancellation);
+            await staffService.SetPrimaryAsync(primaryStaff, cancellation);
 
-            var staffVm = await staffService.FindByIdAsync(primaryStaff, cancellation);
-            await staffService.SetCurrentAsync(staffVm, cancellation);
+            var staffVm = await staffService.GetByIdAsync(primaryStaff, cancellation);
+            await staffService.SetPrimaryAsync(staffVm, cancellation);
             workDbService.AutoUpdate(staffVm);
         }
         catch
         {
             try
             {
-                var result = await staffService.FindAllByUserAsync(coreModule.CurrentUser, cancellation);
+                var result = await staffService.GetAllByUserAsync(coreModule.CurrentUser, cancellation);
                 var staffVm = result.FirstOrDefault();
 
                 ArgumentNullException.ThrowIfNull(staffVm);
 
-                await staffService.SetCurrentAsync(staffVm, cancellation);
-                await staffService.BindingPrimaryAsync(coreModule.CurrentUser, staffVm, cancellation);
+                await staffService.SetPrimaryAsync(staffVm, cancellation);
+                await staffService.SetPrimaryToUserAsync(staffVm, coreModule.CurrentUser, cancellation);
                 workDbService.AutoUpdate(staffVm);
             }
             catch
@@ -83,8 +83,8 @@ internal class HostedService(
                 var staffVm = new StaffViewModel { Name = coreModule.CurrentUser.Name };
                 await staffService.AddAsync(staffVm, coreModule.CurrentUser, cancellation);
 
-                await staffService.SetCurrentAsync(staffVm, cancellation);
-                await staffService.BindingPrimaryAsync(coreModule.CurrentUser, staffVm, cancellation);
+                await staffService.SetPrimaryAsync(staffVm, cancellation);
+                await staffService.SetPrimaryToUserAsync(staffVm, coreModule.CurrentUser, cancellation);
                 workDbService.AutoUpdate(staffVm);
             }
         }
@@ -101,7 +101,7 @@ internal class HostedService(
         //创建销售职位 (如果没有
         try
         {
-            await staffPositionService.FindByTypeAsync(StaffPositionType.Salesperson, cancellation);
+            await staffPositionService.GetByTypeAsync(StaffPositionType.Salesperson, cancellation);
         }
         catch
         {
@@ -115,7 +115,7 @@ internal class HostedService(
 
         try
         {
-            await staffPositionService.FindByTypeAsync(StaffPositionType.Designer, cancellation);
+            await staffPositionService.GetByTypeAsync(StaffPositionType.Designer, cancellation);
         }
         catch
         {

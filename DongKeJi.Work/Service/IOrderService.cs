@@ -5,13 +5,16 @@ using DongKeJi.Extensions;
 using DongKeJi.Inject;
 using DongKeJi.Validation;
 using DongKeJi.Work.Model;
+using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.Model.Entity.Staff;
+using DongKeJi.Work.ViewModel.Consume;
 using DongKeJi.Work.ViewModel.Customer;
 using DongKeJi.Work.ViewModel.Order;
 using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Controls;
 
 namespace DongKeJi.Work.Service;
 
@@ -45,22 +48,22 @@ public interface IOrderService
         CancellationToken cancellation = default);
 
     /// <summary>
-    /// 查询订单的销售
+    /// 获取订单的销售
     /// </summary>
     /// <param name="order"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<StaffViewModel> FindSalespersonAsync(
+    ValueTask<StaffViewModel> GetSalespersonAsync(
         IIdentifiable order,
         CancellationToken cancellation = default);
 
     /// <summary>
-    /// 查询订单的机构
+    /// 获取订单的机构
     /// </summary>
     /// <param name="order"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<CustomerViewModel> FindCustomerAsync(
+    ValueTask<CustomerViewModel> GetCustomerAsync(
         IIdentifiable order,
         CancellationToken cancellation = default);
 
@@ -84,29 +87,84 @@ public interface IOrderService
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<OrderViewModel>> FindAllByCustomerIdAsync(
+    ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerAsync(
         IIdentifiable customer,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     根据员工Id查询所有订单
+    ///     根据员工Id获取所有订单
     /// </summary>
     /// <param name="staff"></param>
     /// <param name="skip"></param>
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<OrderViewModel>> FindAllByStaffIdAsync(
+    ValueTask<IEnumerable<OrderViewModel>> GetAllByStaffAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
         CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 获取所有订单
+    /// </summary>
+    /// <param name="skip"></param>
+    /// <param name="take"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<IEnumerable<OrderViewModel>> GetAllAsync(
+        int? skip = null,
+        int? take = null,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 获取所有指定类型订单
+    /// </summary>
+    /// <param name="skip"></param>
+    /// <param name="take"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask<IEnumerable<TOrder>> GetAllAsync<TOrder>(
+        int? skip = null,
+        int? take = null,
+        CancellationToken cancellation = default) where TOrder : OrderViewModel;
 }
 
 /// <summary>
-///     订单服务
+/// 订单服务扩展
+/// </summary>
+public static class OrderServiceExtensions
+{
+    /// <summary>
+    /// 获取所有订单
+    /// </summary>
+    /// <param name="orderService"></param>
+    /// <param name="order"></param>
+    /// <param name="skip"></param>
+    /// <param name="take"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    public static async ValueTask<IEnumerable<OrderViewModel>> GetAllAsync(
+        this IOrderService orderService, 
+        OrderType order, 
+        int? skip = null,
+        int? take = null,
+        CancellationToken cancellation = default)
+    {
+        return order switch
+        {
+            OrderType.Timing => await orderService.GetAllAsync<OrderTimingViewModel>(skip, take, cancellation),
+            OrderType.Counting => await orderService.GetAllAsync<OrderCountingViewModel>(skip, take, cancellation),
+            OrderType.Mixing => await orderService.GetAllAsync<OrderMixingViewModel>(skip, take, cancellation),
+            _ => []
+        };
+    }
+}
+
+/// <summary>
+///     订单服务默认实现
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IOrderService))]
 internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderService
@@ -196,7 +254,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         }
     }
 
-    public async ValueTask<StaffViewModel> FindSalespersonAsync(
+    public async ValueTask<StaffViewModel> GetSalespersonAsync(
         IIdentifiable order,
         CancellationToken cancellation = default)
     {
@@ -226,11 +284,13 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询订单销售时发生错误\n订单Id: {order.Id}", ex);
+            throw new DatabaseException($"获取订单销售时发生错误\n订单Id: {order.Id}", ex);
         }
     }
 
-    public async ValueTask<CustomerViewModel> FindCustomerAsync(IIdentifiable order, CancellationToken cancellation = default)
+    public async ValueTask<CustomerViewModel> GetCustomerAsync(
+        IIdentifiable order, 
+        CancellationToken cancellation = default)
     {
         //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
@@ -247,7 +307,7 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询订单销售时发生错误\n订单Id: {order.Id}", ex);
+            throw new DatabaseException($"获取订单销售时发生错误\n订单Id: {order.Id}", ex);
         }
     }
 
@@ -292,11 +352,11 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询订单销售时发生错误\n订单Id: {order}", ex);
+            throw new DatabaseException($"获取订单销售时发生错误\n订单Id: {order}", ex);
         }
     }
 
-    public async ValueTask<IEnumerable<OrderViewModel>> FindAllByCustomerIdAsync(
+    public async ValueTask<IEnumerable<OrderViewModel>> GetAllByCustomerAsync(
         IIdentifiable customer,
         int? skip = null,
         int? take = null,
@@ -319,11 +379,11 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"获取机构下所有订单时发生错误\n机构Id: {customer}", ex);
+            throw new DatabaseException($"获取机构下所有订单时发生错误\n机构Id: {customer}\nSkip: {skip}\nTake: {take}", ex);
         }
     }
 
-    public async ValueTask<IEnumerable<OrderViewModel>> FindAllByStaffIdAsync(
+    public async ValueTask<IEnumerable<OrderViewModel>> GetAllByStaffAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,
@@ -346,7 +406,88 @@ internal class OrderService(WorkDbContext dbContext, IMapper mapper) : IOrderSer
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"获取员工下所有订单时发生错误\n员工Id: {staff}", ex);
+            throw new DatabaseException($"获取员工下所有订单时发生错误\n员工Id: {staff}\nSkip: {skip}\nTake: {take}", ex);
+        }
+    }
+
+    public async ValueTask<IEnumerable<OrderViewModel>> GetAllAsync(
+        int? skip = null, 
+        int? take = null, 
+        CancellationToken cancellation = default)
+    {
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            var orders = await dbContext.Order
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+
+            return orders.Select(mapper.Map<OrderViewModel>);
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new DatabaseException($"获取所有订单时发生错误\nSkip: {skip}\nTake: {take}", ex);
+        }
+    }
+
+    public async ValueTask<IEnumerable<TOrder>> GetAllAsync<TOrder>(
+        int? skip = null, 
+        int? take = null, 
+        CancellationToken cancellation = default) where TOrder : OrderViewModel
+    {
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            var consumeType = typeof(TOrder);
+
+            if (consumeType == typeof(OrderTimingViewModel))
+            {
+                var result = await LoadTiming();
+                return result.Select(mapper.Map<TOrder>);
+            }
+
+            if (consumeType == typeof(OrderCountingViewModel))
+            {
+                var result = await LoadCounting();
+                return result.Select(mapper.Map<TOrder>);
+            }
+
+            if (consumeType == typeof(OrderMixingViewModel))
+            {
+                var result = await LoadMixing();
+                return result.Select(mapper.Map<TOrder>);
+            }
+
+            return [];
+        }
+        catch (Exception ex)
+        {
+            //await transaction.RollbackAsync(cancellation);
+            throw new DatabaseException($"获取所有指定类型订单时发生错误\nSkip: {skip}\nTake: {take}", ex);
+        }
+
+        async Task<List<OrderTimingEntity>> LoadTiming()
+        {
+            return await dbContext.OrderTiming
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+        }
+
+        async Task<List<OrderCountingEntity>> LoadCounting()
+        {
+            return await dbContext.OrderCounting
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
+        }
+
+        async Task<List<OrderMixingEntity>> LoadMixing()
+        {
+            return await dbContext.OrderMixing
+                .SkipAndTake(skip, take)
+                .ToListAsync(cancellation);
         }
     }
 }

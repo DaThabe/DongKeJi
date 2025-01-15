@@ -13,12 +13,15 @@ using DongKeJi.Work.ViewModel.Staff;
 namespace DongKeJi.Work.Service;
 
 
+/// <summary>
+/// 职位服务
+/// </summary>
 public interface IStaffPositionService
 {
     /// <summary>
-    ///     绑定职位
+    /// 关联员工  (将指定职位关联至员工
     /// </summary>
-    ValueTask<StaffPositionViewModel> BindingAsync(
+    ValueTask<StaffPositionViewModel> SetStaffAsync(
         StaffPositionType positionType, 
         IIdentifiable staff,
         CancellationToken cancellation = default);
@@ -26,7 +29,7 @@ public interface IStaffPositionService
     /// <summary>
     ///     解除绑定职位
     /// </summary>
-    ValueTask UnbindingAsync(
+    ValueTask RemoveStaffAsync(
         StaffPositionType positionType, 
         IIdentifiable staff,
         CancellationToken cancellation = default);
@@ -34,7 +37,7 @@ public interface IStaffPositionService
     /// <summary>
     ///     解除绑定员工的所有职位
     /// </summary>
-    ValueTask UnbindingAsync(
+    ValueTask RemoveStaffAsync(
         IIdentifiable staff, 
         CancellationToken cancellation = default);
 
@@ -59,24 +62,24 @@ public interface IStaffPositionService
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     根据类型查询职位信息
+    ///     根据类型获取职位信息
     /// </summary>
     /// <param name="positionType"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<StaffPositionViewModel> FindByTypeAsync(
+    ValueTask<StaffPositionViewModel> GetByTypeAsync(
         StaffPositionType positionType,
         CancellationToken cancellation = default);
 
     /// <summary>
-    ///     查询员工的所有职位
+    ///     获取员工的所有职位
     /// </summary>
     /// <param name="staff"></param>
     /// <param name="take"></param>
     /// <param name="cancellation"></param>
     /// <param name="skip"></param>
     /// <returns></returns>
-    ValueTask<IEnumerable<StaffPositionViewModel>> FindAllByStaffAsync(
+    ValueTask<IEnumerable<StaffPositionViewModel>> GetAllByStaffAsync(
         IIdentifiable staff, 
         int? skip = null,
         int? take = null, 
@@ -95,10 +98,15 @@ public interface IStaffPositionService
         CancellationToken cancellation = default);
 }
 
+/// <summary>
+/// 职位服务默认实现
+/// </summary>
+/// <param name="mapper"></param>
+/// <param name="dbContext"></param>
 [Inject(ServiceLifetime.Transient, typeof(IStaffPositionService))]
 internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : IStaffPositionService
 {
-    public async ValueTask<StaffPositionViewModel> BindingAsync(
+    public async ValueTask<StaffPositionViewModel> SetStaffAsync(
         StaffPositionType positionType,
         IIdentifiable staff,
         CancellationToken cancellation = default)
@@ -147,7 +155,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
         }
     }
 
-    public async ValueTask UnbindingAsync(
+    public async ValueTask RemoveStaffAsync(
         StaffPositionType positionType,
         IIdentifiable staff,
         CancellationToken cancellation = default)
@@ -174,7 +182,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
         }
     }
 
-    public async ValueTask UnbindingAsync(
+    public async ValueTask RemoveStaffAsync(
         IIdentifiable staff,
         CancellationToken cancellation = default)
     {
@@ -261,7 +269,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
         }
     }
 
-    public async ValueTask<StaffPositionViewModel> FindByTypeAsync(
+    public async ValueTask<StaffPositionViewModel> GetByTypeAsync(
         StaffPositionType positionType,
         CancellationToken cancellation = default)
     {
@@ -282,7 +290,7 @@ internal class StaffPositionService(IMapper mapper, WorkDbContext dbContext) : I
         }
     }
 
-    public async ValueTask<IEnumerable<StaffPositionViewModel>> FindAllByStaffAsync(
+    public async ValueTask<IEnumerable<StaffPositionViewModel>> GetAllByStaffAsync(
         IIdentifiable staff,
         int? skip = null,
         int? take = null,

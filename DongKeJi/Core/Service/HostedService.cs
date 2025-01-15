@@ -34,7 +34,7 @@ internal class HostedService(
         try
         {
             var userId = await userService.GetRememberUserIdAsync(cancellationToken);
-            var user = await userService.FindByIdAsync(userId, cancellationToken);
+            var user = await userService.GetByIdAsync(userId, cancellationToken);
 
             await userService.LoginAsync(user, true, cancellation: cancellationToken);
             database.AutoUpdate(user);

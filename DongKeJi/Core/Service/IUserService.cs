@@ -13,7 +13,7 @@ namespace DongKeJi.Core.Service;
 
 
 /// <summary>
-///     用户储存库
+/// 用户服务
 /// </summary>
 public interface IUserService
 {
@@ -25,11 +25,11 @@ public interface IUserService
     ValueTask<IIdentifiable> GetRememberUserIdAsync(CancellationToken cancellation = default);
 
     /// <summary>
-    ///     获取"记住我"的用户Id
+    /// 删除"记住我"的用户
     /// </summary>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask ClearRememberUserIdAsync(CancellationToken cancellation = default);
+    ValueTask RemoveRememberUserAsync(CancellationToken cancellation = default);
 
 
 
@@ -59,20 +59,20 @@ public interface IUserService
     ValueTask AddAsync(UserViewModel value, CancellationToken cancellation = default);
 
     /// <summary>
-    ///     根据用户名查询
+    ///     根据用户名获取
     /// </summary>
     /// <param name="name"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<UserViewModel> FindByNameAsync(string name, CancellationToken cancellation = default);
+    ValueTask<UserViewModel> GetByNameAsync(string name, CancellationToken cancellation = default);
 
     /// <summary>
-    ///     根据用户Id查询
+    ///     根据用户Id获取
     /// </summary>
     /// <param name="value"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask<UserViewModel> FindByIdAsync(IIdentifiable value, CancellationToken cancellation = default);
+    ValueTask<UserViewModel> GetByIdAsync(IIdentifiable value, CancellationToken cancellation = default);
 
     /// <summary>
     ///     获取所有用户
@@ -85,6 +85,13 @@ public interface IUserService
         CancellationToken cancellation = default);
 }
 
+/// <summary>
+/// 用户服务默认实现
+/// </summary>
+/// <param name="mapper"></param>
+/// <param name="coreConfigService"></param>
+/// <param name="dbContext"></param>
+/// <param name="coreModule"></param>
 [Inject(ServiceLifetime.Singleton, typeof(IUserService))]
 internal class UserService(
     IMapper mapper,
@@ -92,18 +99,23 @@ internal class UserService(
     CoreDbContext dbContext,
     ICoreModule coreModule) :  IUserService
 {
-    public async ValueTask ClearRememberUserIdAsync(CancellationToken cancellation = default)
+    public async ValueTask RemoveRememberUserAsync(
+        CancellationToken cancellation = default)
     {
         await coreConfigService.RememberUserId.SetAsync(Guid.Empty, cancellation);
     }
 
-    public async ValueTask<IIdentifiable> GetRememberUserIdAsync(CancellationToken cancellation = default)
+    public async ValueTask<IIdentifiable> GetRememberUserIdAsync(
+        CancellationToken cancellation = default)
     {
         var guid = await coreConfigService.RememberUserId.GetAsync(cancellation: cancellation);
         return Identifiable.Create(guid);
     }
 
-    public async ValueTask LoginAsync(UserViewModel user, bool isRemember = false, CancellationToken cancellation = default)
+    public async ValueTask LoginAsync(
+        UserViewModel user,
+        bool isRemember = false, 
+        CancellationToken cancellation = default)
     {
         if (isRemember)
         {
@@ -111,19 +123,22 @@ internal class UserService(
         }
         else
         {
-            await ClearRememberUserIdAsync(cancellation);
+            await RemoveRememberUserAsync(cancellation);
         }
 
         (coreModule as CoreModule)!.CurrentUser = user;
     }
 
-    public ValueTask LogoutAsync(CancellationToken cancellation = default)
+    public ValueTask LogoutAsync(
+        CancellationToken cancellation = default)
     {
         (coreModule as CoreModule)!.CurrentUser = null;
         return ValueTask.CompletedTask;
     }
 
-    public async ValueTask AddAsync(UserViewModel value, CancellationToken cancellation = default)
+    public async ValueTask AddAsync(
+        UserViewModel value, 
+        CancellationToken cancellation = default)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellation);
 
@@ -132,7 +147,7 @@ internal class UserService(
             //验证
             value.AssertValidate();
 
-            //查询
+            //获取
             var userEntity = await dbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == value.Id, cancellation);
              DatabaseException.ThrowIfEntityAlreadyExists(userEntity, "用户已存在");
@@ -151,7 +166,9 @@ internal class UserService(
         }
     }
 
-    public async ValueTask<UserViewModel> FindByNameAsync(string name, CancellationToken cancellation = default)
+    public async ValueTask<UserViewModel> GetByNameAsync(
+        string name, 
+        CancellationToken cancellation = default)
     {
         //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
 
@@ -167,11 +184,13 @@ internal class UserService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询用户时发生错误\n用户名称: {name}", ex);
+            throw new DatabaseException($"获取用户时发生错误\n用户名称: {name}", ex);
         }
     }
 
-    public async ValueTask<UserViewModel> FindByIdAsync(IIdentifiable value, CancellationToken cancellation = default)
+    public async ValueTask<UserViewModel> GetByIdAsync(
+        IIdentifiable value, 
+        CancellationToken cancellation = default)
     {
         //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
 
@@ -186,11 +205,13 @@ internal class UserService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"查询用户时发生错误\n用户Id: {value.Id}", ex);
+            throw new DatabaseException($"获取用户时发生错误\n用户Id: {value.Id}", ex);
         }
     }
 
-    public async ValueTask<IEnumerable<UserViewModel>> GetAllAsync(int? skip = null, int? take = null,
+    public async ValueTask<IEnumerable<UserViewModel>> GetAllAsync(
+        int? skip = null, 
+        int? take = null,
         CancellationToken cancellation = default)
     {
         //await using var transaction = await DbContext.Database.BeginTransactionAsync(cancellation);
@@ -205,12 +226,7 @@ internal class UserService(
         catch (Exception ex)
         {
             //await transaction.RollbackAsync(cancellation);
-            throw new DatabaseException($"获取所有用户时发生错误", ex);
+            throw new DatabaseException($"获取所有用户时发生错误\nSkip: {skip}\nTake: {take}", ex);
         }
-    }
-
-    public ValueTask UpdateAsync(UserViewModel viewModel)
-    {
-        throw new NotImplementedException();
     }
 }
