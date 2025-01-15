@@ -25,36 +25,49 @@
         <!--  职位列表元素  -->
         <DataTemplate x:Key="PositionListItem" DataType="{x:Type staffVm:StaffPositionViewModel}">
 
-            <ui:CardAction
-                d:Content="标题"
-                Content="{Binding Title}"
-                IsHitTestVisible="False">
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+                <DockPanel>
 
-                <ui:CardAction.Icon>
-                    <ui:SymbolIcon Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
-                </ui:CardAction.Icon>
+                    <ui:SymbolIcon
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Right"
+                        Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
+                    <ui:TextBlock
+                        VerticalAlignment="Center"
+                        Appearance="Primary"
+                        Text="{Binding Title}" />
 
-            </ui:CardAction>
+                </DockPanel>
+            </Border>
 
         </DataTemplate>
 
         <!--  员工列表元素  -->
         <DataTemplate x:Key="StaffListItem" DataType="{x:Type staffVm:StaffViewModel}">
 
-            <ui:CardControl d:Icon="{ui:SymbolIcon Symbol=Bug24}" Header="{Binding Name}">
-
-                <ui:CardControl.Content>
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+                <DockPanel>
 
                     <ui:Button
                         Appearance="Danger"
                         Command="{Binding Data.UnbindingStaffCommand, Source={StaticResource BindingProxy}}"
                         CommandParameter="{Binding}"
+                        DockPanel.Dock="Right"
                         Foreground="#fff"
                         Icon="{ui:SymbolIcon Symbol=Delete24}" />
 
-                </ui:CardControl.Content>
+                    <ui:TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
 
-            </ui:CardControl>
+                </DockPanel>
+            </Border>
 
         </DataTemplate>
 
@@ -114,17 +127,7 @@
                 d:ItemsSource="{d:SampleData ItemCount=5}"
                 ItemTemplate="{StaticResource PositionListItem}"
                 ItemsSource="{Binding PositionCollection}"
-                SelectedItem="{Binding SelectedPosition}">
-
-                <ui:ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-
-                        <StackPanel Orientation="Vertical" />
-
-                    </ItemsPanelTemplate>
-                </ui:ListView.ItemsPanel>
-
-            </ui:ListView>
+                SelectedItem="{Binding SelectedPosition}" />
 
         </StackPanel>
 
@@ -215,18 +218,7 @@
                         Margin="5,0"
                         d:ItemsSource="{d:SampleData ItemCount=3}"
                         ItemTemplate="{StaticResource StaffListItem}"
-                        ItemsSource="{Binding StaffCollection}">
-
-
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-
-                                <StackPanel />
-
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                    </ItemsControl>
+                        ItemsSource="{Binding StaffCollection}" />
 
                 </StackPanel>
 

@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cb="clr-namespace:CalcBinding;assembly=CalcBinding"
+    xmlns:compose="clr-namespace:DongKeJi.Work.ViewModel.Compose"
     xmlns:consume="clr-namespace:DongKeJi.Work.ViewModel.Consume"
     xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
     xmlns:converter1="clr-namespace:DongKeJi.UI.Converter;assembly=DongKeJi"
@@ -19,7 +20,6 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:view="clr-namespace:DongKeJi.UI.View;assembly=DongKeJi"
     xmlns:viewModel="clr-namespace:DongKeJi.Work.ViewModel"
-    xmlns:compose="clr-namespace:DongKeJi.Work.ViewModel.Compose"
     d:DataContext="{d:DesignInstance viewModel:CustomerDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
     d:State="Focused"
@@ -35,44 +35,89 @@
 
         <dkjui:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
 
+        <!--  计时划扣  -->
+        <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume:ConsumeTimingViewModel}">
+            <StackPanel Orientation="Horizontal">
+
+                <ui:NumberBox
+                    ClearButtonEnabled="False"
+                    Icon="{ui:SymbolIcon Symbol=Clock24}"
+                    Maximum="99"
+                    Minimum="0.5"
+                    ToolTip="请输入划扣天数"
+                    Value="{Binding ConsumeDays}" />
+
+            </StackPanel>
+        </DataTemplate>
+
+        <!--  计数划扣  -->
+        <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume:ConsumeCountingViewModel}">
+            <StackPanel Orientation="Horizontal">
+
+                <ui:NumberBox
+                    ClearButtonEnabled="False"
+                    Icon="{ui:SymbolIcon Symbol=Layer20}"
+                    Maximum="99"
+                    Minimum="0.5"
+                    ToolTip="请输入划扣张数"
+                    Value="{Binding ConsumeCounts}" />
+
+            </StackPanel>
+        </DataTemplate>
+
+        <!--  混合划扣  -->
+        <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume:ConsumeMixingViewModel}">
+            <StackPanel Orientation="Horizontal">
+
+                <ui:NumberBox
+                    ClearButtonEnabled="False"
+                    Icon="{ui:SymbolIcon Symbol=Clock24}"
+                    Maximum="99"
+                    Minimum="0"
+                    ToolTip="请输入划扣天数"
+                    Value="{Binding ConsumeDays}" />
+
+                <ui:NumberBox
+                    ClearButtonEnabled="False"
+                    Icon="{ui:SymbolIcon Symbol=Layer20}"
+                    Maximum="99"
+                    Minimum="0"
+                    ToolTip="请输入划扣张数"
+                    Value="{Binding ConsumeCounts}" />
+
+            </StackPanel>
+        </DataTemplate>
+
+        <!--  划扣模板选择器  -->
+        <templateSelector:ConsumeDataTemplateSelector
+            x:Key="ConsumeTemplateSelector"
+            Counting="{StaticResource CountingConsume}"
+            Mixing="{StaticResource MixingConsume}"
+            Timing="{StaticResource TimingConsume}" />
+
 
         <!--  机构列表元素  -->
         <DataTemplate x:Key="CustomerListItem" DataType="{x:Type customerVm:CustomerViewModel}">
 
             <Border
-                Height="50"
                 Padding="10"
-                Background="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
+                Background="{DynamicResource CardBackground}"
                 CornerRadius="5">
+                <DockPanel>
 
-                <!--  d:Background="{ui:ThemeResource ControlFillColorDefaultBrush}"  -->
-
-                <Border.ContextMenu>
-                    <ContextMenu>
-
-                        <MenuItem Header="置顶" Icon="{ui:SymbolIcon Flag24}" />
-
-                    </ContextMenu>
-                </Border.ContextMenu>
-
-                <StackPanel Orientation="Horizontal">
-
-                    <ui:SymbolIcon
-                        Margin="0,0,5,0"
-                        Foreground="{ui:ThemeResource TextFillColorInverseBrush}"
-                        Symbol="Flag24" />
+                    <ui:SymbolIcon DockPanel.Dock="Left" Symbol="Flag24" />
 
                     <!--  机构名称  -->
                     <ui:TextBlock
+                        Margin="5,0,0,0"
                         VerticalAlignment="Center"
                         Appearance="Primary"
-                        FontTypography="BodyStrong"
-                        Foreground="{ui:ThemeResource TextFillColorInverseBrush}">
+                        FontTypography="BodyStrong">
                         <Run d:Text="区域" Text="{Binding Area}" />
                         <Run d:Text="名称" Text="{Binding Name}" />
                     </ui:TextBlock>
 
-                </StackPanel>
+                </DockPanel>
             </Border>
 
         </DataTemplate>
@@ -80,13 +125,14 @@
         <!--  订单列表元素  -->
         <DataTemplate x:Key="OrderListItem" DataType="{x:Type compose:SalespersonOrderViewModel}">
 
-            <ui:CardAction IsHitTestVisible="False">
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+                <DockPanel>
 
-                <ui:CardAction.Icon>
-                    <ui:SymbolIcon Symbol="{Binding Order.Type, Converter={StaticResource OrderTypeToSymbolConverter}}" />
-                </ui:CardAction.Icon>
-
-                <ui:CardAction.Content>
+                    <ui:SymbolIcon DockPanel.Dock="Left" Symbol="{Binding Order.Type, Converter={StaticResource OrderTypeToSymbolConverter}}" />
 
                     <StackPanel>
 
@@ -151,136 +197,70 @@
 
                     </StackPanel>
 
-                </ui:CardAction.Content>
-            </ui:CardAction>
-
+                </DockPanel>
+            </Border>
         </DataTemplate>
 
         <!--  划扣列表元素  -->
         <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type compose:DesignerConsumeViewModel}">
 
-            <ui:CardControl Margin="0,2">
+            <Border
+                Margin="3"
+                Padding="10,5"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+                <DockPanel>
 
-                <ui:CardControl.Resources>
+                    <!--  删除按钮  -->
+                    <ui:Button
+                        Margin="5,0,0,0"
+                        Appearance="Danger"
+                        Command="{Binding Data.RemoveConsumeCommand, Source={StaticResource BindingProxy}}"
+                        CommandParameter="{Binding}"
+                        DockPanel.Dock="Right"
+                        Foreground="#fff"
+                        Icon="{ui:SymbolIcon Symbol=Delete24}" />
 
-                    <!--  计时划扣  -->
-                    <DataTemplate x:Key="TimingConsume" DataType="{x:Type consume:ConsumeTimingViewModel}">
-                        <StackPanel Orientation="Horizontal">
+                    <!--  设计选择器  -->
+                    <ComboBox
+                        Margin="5,0,0,0"
+                        DockPanel.Dock="Right"
+                        ItemsSource="{Binding Data.DesignerCollection, Source={StaticResource BindingProxy}}"
+                        SelectedItem="{Binding Designer}"
+                        ToolTip="划扣设计">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type staff:StaffViewModel}">
+                                <ui:TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-                            <ui:NumberBox
-                                ClearButtonEnabled="False"
-                                Icon="{ui:SymbolIcon Symbol=Clock24}"
-                                Maximum="99"
-                                Minimum="0.5"
-                                ToolTip="请输入划扣天数"
-                                Value="{Binding ConsumeDays}" />
+                    <!--  划扣内容  -->
+                    <ContentPresenter
+                        VerticalAlignment="Center"
+                        Content="{Binding Consume}"
+                        ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}"
+                        DockPanel.Dock="Right" />
 
-                        </StackPanel>
-                    </DataTemplate>
+                    <!--  创建时间  -->
+                    <DatePicker
+                        Background="Transparent"
+                        BorderThickness="0"
+                        DockPanel.Dock="Left"
+                        SelectedDate="{Binding Consume.CreateTime, StringFormat=yyyy-MM-dd}"
+                        ToolTip="创建时间" />
 
-                    <!--  计数划扣  -->
-                    <DataTemplate x:Key="CountingConsume" DataType="{x:Type consume:ConsumeCountingViewModel}">
-                        <StackPanel Orientation="Horizontal">
+                    <ui:TextBox
+                        HorizontalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        PlaceholderText="备注..."
+                        Text="{Binding Consume.Title}" />
 
-                            <ui:NumberBox
-                                ClearButtonEnabled="False"
-                                Icon="{ui:SymbolIcon Symbol=Layer20}"
-                                Maximum="99"
-                                Minimum="0.5"
-                                ToolTip="请输入划扣张数"
-                                Value="{Binding ConsumeCounts}" />
 
-                        </StackPanel>
-                    </DataTemplate>
+                </DockPanel>
 
-                    <!--  混合划扣  -->
-                    <DataTemplate x:Key="MixingConsume" DataType="{x:Type consume:ConsumeMixingViewModel}">
-                        <StackPanel Orientation="Horizontal">
-
-                            <ui:NumberBox
-                                ClearButtonEnabled="False"
-                                Icon="{ui:SymbolIcon Symbol=Clock24}"
-                                Maximum="99"
-                                Minimum="0"
-                                ToolTip="请输入划扣天数"
-                                Value="{Binding ConsumeDays}" />
-
-                            <ui:NumberBox
-                                ClearButtonEnabled="False"
-                                Icon="{ui:SymbolIcon Symbol=Layer20}"
-                                Maximum="99"
-                                Minimum="0"
-                                ToolTip="请输入划扣张数"
-                                Value="{Binding ConsumeCounts}" />
-
-                        </StackPanel>
-                    </DataTemplate>
-
-                    <!--  划扣模板选择器  -->
-                    <templateSelector:ConsumeDataTemplateSelector
-                        x:Key="ConsumeTemplateSelector"
-                        Counting="{StaticResource CountingConsume}"
-                        Mixing="{StaticResource MixingConsume}"
-                        Timing="{StaticResource TimingConsume}" />
-
-                </ui:CardControl.Resources>
-
-                <ui:CardControl.Header>
-
-                    <DockPanel>
-
-                        <DatePicker
-                            Background="Transparent"
-                            BorderThickness="0"
-                            DockPanel.Dock="Left"
-                            SelectedDate="{Binding Consume.CreateTime, StringFormat=yyyy-MM-dd}"
-                            ToolTip="创建时间" />
-                        <ui:TextBox
-                            Background="Transparent"
-                            BorderThickness="0"
-                            PlaceholderText="备注..."
-                            Text="{Binding Consume.Title}" />
-
-                    </DockPanel>
-
-                </ui:CardControl.Header>
-
-                <ui:CardControl.Content>
-
-                    <DockPanel>
-
-                        <ui:Button
-                            Margin="5,0,0,0"
-                            Appearance="Danger"
-                            Command="{Binding Data.RemoveConsumeCommand, Source={StaticResource BindingProxy}}"
-                            CommandParameter="{Binding}"
-                            DockPanel.Dock="Right"
-                            Foreground="#fff"
-                            Icon="{ui:SymbolIcon Symbol=Delete24}" />
-
-                        <!--  设计选择器  -->
-                        <ComboBox
-                            Margin="5,0,0,0"
-                            DockPanel.Dock="Right"
-                            ItemsSource="{Binding Data.DesignerCollection, Source={StaticResource BindingProxy}}"
-                            SelectedItem="{Binding Designer}"
-                            ToolTip="划扣设计">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type staff:StaffViewModel}">
-                                    <ui:TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-
-                        <ContentPresenter
-                            VerticalAlignment="Center"
-                            Content="{Binding Consume}"
-                            ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}" />
-
-                    </DockPanel>
-                </ui:CardControl.Content>
-
-            </ui:CardControl>
+            </Border>
 
         </DataTemplate>
 
@@ -290,6 +270,9 @@
             <ui:TextBlock Appearance="Primary" Text="{Binding Name}" />
 
         </DataTemplate>
+
+
+
 
     </view:NavigationView.Resources>
 
@@ -353,7 +336,18 @@
                 ItemTemplate="{StaticResource CustomerListItem}"
                 ItemsSource="{Binding CustomerCollection}"
                 SelectedIndex="0"
-                SelectedItem="{Binding SelectedCustomer}" />
+                SelectedItem="{Binding SelectedCustomer}">
+
+                <ui:ListView.Template>
+                    <ControlTemplate>
+
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+
+                    </ControlTemplate>
+                </ui:ListView.Template>
+            </ui:ListView>
 
         </DockPanel>
 
@@ -548,7 +542,19 @@
                     <ItemsControl
                         d:ItemsSource="{d:SampleData ItemCount=3}"
                         ItemTemplate="{StaticResource ConsumeListItem}"
-                        ItemsSource="{Binding ConsumeCollection}" />
+                        ItemsSource="{Binding ConsumeCollection}">
+
+                        <ItemsControl.Template>
+                            <ControlTemplate>
+
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+
+                    </ItemsControl>
 
                 </TabItem>
 

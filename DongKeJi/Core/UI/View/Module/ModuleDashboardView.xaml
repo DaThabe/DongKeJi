@@ -155,11 +155,12 @@
             <ScrollViewer
                 Grid.Row="1"
                 Grid.Column="1"
+                Padding="10,0"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,5,0,0">
+                <StackPanel>
 
-                    <ui:CardControl Header="创建时间">
+                    <ui:CardControl Padding="20" Header="创建时间">
 
                         <ui:CardControl.Content>
                             <ui:TextBlock d:Text="0000-00-00" Text="{Binding SelectedModule.CreatedAt}" />
@@ -167,7 +168,7 @@
 
                     </ui:CardControl>
 
-                    <ui:CardControl Header="发布时间">
+                    <ui:CardControl Padding="20" Header="发布时间">
 
                         <ui:CardControl.Content>
                             <ui:TextBlock d:Text="0000-00-00" Text="{Binding SelectedModule.ReleaseDate}" />
@@ -175,7 +176,7 @@
 
                     </ui:CardControl>
 
-                    <ui:CardControl Header="开发者">
+                    <ui:CardControl Padding="20" Header="开发者">
 
                         <ui:CardControl.Content>
 
@@ -207,7 +208,7 @@
 
                     </ui:CardControl>
 
-                    <ui:CardControl Header="模块标签">
+                    <ui:CardControl Padding="20" Header="模块标签">
 
                         <ui:CardControl.Content>
 
@@ -239,7 +240,7 @@
 
                     </ui:CardControl>
 
-                    <ui:CardControl Header="依赖项">
+                    <ui:CardControl Padding="20" Header="依赖项">
 
                         <ui:CardControl.Content>
 

@@ -50,7 +50,7 @@ public partial class ConsumeExporterViewModel(
             if (openFolderDialog.ShowDialog() != true) return;
             if (openFolderDialog.FolderNames.Length == 0) return;
 
-            var fileName = string.Join("-", workModule.CurrentStaff?.Name, Date.ToString("yyyy.MM.dd"), "服务明细.txt");
+            var fileName = string.Join("-", workModule.CurrentStaff?.Name, Date.ToString("yyyy-MM"), "服务明细.txt");
             SavePath = Path.Combine(openFolderDialog.FolderNames.First(), fileName);
         }
         catch (Exception ex)

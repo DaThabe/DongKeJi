@@ -115,7 +115,7 @@ internal partial class WagesDashboardViewModel(
 
     async partial void OnSelectedDateChanged(DateTime value)
     {
-        if (_lastDateTime.Year == value.Year && _lastDateTime.Month == value.Month)
+        if (_lastDateTime.EqualsYearMonth(value))
         {
             return;
         }
@@ -152,8 +152,11 @@ internal partial class WagesDashboardViewModel(
             foreach (var order in orders)
             {
                 var customer = await orderService.GetCustomerAsync(order);
-                var consumes = await consumeService.GetAllByOrderAsync(order);
+                var consumes = (await consumeService.GetAllByOrderAsync(order))
+                    .Where(x => x.CreateTime.EqualsYearMonth(SelectedDate))
+                    .ToArray();
 
+                if (consumes.Length <= 0) continue;
                 items.Add(new CustomerOrderConsumePriceViewModel(SelectedDate, customer, order, consumes));
             }
 

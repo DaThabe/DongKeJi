@@ -26,24 +26,54 @@
         <!--  员工列表元素  -->
         <DataTemplate x:Key="StaffListItem" DataType="{x:Type staffVm:StaffViewModel}">
 
-            <ui:CardAction
-                Content="{Binding Name}"
-                Icon="{ui:SymbolIcon Symbol=People24}"
-                IsHitTestVisible="False" />
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+
+                <DockPanel>
+                    <ui:SymbolIcon VerticalAlignment="Center" Symbol="People24" />
+                    <ui:TextBlock
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Name}" />
+
+                </DockPanel>
+            </Border>
 
         </DataTemplate>
 
         <!--  职位列表元素  -->
         <DataTemplate x:Key="PositionListItem" DataType="{x:Type staffVm:StaffPositionViewModel}">
 
-            <ui:CardControl d:Icon="{ui:SymbolIcon Symbol=Bug24}">
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+                <DockPanel>
 
-                <ui:CardControl.Icon>
-                    <ui:SymbolIcon Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
-                </ui:CardControl.Icon>
+                    <!--  图标  -->
+                    <ui:SymbolIcon
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Left"
+                        Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
 
-                <ui:CardControl.Header>
-                    <StackPanel>
+                    <!--  按钮  -->
+                    <ui:Button
+                        Appearance="Danger"
+                        Command="{Binding Data.UnbindingPositionCommand, Source={StaticResource BindingProxy}}"
+                        CommandParameter="{Binding}"
+                        DockPanel.Dock="Right"
+                        Foreground="#fff"
+                        Icon="{ui:SymbolIcon Symbol=Delete24}" />
+
+                    <!--  信息  -->
+                    <StackPanel
+                        Margin="5,0,0,0"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Left">
 
                         <ui:TextBlock Appearance="Primary" Text="{Binding Title}" />
 
@@ -53,20 +83,9 @@
                             Text="{Binding Describe}" />
 
                     </StackPanel>
-                </ui:CardControl.Header>
 
-                <ui:CardControl.Content>
-
-                    <ui:Button
-                        Appearance="Danger"
-                        Command="{Binding Data.UnbindingPositionCommand, Source={StaticResource BindingProxy}}"
-                        CommandParameter="{Binding}"
-                        Foreground="#fff"
-                        Icon="{ui:SymbolIcon Symbol=Delete24}" />
-
-                </ui:CardControl.Content>
-
-            </ui:CardControl>
+                </DockPanel>
+            </Border>
 
         </DataTemplate>
 
@@ -125,19 +144,7 @@
                 d:ItemsSource="{d:SampleData ItemCount=5}"
                 ItemTemplate="{StaticResource StaffListItem}"
                 ItemsSource="{Binding StaffCollection}"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                SelectedItem="{Binding SelectedStaff}">
-
-                <ui:ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-
-                        <StackPanel Orientation="Vertical" />
-
-                    </ItemsPanelTemplate>
-                </ui:ListView.ItemsPanel>
-
-            </ui:ListView>
+                SelectedItem="{Binding SelectedStaff}" />
 
         </StackPanel>
 
@@ -229,48 +236,10 @@
             </ui:CardControl>
 
             <!--  底部  -->
-            <Grid Grid.Row="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="127*" />
-                    <RowDefinition Height="229*" />
-                </Grid.RowDefinitions>
-
-                <Grid.ColumnDefinitions>
-
-                    <ColumnDefinition Width="*" MinWidth="200" />
-                    <ColumnDefinition Width="Auto" />
-
-                </Grid.ColumnDefinitions>
-
-                <!--  职位信息  -->
-                <StackPanel Grid.RowSpan="2" Grid.Column="0">
-
-                    <ui:TextBlock
-                        Margin="0,10"
-                        FontTypography="BodyStrong"
-                        Text="职位信息" />
-
-                    <ItemsControl
-                        Margin="5,0"
-                        d:ItemsSource="{d:SampleData ItemCount=3}"
-                        ItemTemplate="{StaticResource PositionListItem}"
-                        ItemsSource="{Binding PositionCollection}">
-
-
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-
-                                <StackPanel />
-
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                    </ItemsControl>
-
-                </StackPanel>
+            <DockPanel Grid.Row="1">
 
                 <!--  员工信息  -->
-                <StackPanel Grid.RowSpan="2" Grid.Column="1">
+                <StackPanel DockPanel.Dock="Right">
 
                     <!--  左栏  -->
                     <ui:TextBlock
@@ -283,7 +252,23 @@
 
                 </StackPanel>
 
-            </Grid>
+                <!--  职位信息  -->
+                <StackPanel>
+
+                    <ui:TextBlock
+                        Margin="0,10"
+                        FontTypography="BodyStrong"
+                        Text="职位信息" />
+
+                    <ItemsControl
+                        Margin="5,0"
+                        d:ItemsSource="{d:SampleData ItemCount=3}"
+                        ItemTemplate="{StaticResource PositionListItem}"
+                        ItemsSource="{Binding PositionCollection}" />
+
+                </StackPanel>
+
+            </DockPanel>
 
         </Grid>
 

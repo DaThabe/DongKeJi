@@ -2,6 +2,7 @@
     x:Class="DongKeJi.Work.UI.View.ConsumeDashboardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:calcBinding="clr-namespace:CalcBinding;assembly=CalcBinding"
     xmlns:compose="clr-namespace:DongKeJi.Work.ViewModel.Compose"
     xmlns:consumeVm="clr-namespace:DongKeJi.Work.ViewModel.Consume"
@@ -121,28 +122,19 @@
 
         <!--  待办划扣列表元素  -->
         <DataTemplate x:Key="TodoConsumeListItem" DataType="{x:Type compose:DesignerCustomerOrderConsumeViewModel}">
-            <ui:CardControl Command="{Binding Data.ClickConsumeCommand, Source={StaticResource BindingProxy}}" CommandParameter="{Binding}">
-
-                <!--  名称  -->
-                <ui:CardControl.Header>
-
-                    <ui:TextBlock
-                        Margin="0,0,10,0"
-                        VerticalAlignment="Center"
-                        Appearance="Primary"
-                        DockPanel.Dock="Left"
-                        FontTypography="BodyStrong"
-                        Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}">
-
-                        <Run Text="{Binding Customer.Name}" />
-                        <Run Text="{Binding Order.Name}" />
-
-                    </ui:TextBlock>
-
-                </ui:CardControl.Header>
-
-                <!--  划扣  -->
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
                 <DockPanel>
+
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseEnter">
+                            <b:InvokeCommandAction Command="{Binding Data.ClickConsumeCommand, Source={StaticResource BindingProxy}}" CommandParameter="{Binding}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+
 
                     <!--  完成待办  -->
                     <ui:Button
@@ -172,18 +164,71 @@
                     <ContentPresenter
                         VerticalAlignment="Center"
                         Content="{Binding Consume}"
-                        ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}" />
+                        ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}"
+                        DockPanel.Dock="Right" />
+
+                    <!--  名称  -->
+                    <ui:TextBlock
+                        Margin="0,0,10,0"
+                        VerticalAlignment="Center"
+                        Appearance="Primary"
+                        DockPanel.Dock="Left"
+                        FontTypography="BodyStrong"
+                        Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}">
+
+                        <Run Text="{Binding Customer.Name}" />
+                        <Run Text="{Binding Order.Name}" />
+
+                    </ui:TextBlock>
 
                 </DockPanel>
-            </ui:CardControl>
+            </Border>
         </DataTemplate>
 
         <!--  待办划扣列表元素  -->
         <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type compose:DesignerCustomerOrderConsumeViewModel}">
-            <ui:CardControl Command="{Binding Data.ClickConsumeCommand, Source={StaticResource BindingProxy}}" CommandParameter="{Binding}">
+            <Border
+                Margin="3"
+                Padding="10"
+                Background="{DynamicResource CardBackground}"
+                CornerRadius="5">
+                <DockPanel>
 
-                <!--  名称  -->
-                <ui:CardControl.Header>
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseEnter">
+                            <b:InvokeCommandAction Command="{Binding Data.ClickConsumeCommand, Source={StaticResource BindingProxy}}" CommandParameter="{Binding}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+
+                    <!--  删除划扣  -->
+                    <ui:Button
+                        Margin="10,0,0,0"
+                        Appearance="Danger"
+                        Command="{Binding Data.RemoveConsumeCommand, Source={StaticResource BindingProxy}}"
+                        CommandParameter="{Binding}"
+                        DockPanel.Dock="Right"
+                        Foreground="#fff"
+                        Icon="{ui:SymbolIcon Symbol=Delete24}"
+                        ToolTip="删除划扣" />
+
+                    <!--  设计师名称  -->
+                    <ui:TextBox
+                        Margin="10,0,0,0"
+                        VerticalContentAlignment="Center"
+                        Background="Transparent "
+                        BorderThickness="0"
+                        DockPanel.Dock="Right"
+                        IsReadOnly="True"
+                        Text="{Binding Designer.Name}" />
+
+                    <!--  划扣内容  -->
+                    <ContentPresenter
+                        VerticalAlignment="Center"
+                        Content="{Binding Consume}"
+                        ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}"
+                        DockPanel.Dock="Right" />
+
+                    <!--  名称  -->
                     <ui:TextBlock
                         Margin="0,0,10,0"
                         VerticalAlignment="Center"
@@ -195,37 +240,10 @@
                         <Run Text="{Binding Order.Name}" />
 
                     </ui:TextBlock>
-                </ui:CardControl.Header>
-
-                <!--  划扣  -->
-                <DockPanel>
-
-                    <ui:Button
-                        Margin="10,0,0,0"
-                        Appearance="Danger"
-                        Command="{Binding Data.RemoveConsumeCommand, Source={StaticResource BindingProxy}}"
-                        CommandParameter="{Binding}"
-                        DockPanel.Dock="Right"
-                        Foreground="#fff"
-                        Icon="{ui:SymbolIcon Symbol=Delete24}"
-                        ToolTip="删除划扣" />
-
-                    <ui:TextBox
-                        Margin="10,0,0,0"
-                        VerticalContentAlignment="Center"
-                        Background="Transparent "
-                        BorderThickness="0"
-                        DockPanel.Dock="Right"
-                        IsReadOnly="True"
-                        Text="{Binding Designer.Name}" />
-
-                    <ContentPresenter
-                        VerticalAlignment="Center"
-                        Content="{Binding Consume}"
-                        ContentTemplateSelector="{StaticResource ConsumeTemplateSelector}" />
 
                 </DockPanel>
-            </ui:CardControl>
+
+            </Border>
         </DataTemplate>
 
 
