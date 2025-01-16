@@ -1,4 +1,4 @@
-﻿<view:NavigationView
+﻿<dui:NavigationPage
     x:Class="DongKeJi.Work.UI.View.ConsumeDashboardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,19 +7,19 @@
     xmlns:compose="clr-namespace:DongKeJi.Work.ViewModel.Compose"
     xmlns:consumeVm="clr-namespace:DongKeJi.Work.ViewModel.Consume"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dui="clr-namespace:DongKeJi.UI.Control;assembly=DongKeJi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:ui1="clr-namespace:DongKeJi.UI;assembly=DongKeJi"
-    xmlns:view="clr-namespace:DongKeJi.UI.View;assembly=DongKeJi"
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance vm:ConsumeDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
     d:State="Focused"
     mc:Ignorable="d">
 
-    <view:NavigationView.Resources>
+    <dui:NavigationPage.Resources>
 
         <ui1:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
 
@@ -122,11 +122,7 @@
 
         <!--  待办划扣列表元素  -->
         <DataTemplate x:Key="TodoConsumeListItem" DataType="{x:Type compose:DesignerCustomerOrderConsumeViewModel}">
-            <Border
-                Margin="3"
-                Padding="10"
-                Background="{DynamicResource CardBackground}"
-                CornerRadius="5">
+            <dui:CardBorder>
                 <DockPanel>
 
                     <b:Interaction.Triggers>
@@ -182,16 +178,12 @@
                     </ui:TextBlock>
 
                 </DockPanel>
-            </Border>
+            </dui:CardBorder>
         </DataTemplate>
 
         <!--  待办划扣列表元素  -->
         <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type compose:DesignerCustomerOrderConsumeViewModel}">
-            <Border
-                Margin="3"
-                Padding="10"
-                Background="{DynamicResource CardBackground}"
-                CornerRadius="5">
+            <dui:CardBorder>
                 <DockPanel>
 
                     <b:Interaction.Triggers>
@@ -243,11 +235,11 @@
 
                 </DockPanel>
 
-            </Border>
+            </dui:CardBorder>
         </DataTemplate>
 
 
-    </view:NavigationView.Resources>
+    </dui:NavigationPage.Resources>
 
     <Grid>
 
@@ -396,4 +388,4 @@
 
     </Grid>
 
-</view:NavigationView>
+</dui:NavigationPage>

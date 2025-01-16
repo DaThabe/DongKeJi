@@ -1,14 +1,14 @@
-﻿<view:NavigationView
+﻿<control:NavigationPage
     x:Class="DongKeJi.Core.UI.View.User.UserDashboardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cb="clr-namespace:CalcBinding;assembly=CalcBinding"
+    xmlns:control="clr-namespace:DongKeJi.UI.Control"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DongKeJi.Core.UI.View.User"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:userVm="clr-namespace:DongKeJi.Core.ViewModel.User"
-    xmlns:view="clr-namespace:DongKeJi.UI.View"
     Title="用户面板"
     d:DataContext="{d:DesignInstance userVm:UserDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
@@ -16,7 +16,7 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <view:NavigationView.Resources>
+    <control:NavigationPage.Resources>
 
         <DataTemplate x:Key="UserListItem" DataType="{x:Type userVm:UserViewModel}">
 
@@ -25,7 +25,7 @@
 
         </DataTemplate>
 
-    </view:NavigationView.Resources>
+    </control:NavigationPage.Resources>
 
     <!--  内容  -->
     <Grid>
@@ -172,4 +172,4 @@
     </Grid>
 
 
-</view:NavigationView>
+</control:NavigationPage>

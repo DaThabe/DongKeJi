@@ -2,13 +2,13 @@
 using System.Windows;
 using Wpf.Ui.Controls;
 
-namespace DongKeJi.UI.View;
+namespace DongKeJi.UI.Control;
 
 
 /// <summary>
-/// 导航视图
+/// 导航页面
 /// </summary>
-public class NavigationView : ContentControl, INavigationAware
+public class NavigationPage : ContentControl, INavigationAware
 {
     /// <summary>
     /// 标题
@@ -16,17 +16,17 @@ public class NavigationView : ContentControl, INavigationAware
     public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
         nameof(Title),
         typeof(string),
-        typeof(NavigationView),
-        new PropertyMetadata(nameof(NavigationView)));
+        typeof(NavigationPage),
+        new PropertyMetadata(nameof(NavigationPage)));
 
     /// <summary>
     /// 状态
     /// </summary>
     public static readonly DependencyProperty StateProperty = DependencyProperty.Register(
             nameof(State),
-            typeof(NavigationViewState),
-            typeof(NavigationView),
-            new PropertyMetadata(NavigationViewState.None));
+            typeof(NavigationState),
+            typeof(NavigationPage),
+            new PropertyMetadata(NavigationState.None));
 
     /// <summary>
     /// 错误
@@ -34,19 +34,8 @@ public class NavigationView : ContentControl, INavigationAware
     public static readonly DependencyProperty ErrorProperty = DependencyProperty.Register(
         nameof(Error),
         typeof(Exception),
-        typeof(NavigationView),
+        typeof(NavigationPage),
         new PropertyMetadata(null));
-
-
-    public NavigationView()
-    {
-        var resourceDictionary = new ResourceDictionary
-        {
-            Source = new Uri("pack://application:,,,/DongKeJi;component/UI/Themes/Generic.xaml")
-        };
-
-        Template = resourceDictionary["NavigationViewTemplate"] as ControlTemplate;
-    }
 
 
     /// <summary>
@@ -61,9 +50,9 @@ public class NavigationView : ContentControl, INavigationAware
     /// <summary>
     /// 状态
     /// </summary>
-    public NavigationViewState State
+    public NavigationState State
     {
-        get => (NavigationViewState)GetValue(StateProperty);
+        get => (NavigationState)GetValue(StateProperty);
         set => SetValue(StateProperty, value);
     }
 
@@ -85,19 +74,19 @@ public class NavigationView : ContentControl, INavigationAware
     {
         try
         {
-            State = NavigationViewState.Entering;
+            State = NavigationState.Entering;
 
             if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource = new CancellationTokenSource();
 
             await OnNavigatedToAsync(_cancellationTokenSource.Token);
             
-            State = NavigationViewState.Focused;
+            State = NavigationState.Entered;
             Error = null;
         }
         catch (Exception ex)
         {
-            State = NavigationViewState.Error;
+            State = NavigationState.Error;
             Error = ex;
         }
     }
@@ -109,19 +98,19 @@ public class NavigationView : ContentControl, INavigationAware
     {
         try
         {
-            State = NavigationViewState.Leaving;
+            State = NavigationState.Leaving;
 
             if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource = new CancellationTokenSource();
 
             await OnNavigatedFromAsync(_cancellationTokenSource.Token);
             
-            State = NavigationViewState.Unfocused;
+            State = NavigationState.Leaved;
             Error = null;
         }
         catch (Exception ex)
         {
-            State = NavigationViewState.Error;
+            State = NavigationState.Error;
             Error = ex;
         }
     }
@@ -150,13 +139,38 @@ public class NavigationView : ContentControl, INavigationAware
     private CancellationTokenSource? _cancellationTokenSource;
 }
 
-
-public enum NavigationViewState
+/// <summary>
+/// 导航状态
+/// </summary>
+public enum NavigationState
 {
-    None,
-    Entering,
-    Leaving,
-    Focused,
-    Unfocused,
-    Error
+    /// <summary>
+    /// 初始
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// 发生错误
+    /// </summary>
+    Error = 1,
+
+    /// <summary>
+    /// 进入中
+    /// </summary>
+    Entering = 100,
+
+    /// <summary>
+    /// 离开中
+    /// </summary>
+    Leaving = 101,
+
+    /// <summary>
+    /// 已经进入
+    /// </summary>
+    Entered = 200,
+
+    /// <summary>
+    /// 已经离开
+    /// </summary>
+    Leaved = 201
 }

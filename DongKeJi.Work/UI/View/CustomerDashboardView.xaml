@@ -1,4 +1,4 @@
-﻿<view:NavigationView
+﻿<dui:NavigationPage
     x:Class="DongKeJi.Work.UI.View.CustomerDashboardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -11,6 +11,7 @@
     xmlns:customerVm="clr-namespace:DongKeJi.Work.ViewModel.Customer"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dkjui="clr-namespace:DongKeJi.UI;assembly=DongKeJi"
+    xmlns:dui="clr-namespace:DongKeJi.UI.Control;assembly=DongKeJi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Order"
     xmlns:orderEntity="clr-namespace:DongKeJi.Work.Model.Entity.Order"
@@ -18,7 +19,6 @@
     xmlns:staff="clr-namespace:DongKeJi.Work.ViewModel.Staff"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:view="clr-namespace:DongKeJi.UI.View;assembly=DongKeJi"
     xmlns:viewModel="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance viewModel:CustomerDashboardViewModel,
                                      IsDesignTimeCreatable=False}"
@@ -26,7 +26,7 @@
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <view:NavigationView.Resources>
+    <dui:NavigationPage.Resources>
 
         <converter1:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <converter:OrderTypeToSymbolConverter x:Key="OrderTypeToSymbolConverter" />
@@ -99,10 +99,7 @@
         <!--  机构列表元素  -->
         <DataTemplate x:Key="CustomerListItem" DataType="{x:Type customerVm:CustomerViewModel}">
 
-            <Border
-                Padding="10"
-                Background="{DynamicResource CardBackground}"
-                CornerRadius="5">
+            <dui:CardBorder>
                 <DockPanel>
 
                     <ui:SymbolIcon DockPanel.Dock="Left" Symbol="Flag24" />
@@ -118,18 +115,14 @@
                     </ui:TextBlock>
 
                 </DockPanel>
-            </Border>
+            </dui:CardBorder>
 
         </DataTemplate>
 
         <!--  订单列表元素  -->
         <DataTemplate x:Key="OrderListItem" DataType="{x:Type compose:SalespersonOrderViewModel}">
 
-            <Border
-                Margin="3"
-                Padding="10"
-                Background="{DynamicResource CardBackground}"
-                CornerRadius="5">
+            <dui:CardBorder>
                 <DockPanel>
 
                     <ui:SymbolIcon DockPanel.Dock="Left" Symbol="{Binding Order.Type, Converter={StaticResource OrderTypeToSymbolConverter}}" />
@@ -198,17 +191,13 @@
                     </StackPanel>
 
                 </DockPanel>
-            </Border>
+            </dui:CardBorder>
         </DataTemplate>
 
         <!--  划扣列表元素  -->
         <DataTemplate x:Key="ConsumeListItem" DataType="{x:Type compose:DesignerConsumeViewModel}">
 
-            <Border
-                Margin="3"
-                Padding="10,5"
-                Background="{DynamicResource CardBackground}"
-                CornerRadius="5">
+            <dui:CardBorder>
                 <DockPanel>
 
                     <!--  删除按钮  -->
@@ -260,7 +249,7 @@
 
                 </DockPanel>
 
-            </Border>
+            </dui:CardBorder>
 
         </DataTemplate>
 
@@ -274,7 +263,7 @@
 
 
 
-    </view:NavigationView.Resources>
+    </dui:NavigationPage.Resources>
 
     <!--  内容  -->
     <Grid>
@@ -566,4 +555,4 @@
 
     </Grid>
 
-</view:NavigationView>
+</dui:NavigationPage>
