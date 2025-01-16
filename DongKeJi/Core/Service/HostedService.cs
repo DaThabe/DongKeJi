@@ -1,6 +1,5 @@
 using DongKeJi.Core.Model;
-using DongKeJi.Core.UI.View.Module;
-using DongKeJi.Core.UI.View.Setting;
+using DongKeJi.Core.UI.View;
 using DongKeJi.Core.UI.View.User;
 using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Database;
@@ -8,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui.Controls;
+using UserViewModel = DongKeJi.Core.ViewModel.User.UserViewModel;
 
 namespace DongKeJi.Core.Service;
 
@@ -37,9 +37,9 @@ internal class HostedService(
 
         mainFrameService.ShowWindow();
 
-        mainFrameService.AddFooterMenu<ModuleDashboardView>(SymbolRegular.DeveloperBoard16, "模块");
-        mainFrameService.AddFooterMenu<UserDashboardView>(SymbolRegular.People20, "用户");
-        mainFrameService.AddFooterMenu<SettingDashboardView>(SymbolRegular.Settings28, "设置");
+        mainFrameService.AddFooterMenu<ModulePage>(SymbolRegular.DeveloperBoard16, "模块");
+        mainFrameService.AddFooterMenu<UserPage>(SymbolRegular.People20, "用户");
+        mainFrameService.AddFooterMenu<SettingPage>(SymbolRegular.Settings28, "设置");
 
         await InitUser(cancellationToken);
     }

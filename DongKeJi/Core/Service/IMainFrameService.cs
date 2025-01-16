@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using DongKeJi.Core.UI.View;
+using DongKeJi.Core.UI.View.Frame;
 using DongKeJi.Inject;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;

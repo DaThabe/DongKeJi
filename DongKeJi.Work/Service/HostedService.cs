@@ -42,11 +42,11 @@ internal class HostedService(
         {
             //var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");
 
-            var menu = mainFrameService.AddMenu<CustomerDashboardView>(SymbolRegular.BuildingPeople24, "机构");
-            menu.AddChildMenu<ConsumeDashboardView>(SymbolRegular.NotepadEdit16, "划扣");
-            menu.AddChildMenu<WagesDashboardView>(SymbolRegular.ArrowTrendingLines24, "提成");
-            menu.AddChildMenu<StaffDashboardView>(SymbolRegular.People24, "员工");
-            menu.AddChildMenu<StaffPositionDashboardView>(SymbolRegular.VideoPerson16, "职位");
+            var menu = mainFrameService.AddMenu<CustomerPage>(SymbolRegular.BuildingPeople24, "机构");
+            menu.AddChildMenu<ConsumePage>(SymbolRegular.NotepadEdit16, "划扣");
+            menu.AddChildMenu<WagesPage>(SymbolRegular.ArrowTrendingLines24, "提成");
+            menu.AddChildMenu<StaffPage>(SymbolRegular.People24, "员工");
+            menu.AddChildMenu<StaffPositionPage>(SymbolRegular.VideoPerson16, "职位");
 
             await InitStaffAccount(cancellationToken);
             await InitStaffPosition(cancellationToken);

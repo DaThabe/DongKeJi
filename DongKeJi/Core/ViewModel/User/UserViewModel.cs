@@ -25,5 +25,5 @@ public partial class UserViewModel : EntityViewModel
     }
 
 
-    partial void OnNameChanging(string value) => ValidateProperty(value, nameof(Name));
+    partial void OnNameChanging(string value) => ValidateProperty(value, nameof(ViewModel.User.UserViewModel.Name));
 }

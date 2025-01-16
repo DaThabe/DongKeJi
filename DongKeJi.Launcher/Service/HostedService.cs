@@ -29,7 +29,7 @@ internal class HostedService(
         // mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
 
         mainFrameService.ShowWindow();
-        mainFrameService.Navigate(typeof(CustomerDashboardView));
+        mainFrameService.Navigate(typeof(CustomerPage));
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
