@@ -19,13 +19,13 @@ public partial class ModulePageViewModel : ObservableViewModel
     ///     选中模块信息
     /// </summary>
     [ObservableProperty] 
-    private IModuleMetaInfo? _selectedModule;
+    private IModuleInfo? _selectedModule;
 
     /// <summary>
     ///     所有模块
     /// </summary>
     [ObservableProperty] 
-    private ObservableCollection<IModuleMetaInfo> _moduleCollection = [];
+    private ObservableCollection<IModuleInfo> _moduleCollection = [];
 
 
     /// <summary>
@@ -34,6 +34,6 @@ public partial class ModulePageViewModel : ObservableViewModel
     public ModulePageViewModel()
     {
         ModuleCollection = ModuleExtensions.MetaInfos.ToObservableCollection();
-        SelectedModule = Enumerable.FirstOrDefault<IModuleMetaInfo>(ModuleCollection);
+        SelectedModule = Enumerable.FirstOrDefault<IModuleInfo>(ModuleCollection);
     }
 }

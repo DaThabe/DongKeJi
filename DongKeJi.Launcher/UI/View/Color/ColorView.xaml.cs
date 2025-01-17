@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using DongKeJi.Inject;
@@ -8,7 +6,6 @@ using DongKeJi.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Controls;
 using Button = System.Windows.Controls.Button;
 using TextBox = System.Windows.Controls.TextBox;
 

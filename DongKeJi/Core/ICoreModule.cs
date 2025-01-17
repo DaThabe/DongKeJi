@@ -52,7 +52,7 @@ public partial class CoreModule(IApplication application) : ObservableViewModel,
     [ObservableProperty] private UserViewModel? _currentUser;
 
 
-    public static IModuleMetaInfo MetaInfo { get; } = new ModuleMetaInfo()
+    public static IModuleInfo Info { get; } = new ModuleInfo()
     {
         Id = Guid.NewGuid(),
         Name = "DongKeJi.Core",

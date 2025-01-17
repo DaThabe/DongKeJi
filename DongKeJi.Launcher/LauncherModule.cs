@@ -17,7 +17,7 @@ public interface ILauncherModule : IModule;
 [Inject(ServiceLifetime.Singleton)]
 internal class LauncherModule : ILauncherModule
 {
-    public static IModuleMetaInfo MetaInfo { get; } = new ModuleMetaInfo()
+    public static IModuleInfo Info { get; } = new ModuleInfo()
     {
         Id = Guid.NewGuid(),
         Name = "DongKeJi.Launcher",
@@ -42,6 +42,7 @@ internal class LauncherModule : ILauncherModule
             services.AddAutoInject<LauncherModule>();
             //启动后业务
             services.AddHostedService<HostedService>();
+
             //数据库
             //services.AddDbContext<CoreDbContext>();
             //AutoMapper

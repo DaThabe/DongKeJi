@@ -34,7 +34,7 @@ public partial class WorkModule : ObservableViewModel, IWorkModule
     private StaffViewModel? _currentStaff;
 
 
-    public static IModuleMetaInfo MetaInfo { get; }= new ModuleMetaInfo()
+    public static IModuleInfo Info { get; }= new ModuleInfo()
     {
         Id = Guid.NewGuid(),
         Name = "DongKeJi.Work",

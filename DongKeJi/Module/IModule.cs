@@ -7,7 +7,7 @@ public interface IModule
     /// <summary>
     /// 元信息
     /// </summary>
-    static abstract IModuleMetaInfo MetaInfo { get; }
+    static abstract IModuleInfo Info { get; }
 
     /// <summary>
     /// 配置模块

@@ -16,7 +16,7 @@
 
     <control:NavigationPage.Resources>
 
-        <DataTemplate x:Key="ModuleListItem" DataType="{x:Type module:IModuleMetaInfo}">
+        <DataTemplate x:Key="ModuleListItem" DataType="{x:Type module:IModuleInfo}">
 
             <!--  用户元素模板  -->
             <ui:CardAction Content="{Binding Title}" IsHitTestVisible="False" />
@@ -38,7 +38,7 @@
                 SuggestionChosen="AutoSuggestBox_OnSuggestionChosen">
 
                 <ui:AutoSuggestBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type module:IModuleMetaInfo}">
+                    <DataTemplate DataType="{x:Type module:IModuleInfo}">
                         <TextBlock Text="{Binding Title}" />
                     </DataTemplate>
                 </ui:AutoSuggestBox.ItemTemplate>

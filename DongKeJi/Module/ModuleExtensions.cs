@@ -7,12 +7,12 @@ public static class ModuleExtensions
     /// <summary>
     ///     所有已加载模块
     /// </summary>
-    private static Dictionary<Type, IModuleMetaInfo> Modules { get; } = new();
+    private static Dictionary<Type, IModuleInfo> Modules { get; } = new();
 
     /// <summary>
     /// 已加载的模块元信息
     /// </summary>
-    public static IEnumerable<IModuleMetaInfo> MetaInfos => Modules.Select(x => x.Value);
+    public static IEnumerable<IModuleInfo> MetaInfos => Modules.Select(x => x.Value);
 
     /// <summary>
     ///     注册模块信息
@@ -27,7 +27,7 @@ public static class ModuleExtensions
         if (!Modules.TryGetValue(type, out var moduleMetaInfo))
         {
             TModule.Configure(builder);
-            Modules[type] = TModule.MetaInfo;
+            Modules[type] = TModule.Info;
         }
 
         return builder;

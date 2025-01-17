@@ -26,8 +26,9 @@ internal class HostedService(
             await coreConfig.ApplicationTheme.SetAsync(application.Theme, cancellationToken);
         }
 
-        // mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
-
+#if DEBUG
+        mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
+#endif
         mainFrameService.ShowWindow();
         mainFrameService.Navigate(typeof(CustomerPage));
     }

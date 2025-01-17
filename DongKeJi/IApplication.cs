@@ -20,6 +20,11 @@ public interface IApplication
     string DatabaseDirectory { get; }
 
     /// <summary>
+    ///     缓存文件目录
+    /// </summary>
+    string CacheDirectory { get; }
+
+    /// <summary>
     /// 资源字典
     /// </summary>
     ResourceDictionary Resources { get; }

@@ -90,6 +90,15 @@
                     <ui:VirtualizingWrapPanel />
                 </ItemsPanelTemplate>
             </ui:ListView.ItemsPanel>
+
+            <ui:ListView.Template>
+                <ControlTemplate>
+
+                    <ItemsPresenter />
+
+                </ControlTemplate>
+            </ui:ListView.Template>
+
         </ui:ListView>
 
 

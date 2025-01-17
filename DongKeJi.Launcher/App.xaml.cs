@@ -4,7 +4,7 @@ using System.Windows.Threading;
 using DongKeJi.Core;
 using DongKeJi.Launcher.Service;
 using DongKeJi.Module;
-using DongKeJi.ViewModel;
+using DongKeJi.Tool;
 using DongKeJi.Work;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,6 +29,11 @@ public partial class App : IApplication
     ///     数据库文件目录
     /// </summary>
     public string DatabaseDirectory { get; }
+
+    /// <summary>
+    /// 缓存目录
+    /// </summary>
+    public string CacheDirectory { get; }
 
     /// <summary>
     /// 标题
@@ -58,13 +63,15 @@ public partial class App : IApplication
     {
         BaseDirectory = AppContext.BaseDirectory;
         DatabaseDirectory = Path.Combine(BaseDirectory, "Database");
-        Version = new Version(0, 0, 1);
+        CacheDirectory = Path.Combine(BaseDirectory, "Cache");
+        Version = new Version(1, 0, 0);
         Title = $"懂科技 - {Version}";
 
 
         var builder = Host.CreateDefaultBuilder()
             .RegisterModule<CoreModule>()
             .RegisterModule<WorkModule>()
+            .RegisterModule<ToolModule>()
             .RegisterModule<LauncherModule>()
             .ConfigureLogging(x => x.SetMinimumLevel(LogLevel.Trace))
             .ConfigureServices(services =>

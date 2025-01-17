@@ -119,14 +119,21 @@ public interface IEncodeContent<out T>
 file class Base64EncodeContent : IBase64EncodeContent
 {
     public required string Content { get; init; }
+
+    public override string ToString() => Content;
 }
 
 file class JsonEncodeContent : IJsonEncodeContent
 {
     public required string Content { get; init; }
+
+    public override string ToString() => Content;
 }
 
 file class Md5EncodeContent : IMd5EncodeContent
 {
     public required string Content { get; init; }
+
+
+    public override string ToString() => Content;
 }

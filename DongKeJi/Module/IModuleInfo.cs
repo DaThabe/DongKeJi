@@ -6,7 +6,7 @@ namespace DongKeJi.Module;
 /// <summary>
 /// 模块信息
 /// </summary>
-public interface IModuleMetaInfo
+public interface IModuleInfo
 {
     /// <summary>
     /// id
@@ -60,7 +60,7 @@ public interface IModuleMetaInfo
 }
 
 
-public class ModuleMetaInfo : IModuleMetaInfo
+public class ModuleInfo : IModuleInfo
 {
     public required Guid Id { get; set; }
     public required string Name { get; set; }
