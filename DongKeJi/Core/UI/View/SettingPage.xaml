@@ -61,6 +61,17 @@
             <TextBlock Text="{Binding Application.Version}" />
         </ui:CardControl>
 
+        <!--  版本  -->
+        <ui:CardControl Header="项目地址" Icon="{ui:SymbolIcon Symbol=CodeBlock20}">
+            <StackPanel Orientation="Horizontal">
+
+                <ui:HyperlinkButton Content="Gitee" NavigateUri="https://gitee.com/dongkeji-cloud/dev" />
+                <ui:HyperlinkButton Content="Github" NavigateUri="https://github.com/DaThabe/DongKeJi" />
+
+            </StackPanel>
+        </ui:CardControl>
+
+
     </ItemsControl>
 
 </control:NavigationPage>
