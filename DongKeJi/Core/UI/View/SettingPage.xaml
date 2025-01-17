@@ -22,35 +22,29 @@
 
     </control:NavigationPage.Resources>
 
-    <TabControl>
+
+
+    <ItemsControl>
 
         <!--  主题  -->
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
-                    <TextBlock Text="个性化" />
-                </StackPanel>
-            </TabItem.Header>
+        <ui:CardControl Header="主题" Icon="{ui:SymbolIcon Symbol=DarkTheme20}">
+            <StackPanel Orientation="Horizontal">
 
-            <StackPanel>
-                <TextBlock Margin="0,12,0,0" Text="主题" />
                 <RadioButton
-                    Margin="0,12,0,0"
                     Command="{Binding ChangeThemeCommand, Mode=OneWay}"
                     CommandParameter="Light"
                     Content="亮色"
                     GroupName="themeSelect"
                     IsChecked="{Binding Application.Theme, Converter={StaticResource ApplicationThemeEnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}" />
+
                 <RadioButton
-                    Margin="0,8,0,0"
                     Command="{Binding ChangeThemeCommand, Mode=OneWay}"
                     CommandParameter="Dark"
                     Content="暗色"
                     GroupName="themeSelect"
                     IsChecked="{Binding Application.Theme, Converter={StaticResource ApplicationThemeEnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}" />
+
                 <RadioButton
-                    Margin="0,8,0,0"
                     Command="{Binding ChangeThemeCommand, Mode=OneWay}"
                     CommandParameter="HighContrast"
                     Content="高亮"
@@ -58,27 +52,15 @@
                     IsChecked="{Binding Application.Theme, Converter={StaticResource ApplicationThemeEnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}" />
 
             </StackPanel>
-        </TabItem>
+        </ui:CardControl>
 
-        <!--  关于  -->
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Margin="0,0,6,0" Symbol="XboxConsole24" />
-                    <TextBlock Text="关于" />
-                </StackPanel>
-            </TabItem.Header>
+        <Separator Margin="0,5" />
 
-            <StackPanel>
-                <TextBlock
-                    Margin="0,24,0,0"
-                    FontSize="20"
-                    FontWeight="Medium"
-                    Text="懂科技" />
-                <TextBlock Margin="0,12,0,0" Text="{Binding Application.Version, Mode=OneWay}" />
-            </StackPanel>
-        </TabItem>
+        <!--  版本  -->
+        <ui:CardControl Header="版本" Icon="{ui:SymbolIcon Symbol=Bug24}">
+            <TextBlock Text="{Binding Application.Version}" />
+        </ui:CardControl>
 
-    </TabControl>
+    </ItemsControl>
 
 </control:NavigationPage>
