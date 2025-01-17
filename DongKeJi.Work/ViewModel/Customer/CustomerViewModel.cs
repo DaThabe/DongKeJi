@@ -31,6 +31,6 @@ public partial class CustomerViewModel : EntityViewModel
 
     public override string ToString()
     {
-        return $"{Area}-{Name}";
+        return $"{Area} {Name}".Trim();
     }
 }

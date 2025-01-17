@@ -2,6 +2,7 @@
 using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
 using DongKeJi.Work.ViewModel;
+using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
 
@@ -37,8 +38,7 @@ public partial class StaffPage
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
-        if (DataContext is not UserPageViewModel vm) return;
-
-        if (args.SelectedItem is UserViewModel customer) vm.SelectedUser = customer;
+        if (DataContext is not StaffPageViewModel vm) return;
+        if (args.SelectedItem is StaffViewModel staff) vm.SelectedStaff = staff;
     }
 }

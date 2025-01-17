@@ -6,7 +6,6 @@
     xmlns:compose="clr-namespace:DongKeJi.Work.ViewModel.Compose"
     xmlns:consume="clr-namespace:DongKeJi.Work.ViewModel.Consume"
     xmlns:converter="clr-namespace:DongKeJi.Work.UI.Converter"
-    xmlns:converter1="clr-namespace:DongKeJi.UI.Converter;assembly=DongKeJi"
     xmlns:customer="clr-namespace:DongKeJi.Work.UI.View.Customer"
     xmlns:customerVm="clr-namespace:DongKeJi.Work.ViewModel.Customer"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -135,15 +134,16 @@
                 <!--  标题  -->
                 <ui:CardControl.Header>
                     <DatePicker
+                        MinWidth="150"
+                        HorizontalAlignment="Left"
                         Background="Transparent"
                         BorderThickness="0"
-                        DockPanel.Dock="Left"
                         SelectedDate="{Binding Consume.CreateTime, StringFormat=yyyy-MM-dd}"
                         ToolTip="创建时间" />
                 </ui:CardControl.Header>
 
                 <!--  划扣  -->
-                <StackPanel>
+                <StackPanel Orientation="Horizontal">
 
                     <!--  划扣样式定义  -->
                     <StackPanel.Resources>

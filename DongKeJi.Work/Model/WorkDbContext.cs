@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace DongKeJi.Work.Model;
 
-internal class WorkDbContext(string dbFolder) : LocalDbContext(dbFolder, "PerformanceRecord"), IConfigDbContext
+internal class WorkDbContext(string dbFolder) : LocalDbContext(dbFolder, "Work"), IConfigDbContext
 {
     /// <summary>
     /// 配置

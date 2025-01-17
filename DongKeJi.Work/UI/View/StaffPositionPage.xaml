@@ -25,21 +25,21 @@
         <!--  职位列表元素  -->
         <DataTemplate x:Key="PositionListItem" DataType="{x:Type staffVm:StaffPositionViewModel}">
 
-            <dui:CardBorder>
-                <DockPanel>
+            <ui:CardAction IsHitTestVisible="False">
 
+                <ui:CardAction.Icon>
                     <ui:SymbolIcon
                         VerticalAlignment="Center"
                         DockPanel.Dock="Left"
                         Symbol="{Binding Type, Converter={StaticResource StaffPositionTypeToSymbolConverter}}" />
+                </ui:CardAction.Icon>
 
-                    <ui:TextBlock
-                        VerticalAlignment="Center"
-                        Appearance="Primary"
-                        Text="{Binding Title}" />
+                <ui:TextBlock
+                    VerticalAlignment="Center"
+                    Appearance="Primary"
+                    Text="{Binding Title}" />
 
-                </DockPanel>
-            </dui:CardBorder>
+            </ui:CardAction>
 
         </DataTemplate>
 

@@ -36,6 +36,6 @@ public partial class StaffPositionPage
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
         if (DataContext is not StaffPositionPageViewModel vm) return;
-        if (args.SelectedItem is StaffPositionViewModel customer) vm.SelectedPosition = customer;
+        if (args.SelectedItem is StaffPositionViewModel position) vm.SelectedPosition = position;
     }
 }

@@ -3,6 +3,7 @@ using DongKeJi.Core.ViewModel;
 using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
 using DongKeJi.Work.ViewModel;
+using DongKeJi.Work.ViewModel.Customer;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
 
@@ -40,9 +41,8 @@ public partial class CustomerPage
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
-        if (DataContext is not UserPageViewModel vm) return;
-
-        if (args.SelectedItem is UserViewModel customer) vm.SelectedUser = customer;
+        if (DataContext is not CustomerPageViewModel vm) return;
+        if (args.SelectedItem is CustomerViewModel customer) vm.SelectedCustomer = customer;
     }
 
     private void AddOrderButtonClick(object sender, RoutedEventArgs e)
