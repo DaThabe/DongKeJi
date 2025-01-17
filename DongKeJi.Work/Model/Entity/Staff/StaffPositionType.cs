@@ -13,10 +13,10 @@ public enum StaffPositionType
     /// <summary>
     ///     设计师
     /// </summary>
-    Designer = 1,
+    Designer = 100,
 
     /// <summary>
     ///     销售员
     /// </summary>
-    Salesperson = 2
+    Salesperson = 200
 }

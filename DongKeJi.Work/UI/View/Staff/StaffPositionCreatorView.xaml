@@ -1,0 +1,38 @@
+﻿<UserControl
+    x:Class="DongKeJi.Work.UI.View.Staff.StaffPositionCreatorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:staff="clr-namespace:DongKeJi.Work.UI.View.Staff"
+    xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    d:DataContext="{d:DesignInstance staffVm:StaffPositionCreatorViewModel,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+
+    <StackPanel>
+
+        <!--  标头  -->
+        <ui:CardControl Header="新增职位" Icon="{ui:SymbolIcon VideoPeople32}">
+
+            <ui:CardControl.Content>
+                <StackPanel Orientation="Horizontal">
+
+                    <!--  类型选择器  -->
+                    <staff:StaffPositionTypeComboBox DataContext="{Binding Position}" />
+
+                </StackPanel>
+            </ui:CardControl.Content>
+
+        </ui:CardControl>
+
+        <!--  分界线  -->
+        <Rectangle Height="3" Fill="{DynamicResource StripedBackgroundBrush}" />
+
+        <!--  订单信息  -->
+        <staff:StaffPositionEditView DataContext="{Binding Position}" />
+
+    </StackPanel>
+
+</UserControl>

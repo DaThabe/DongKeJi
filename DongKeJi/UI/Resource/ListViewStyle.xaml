@@ -1,0 +1,117 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <!--  包含竖向滚动条的元素集合  -->
+    <ControlTemplate x:Key="VerticalScrollBarItemsPresenter" TargetType="ui:ListView">
+
+        <ScrollViewer
+            x:Name="ScrollViewer"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <ItemsPresenter />
+        </ScrollViewer>
+
+        <ControlTemplate.Triggers>
+
+            <!--  鼠标进入  -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Disabled" />
+            </Trigger>
+
+            <!--  鼠标离开  -->
+            <Trigger Property="IsMouseOver" Value="False">
+                <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Auto" />
+            </Trigger>
+
+        </ControlTemplate.Triggers>
+
+    </ControlTemplate>
+
+    <!--  包含横向滚动条的元素集合  -->
+    <ControlTemplate x:Key="HorizontalScrollBarItemsPresenter" TargetType="ui:ListView">
+
+        <ScrollViewer
+            x:Name="ScrollViewer"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Disabled">
+            <ItemsPresenter />
+        </ScrollViewer>
+
+        <ControlTemplate.Triggers>
+
+            <!--  鼠标进入  -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ScrollViewer" Property="HorizontalScrollBarVisibility" Value="Auto" />
+            </Trigger>
+
+            <!--  鼠标离开  -->
+            <Trigger Property="IsMouseOver" Value="False">
+                <Setter TargetName="ScrollViewer" Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            </Trigger>
+
+        </ControlTemplate.Triggers>
+
+    </ControlTemplate>
+
+    <!--  包含横向和竖向滚动条的元素集合  -->
+    <ControlTemplate x:Key="HorizontalVerticalScrollBarItemsPresenter" TargetType="ui:ListView">
+
+        <ScrollViewer
+            x:Name="ScrollViewer"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto">
+            <ItemsPresenter />
+        </ScrollViewer>
+
+        <ControlTemplate.Triggers>
+
+            <!--  鼠标进入  -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Auto" />
+                <Setter TargetName="ScrollViewer" Property="HorizontalScrollBarVisibility" Value="Auto" />
+            </Trigger>
+
+            <!--  鼠标离开  -->
+            <Trigger Property="IsMouseOver" Value="False">
+                <Setter TargetName="ScrollViewer" Property="VerticalScrollBarVisibility" Value="Disabled" />
+                <Setter TargetName="ScrollViewer" Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            </Trigger>
+
+        </ControlTemplate.Triggers>
+
+    </ControlTemplate>
+
+
+
+
+    <!--  默认列表视图样式  -->
+    <Style TargetType="ui:ListView">
+
+        <Setter Property="Template" Value="{StaticResource HorizontalVerticalScrollBarItemsPresenter}" />
+        <Setter Property="Background" Value="#000" />
+
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel VirtualizationMode="Recycling" />
+                </ItemsPanelTemplate>
+
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
+    <!--  开启竖向滚动条的列表视图样式  -->
+    <Style x:Key="VerticalScrollBarListViewStyle" TargetType="ui:ListView">
+        <Setter Property="Template" Value="{StaticResource VerticalScrollBarItemsPresenter}" />
+    </Style>
+
+    <!--  开启横向滚动条的列表视图样式  -->
+    <Style x:Key="HorizontalScrollBarListViewStyle" TargetType="ui:ListView">
+        <Setter Property="Template" Value="{StaticResource HorizontalScrollBarItemsPresenter}" />
+    </Style>
+
+</ResourceDictionary>

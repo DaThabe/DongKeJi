@@ -8,30 +8,30 @@ public enum OrderState
     /// <summary>
     ///     没有状态
     /// </summary>
-    None,
+    None = 0,
 
     /// <summary>
     ///     等待开始
     /// </summary>
-    Ready,
+    Ready = 100,
 
     /// <summary>
     ///     进行中
     /// </summary>
-    Active,
+    Active = 200,
 
     /// <summary>
     ///     暂停
     /// </summary>
-    Paused,
+    Paused = 300,
 
     /// <summary>
     ///     过期
     /// </summary>
-    Expired,
+    Expired = 400,
 
     /// <summary>
     ///     取消
     /// </summary>
-    Cancel
+    Cancel = 500
 }

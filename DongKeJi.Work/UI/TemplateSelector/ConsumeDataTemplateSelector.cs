@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using CountingConsumeViewModel = DongKeJi.Work.ViewModel.Common.Consume.CountingConsumeViewModel;
-using MixingConsumeViewModel = DongKeJi.Work.ViewModel.Common.Consume.MixingConsumeViewModel;
-using TimingConsumeViewModel = DongKeJi.Work.ViewModel.Common.Consume.TimingConsumeViewModel;
+using DongKeJi.Work.ViewModel.Consume;
 
 namespace DongKeJi.Work.UI.TemplateSelector;
 
@@ -12,17 +10,17 @@ namespace DongKeJi.Work.UI.TemplateSelector;
 internal class ConsumeDataTemplateSelector : DataTemplateSelector
 {
     public required DataTemplate Timing { get; set; }
-    public required DataTemplate Couting { get; set; }
+    public required DataTemplate Counting { get; set; }
     public required DataTemplate Mixing { get; set; }
 
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-        if (item is TimingConsumeViewModel) return Timing;
+        if (item is ConsumeTimingViewModel) return Timing;
 
-        if (item is CountingConsumeViewModel) return Couting;
+        if (item is ConsumeCountingViewModel) return Counting;
 
-        if (item is MixingConsumeViewModel) return Mixing;
+        if (item is ConsumeMixingViewModel) return Mixing;
 
         return base.SelectTemplate(item, container);
     }

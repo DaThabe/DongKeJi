@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+    <ResourceDictionary.MergedDictionaries>
+
+        <!--  样式  -->
+        <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/ItemsControlStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/ListViewStyle.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/TextBlockStyle.xaml" />
+        <!--<ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/CardControlStyle.xaml" />-->
+
+        <!--  控件  -->
+        <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Control/NavigationPage.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Control/CardBorder.xaml" />
+
+
+    </ResourceDictionary.MergedDictionaries>
+
+
+    <Style TargetType="FrameworkElement">
+        <Setter Property="Margin" Value="2" />
+    </Style>
+
+</ResourceDictionary>

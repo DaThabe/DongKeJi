@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DongKeJi.Common.Entity;
+using DongKeJi.Entity;
 using DongKeJi.Work.Model.Entity.Staff;
 
 namespace DongKeJi.Work.Model.Entity.Consume;

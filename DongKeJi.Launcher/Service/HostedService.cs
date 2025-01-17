@@ -1,23 +1,35 @@
-﻿using DongKeJi.Launcher.Model;
-using DongKeJi.UI.View;
+﻿using DongKeJi.Core;
+using DongKeJi.Core.Service;
+using DongKeJi.Core.UI.View;
+using DongKeJi.Launcher.UI.View.Color;
+using DongKeJi.Work.UI.View;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Wpf.Ui;
+using Wpf.Ui.Appearance;
+using Wpf.Ui.Controls;
 
 namespace DongKeJi.Launcher.Service;
 
-
 internal class HostedService(
-    ILoggerFactory loggerFactory,
-    ISnackbarService snackbarService,
-    MainFrame mainFrame) : IHostedService
+    ICoreConfig coreConfig,
+    IApplication application,
+    IMainFrameService mainFrameService) : IHostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        //loggerFactory.AddProvider(new SnakebarLoggerProvider(LogLevel.Trace, snackbarService));
-        mainFrame.Show();
+        try
+        {
+            application.Theme = await coreConfig.ApplicationTheme.GetAsync(cancellation: cancellationToken);
+        }
+        catch
+        {
+            application.Theme = ApplicationTheme.Light;
+            await coreConfig.ApplicationTheme.SetAsync(application.Theme, cancellationToken);
+        }
 
-        return Task.CompletedTask;
+        // mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
+
+        mainFrameService.ShowWindow();
+        mainFrameService.Navigate(typeof(CustomerPage));
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

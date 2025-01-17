@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DongKeJi.Common.Entity;
+using DongKeJi.Entity;
 using DongKeJi.Work.Model.Entity.Consume;
 using DongKeJi.Work.Model.Entity.Customer;
 using DongKeJi.Work.Model.Entity.Order;
@@ -27,13 +27,6 @@ internal class StaffEntity : EntityBase
     [Required]
     [Column("Name")]
     public required string Name { get; set; }
-
-    /// <summary>
-    ///     是否是主账户
-    /// </summary>
-    [Required]
-    [Column("IsPrimaryAccount")]
-    public required bool IsPrimaryAccount { get; set; } = false;
 
 
     /// <summary>

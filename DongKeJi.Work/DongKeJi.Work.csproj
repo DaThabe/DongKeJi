@@ -9,26 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="UI\View\Consume\**" />
-    <Compile Remove="UI\View\Customer\**" />
-    <Compile Remove="UI\View\Order\**" />
-    <Compile Remove="UI\View\StaffPosition\**" />
-    <Compile Remove="UI\View\Staff\**" />
-    <EmbeddedResource Remove="UI\View\Consume\**" />
-    <EmbeddedResource Remove="UI\View\Customer\**" />
-    <EmbeddedResource Remove="UI\View\Order\**" />
-    <EmbeddedResource Remove="UI\View\StaffPosition\**" />
-    <EmbeddedResource Remove="UI\View\Staff\**" />
-    <None Remove="UI\View\Consume\**" />
-    <None Remove="UI\View\Customer\**" />
-    <None Remove="UI\View\Order\**" />
-    <None Remove="UI\View\StaffPosition\**" />
-    <None Remove="UI\View\Staff\**" />
-    <Page Remove="UI\View\Consume\**" />
-    <Page Remove="UI\View\Customer\**" />
-    <Page Remove="UI\View\Order\**" />
-    <Page Remove="UI\View\StaffPosition\**" />
-    <Page Remove="UI\View\Staff\**" />
+    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -36,7 +21,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UI\View\Common\Staff\" />
+    <Compile Update="UI\View\Staff\StaffEditView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\View\Staff\StaffPositionView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\View\Staff\StaffPositionTypeComboBox.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\View\Staff\StaffPositionEditView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>
