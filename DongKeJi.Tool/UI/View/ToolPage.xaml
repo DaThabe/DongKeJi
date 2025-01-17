@@ -77,7 +77,12 @@
         <DockPanel Grid.Column="0">
 
             <!--  搜索  -->
-            <ui:AutoSuggestBox Margin="5,0" DockPanel.Dock="Top" />
+            <ui:AutoSuggestBox
+                Margin="5,0"
+                DockPanel.Dock="Top"
+                OriginalItemsSource="{Binding ToolItemCollection, Mode=OneWay}"
+                PlaceholderText="搜索工具..."
+                SuggestionChosen="AutoSuggestBox_OnSuggestionChosen" />
 
             <Separator Margin="5,0" DockPanel.Dock="Top" />
 

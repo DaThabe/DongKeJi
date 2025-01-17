@@ -1,6 +1,7 @@
 ﻿using DongKeJi.Inject;
 using DongKeJi.Tool.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
+using Wpf.Ui.Controls;
 
 namespace DongKeJi.Tool.UI.View;
 
@@ -29,5 +30,12 @@ public partial class ToolPage
     {
         DataContext = null;
         return base.OnNavigatedFromAsync(cancellation);
+    }
+
+
+    private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (DataContext is not ToolPageViewModel vm) return;
+        if (args.SelectedItem is ToolItemViewModel tool) vm.SelectedToolItem = tool;
     }
 }

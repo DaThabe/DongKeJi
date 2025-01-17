@@ -25,4 +25,7 @@ public partial class ToolItemViewModel(IconElement icon, string title, Type page
     /// </summary>
     [ObservableProperty] 
     private Type _pageType = pageType;
+
+
+    public override string ToString() => Title;
 }

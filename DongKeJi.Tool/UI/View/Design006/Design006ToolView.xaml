@@ -48,17 +48,22 @@
                 </StackPanel>
 
                 <!--  缩略图  -->
-                <Image Source="{Binding DropUrl}" Stretch="Uniform" />
+                <Image
+                    IsEnabled="{cb:Binding 'DropUrl != null'}"
+                    Source="{Binding DropUrl}"
+                    Stretch="Uniform" />
 
             </DockPanel>
 
             <!--  原图  -->
             <ItemsControl MaxWidth="750" Margin="10,0">
-                <Image Source="{Binding DropUrl}" Stretch="UniformToFill" />
+                <Image
+                    IsEnabled="{cb:Binding 'DropUrl != null'}"
+                    Source="{Binding DropUrl}"
+                    Stretch="UniformToFill" />
             </ItemsControl>
 
         </DockPanel>
-
 
         <ui:SymbolIcon
             MinWidth="400"
