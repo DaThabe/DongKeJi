@@ -7,6 +7,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+    <Authors>DaThabe</Authors>
+    <Title>懂科技启动器</Title>
+	<VersionPrefix>0.0.1</VersionPrefix>
+    <Copyright>©DaThabe 2025</Copyright>
+    <Company>ThabeSoft</Company>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using DongKeJi.Core;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+
 
 namespace DongKeJi.Launcher;
 
@@ -84,6 +86,23 @@ public partial class App : IApplication
         _coreConfig = _host.Services.GetRequiredService<ICoreConfig>();
     }
 
+    static App()
+    {
+        try
+        {
+            //更新
+            if (File.Exists(@"Database\PerformanceRecord.db"))
+            {
+                File.Move(@"Database\PerformanceRecord.db", @"Database\Work.db");
+            }
+        }
+        catch (Exception e)
+        {
+            //2025-01-18 01:55:20.log
+            var fileName = $"{DateTime.Now:yyyy-MM-dd HH:MM:ss}.log";
+            File.WriteAllText(fileName, e.ToString());
+        }
+    }
 
 
     #region --事件处理--

@@ -1,48 +1,60 @@
-﻿using System.Windows;
-using DongKeJi.Deploy.Model;
+﻿using System.IO;
+using System.Windows;
+using System.Windows.Threading;
+using DongKeJi.Deploy.Extensions;
 using DongKeJi.Deploy.Service;
+using DongKeJi.Deploy.UI.View;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DongKeJi.Deploy;
 
-public partial class App : Application
+
+public partial class App
 {
-    public App()
-    {
-        Fuck();
-    }
-
-
-
-    public async Task Fuck()
-    {
-        try
+    public static IHost Host { get; } = Microsoft.Extensions.Hosting.Host
+        .CreateDefaultBuilder()
+        .ConfigureServices(x =>
         {
-            Updater updater = new();
-            var newVersion = await updater.GetLatestVersionAsync();
+            x.AddSingleton<IConfig>(Config.Instance);
+            x.AddSingleton<IPublishService, PublishService>();
+            x.AddSingleton<IUpdateService, UpdateService>();
+            x.AddSingleton<IDeployService, DeployService>();
+            x.AddSingleton<IVersionService, VersionService>();
 
-            await updater.DownloadVersionFileAsync(newVersion, "Download", new Progress<(string fileName, double progress)>(x =>
+
+            x.AddSingleton<MainFrame>();
+        })
+        .Build();
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        Current.Dispatcher.InvokeAsync(async () =>
+        {
+            var publish = Host.Services.GetRequiredService<IPublishService>();
+            var versionItems = await publish.CreateByFolderAsync(
+                @"D:\Src\Data\Code\懂科技\开发\DongKeJi\DongKeJi.Launcher\bin\Release\net8.0-windows\publish\win-x64\懂科技-v0.0.1-beta");
+
+            var fuck = versionItems.ToJson();
+
+
+            try
             {
-                string fuck = $"{x.fileName} - {x.progress}";
-            }));
+                var mainFrame = Host.Services.GetRequiredService<MainFrame>();
+                Current.MainWindow = mainFrame;
+                mainFrame.Show();
 
-            var shit = 1;
+                await mainFrame.LazyInitAsync();
+            }
+            catch (Exception ex)
+            {
+                var fileName = $"{DateTime.Now:yyyyMMdd-HHmmss}-Error.log";
+                await File.WriteAllTextAsync(fileName, ex.ToString());
 
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-        
+                MessageBox.Show(ex.Message, "发生错误");
+                Shutdown(-1);
+            }
 
-        //Publisher publisher = new();
-        //const string folder = @"D:\Src\Data\Code\懂科技\code-hosting\V2\DongKeJi\DongKeJi.Launcher\bin\Release\net8.0-windows\publish\win-x64";
-
-        //var versionInfo = await publisher.CreateByFolderAsync(folder, new Version(0, 0, 1), "");
-
-        //var json = versionInfo.ToJson();
-
-        //Deployer deployer = new Deployer();
-        //await deployer.ValidateByFolderAsync(versionInfo, folder);
+        }, DispatcherPriority.Send);
     }
 }

@@ -5,7 +5,7 @@ namespace DongKeJi.Deploy.Model;
 /// <summary>
 /// 文件信息
 /// </summary>
-public class VersionFileInfo
+public class VersionFileItem
 {
     /// <summary>
     /// 下载地址

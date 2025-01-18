@@ -4,40 +4,49 @@ using DongKeJi.Deploy.Model;
 
 namespace DongKeJi.Deploy.Service;
 
-public interface IDeployer
+public interface IDeployService
 {
     /// <summary>
     /// 验证文件
     /// </summary>
-    /// <param name="info">版本信息</param>
+    /// <param name="item">版本信息</param>
     /// <param name="files">版本文件</param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
-    ValueTask ValidateByFilePathsAsync(VersionInfo info, IEnumerable<string> files);
+    ValueTask ValidateByFilePathsAsync(
+        VersionItem item, 
+        IEnumerable<string> files,
+        CancellationToken cancellation = default);
 }
 
-public static class DeployerExtensions
+public static class DeployExtensions
 {
     /// <summary>
     /// 从目录验证
     /// </summary>
-    /// <param name="deployer"></param>
-    /// <param name="info">版本信息</param>
+    /// <param name="deployService"></param>
+    /// <param name="item">版本信息</param>
     /// <param name="folder">所有更新文件所在目录</param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
-    public static  ValueTask ValidateByFolderAsync(
-        this IDeployer deployer,
-        VersionInfo info, 
-        string folder)
+    public static ValueTask ValidateByFolderAsync(
+        this IDeployService deployService,
+        VersionItem item, 
+        string folder,
+        CancellationToken cancellation = default)
     {
         var files = Directory.EnumerateFiles(folder);
-        return deployer.ValidateByFilePathsAsync(info, files);
+        return deployService.ValidateByFilePathsAsync(item, files, cancellation);
     }
 }
 
 
-public class Deployer : IDeployer
+public class DeployService : IDeployService
 {
-    public async ValueTask ValidateByFilePathsAsync(VersionInfo info, IEnumerable<string> files)
+    public async ValueTask ValidateByFilePathsAsync(
+        VersionItem item, 
+        IEnumerable<string> files,
+        CancellationToken cancellation = default)
     {
         Dictionary<string, string> fileNamePath = new(files.Select(x =>
         {
@@ -46,7 +55,7 @@ public class Deployer : IDeployer
         }));
 
 
-        foreach (var i in info.Files)
+        foreach (var i in item.Files)
         {
             if (!fileNamePath.TryGetValue(i.Name, out var path))
             {
