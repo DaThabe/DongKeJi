@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
 using System.Windows.Threading;
-using DongKeJi.Deploy.Extensions;
 using DongKeJi.Deploy.Service;
 using DongKeJi.Deploy.UI.View;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,28 +22,36 @@ public partial class App
             x.AddSingleton<IVersionService, VersionService>();
 
 
-            x.AddSingleton<MainFrame>();
+            x.AddSingleton<UpdateWindow>();
+            x.AddSingleton<DevelopmentWindow>();
         })
         .Build();
+
+    /// <summary>
+    /// 是否是开发模式
+    /// </summary>
+    public static bool IsDevelopment { get; } = true;
+
 
     protected override void OnStartup(StartupEventArgs e)
     {
         Current.Dispatcher.InvokeAsync(async () =>
         {
-            var publish = Host.Services.GetRequiredService<IPublishService>();
-            var versionItems = await publish.CreateByFolderAsync(
-                @"D:\Src\Data\Code\懂科技\开发\DongKeJi\DongKeJi.Launcher\bin\Release\net8.0-windows\publish\win-x64\懂科技-v0.0.1-beta");
-
-            var fuck = versionItems.ToJson();
-
-
             try
             {
-                var mainFrame = Host.Services.GetRequiredService<MainFrame>();
-                Current.MainWindow = mainFrame;
-                mainFrame.Show();
-
-                await mainFrame.LazyInitAsync();
+                if (!IsDevelopment)
+                {
+                    var win = Host.Services.GetRequiredService<UpdateWindow>();
+                    Current.MainWindow = win;
+                    win.Show();
+                    await win.LazyInitAsync();
+                }
+                else
+                {
+                    var win = Host.Services.GetRequiredService<DevelopmentWindow>();
+                    Current.MainWindow = win;
+                    win.Show();
+                }
             }
             catch (Exception ex)
             {

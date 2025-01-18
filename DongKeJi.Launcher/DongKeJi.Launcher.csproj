@@ -9,7 +9,6 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <Authors>DaThabe</Authors>
     <Title>懂科技启动器</Title>
-	<VersionPrefix>0.0.1</VersionPrefix>
     <Copyright>©DaThabe 2025</Copyright>
     <Company>ThabeSoft</Company>
   </PropertyGroup>
@@ -25,9 +24,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DongKeJi.Tool\DongKeJi.Tool.csproj" />
+    <ProjectReference Include="..\DongKeJi.WebView\DongKeJi.WebView.csproj" />
     <ProjectReference Include="..\DongKeJi.Work\DongKeJi.Work.csproj" />
     <ProjectReference Include="..\DongKeJi\DongKeJi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

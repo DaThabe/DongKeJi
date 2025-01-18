@@ -206,7 +206,7 @@
 
             <wpf:MarkdownViewer
                 d:Markdown="Test"
-                Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"
+                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                 Markdown="{Binding SelectedModule.Describe}" />
 
         </ItemsControl>

@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -102,6 +103,29 @@ public static class EncodeExtensions
         }
 
         return new Md5EncodeContent { Content = sb.ToString() };
+    }
+
+    /// <summary>
+    /// 计算文件的 MD5 哈希值
+    /// </summary>
+    /// <param name="filePath">文件路径</param>
+    /// <param name="cancellation"></param>
+    /// <returns>MD5 哈希值</returns>
+    public static async ValueTask<string> CalcFileMd5Async(
+        string filePath, 
+        CancellationToken cancellation = default)
+    {
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException($"文件未找到: {filePath}");
+        }
+
+        using var md5 = MD5.Create();
+        await using var stream = File.OpenRead(filePath);
+        var hashBytes = await md5.ComputeHashAsync(stream);
+        var md5String = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+
+        return md5String;
     }
 }
 

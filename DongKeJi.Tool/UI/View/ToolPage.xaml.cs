@@ -15,6 +15,11 @@ public partial class ToolPage
     {
         _services = services;
         InitializeComponent();
+
+        LostFocus += async (_, _) =>
+        {
+            await OnNavigatedFromAsync();
+        };
     }
 
 

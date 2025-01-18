@@ -1,7 +1,5 @@
 using DongKeJi.Core.Model;
 using DongKeJi.Core.UI.View;
-using DongKeJi.Core.UI.View.User;
-using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;

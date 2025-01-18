@@ -77,7 +77,7 @@ internal class WorkDbContext(string dbFolder) : LocalDbContext(dbFolder, "Work")
     public DbSet<ConsumeMixingEntity> ConsumeMixing { get; set; }
 
 
-    public WorkDbContext(IApplication applicationContext) : this(applicationContext.DatabaseDirectory)
+    public WorkDbContext(IApplication applicationContext) : this(applicationContext.DirectoryDatabase)
     {
 
     }

@@ -2,7 +2,7 @@ using System.Windows;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui;
 
-namespace DongKeJi.Service;
+namespace DongKeJi.Core.Service;
 
 /// <summary>
 ///     页面服务实现

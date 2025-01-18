@@ -7,23 +7,8 @@ namespace DongKeJi;
 /// <summary>
 /// 程序主功能
 /// </summary>
-public interface IApplication
+public interface IApplication : IApplicationConfig
 {
-    /// <summary>
-    ///     程序根目录
-    /// </summary>
-    string BaseDirectory { get; }
-
-    /// <summary>
-    ///     数据库文件目录
-    /// </summary>
-    string DatabaseDirectory { get; }
-
-    /// <summary>
-    ///     缓存文件目录
-    /// </summary>
-    string CacheDirectory { get; }
-
     /// <summary>
     /// 资源字典
     /// </summary>

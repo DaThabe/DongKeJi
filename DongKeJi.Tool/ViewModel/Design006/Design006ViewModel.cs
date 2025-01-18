@@ -11,9 +11,7 @@ using DongKeJi.UI;
 using DongKeJi.ViewModel;
 using Flurl.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Wpf.Ui;
-using Wpf.Ui.Extensions;
 
 namespace DongKeJi.Tool.ViewModel.Design006;
 
@@ -46,6 +44,7 @@ public partial class Design006ViewModel(
         }
         catch (Exception e)
         {
+            DropUrl = null;
             snackbarService.ShowError(e);
         }
     }
@@ -92,6 +91,8 @@ public partial class Design006ViewModel(
                 throw new FileNotFoundException("文件不存在", uri);
             }
 
+            await Task.Delay(100);
+
             Process.Start("explorer.exe", $"/select,\"{uri}\"");
         }
         catch (Exception ex)
@@ -125,11 +126,11 @@ public partial class Design006ViewModel(
         var fileType = Path.GetExtension(DropUrl.AbsoluteUri);
 
         var fileName = $"{fileId}{fileType}";
-        var filePath = Path.Combine(application.CacheDirectory, fileName);
+        var filePath = Path.Combine(application.DirectoryCache, fileName);
 
-        if (!Directory.Exists(application.CacheDirectory))
+        if (!Directory.Exists(application.DirectoryCache))
         {
-            Directory.CreateDirectory(application.CacheDirectory);
+            Directory.CreateDirectory(application.DirectoryCache);
         }
 
         if (useLocalFile && File.Exists(filePath))
@@ -137,9 +138,8 @@ public partial class Design006ViewModel(
             return filePath;
         }
 
-        return await DropUrl.DownloadFileAsync(application.CacheDirectory, fileName);
+        return await DropUrl.DownloadFileAsync(application.DirectoryCache, fileName);
     }
-
 
 
 

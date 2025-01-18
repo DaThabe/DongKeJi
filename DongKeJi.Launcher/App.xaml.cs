@@ -1,12 +1,13 @@
 ﻿using System.IO;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using DongKeJi.Core;
 using DongKeJi.Launcher.Service;
 using DongKeJi.Module;
 using DongKeJi.Tool;
+using DongKeJi.WebView;
 using DongKeJi.Work;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,34 +23,21 @@ namespace DongKeJi.Launcher;
 /// </summary>
 public partial class App : IApplication
 {
-    /// <summary>
-    ///     程序根目录
-    /// </summary>
-    public string BaseDirectory { get; } 
+    public string DirectoryBase { get; }
+    public string DirectoryDatabase { get; }
+    public string DirectoryCache { get; }
 
-    /// <summary>
-    ///     数据库文件目录
-    /// </summary>
-    public string DatabaseDirectory { get; }
+    public string UpdateVersionListUrl =>
+        _configuration[nameof(UpdateVersionListUrl)] ?? 
+        throw new ArgumentNullException(nameof(UpdateVersionListUrl), "无法获取更新版本列表网址, 因为未读取到配置");
 
-    /// <summary>
-    /// 缓存目录
-    /// </summary>
-    public string CacheDirectory { get; }
+    public string UpdateDownloadHost =>
+        _configuration[nameof(UpdateDownloadHost)] ??
+        throw new ArgumentNullException(nameof(UpdateDownloadHost), "无法获取更新下载地址, 因为未读取到配置");
 
-    /// <summary>
-    /// 标题
-    /// </summary>
+
     public string Title { get; }
-
-    /// <summary>
-    /// 版本
-    /// </summary>
     public Version Version { get;  }
-
-    /// <summary>
-    /// 主题
-    /// </summary>
     public ApplicationTheme Theme
     {
         get => ApplicationThemeManager.GetAppTheme();
@@ -63,45 +51,38 @@ public partial class App : IApplication
 
     public App()
     {
-        BaseDirectory = AppContext.BaseDirectory;
-        DatabaseDirectory = Path.Combine(BaseDirectory, "Database");
-        CacheDirectory = Path.Combine(BaseDirectory, "Cache");
-        Version = new Version(1, 0, 0);
+        Version = new Version(0, 0, 1);
         Title = $"懂科技 - {Version}";
 
+        DirectoryBase = AppContext.BaseDirectory;
+        DirectoryCache = Path.Combine(AppContext.BaseDirectory, "Cache");
+        DirectoryDatabase = Path.Combine(AppContext.BaseDirectory, "Database");
 
         var builder = Host.CreateDefaultBuilder()
             .RegisterModule<CoreModule>()
             .RegisterModule<WorkModule>()
             .RegisterModule<ToolModule>()
+            .RegisterModule<WebViewModule>()
             .RegisterModule<LauncherModule>()
-            .ConfigureLogging(x => x.SetMinimumLevel(LogLevel.Trace))
+            .ConfigureAppConfiguration(x =>
+            {
+                x.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            })
+            .ConfigureLogging(logging =>
+            {
+                logging.SetMinimumLevel(LogLevel.Trace);
+            })
             .ConfigureServices(services =>
             {
                 services.AddHostedService<HostedService>();
                 services.AddSingleton<IApplication>(this);
             });
+            
 
         _host = builder.Build();
-        _coreConfig = _host.Services.GetRequiredService<ICoreConfig>();
-    }
 
-    static App()
-    {
-        try
-        {
-            //更新
-            if (File.Exists(@"Database\PerformanceRecord.db"))
-            {
-                File.Move(@"Database\PerformanceRecord.db", @"Database\Work.db");
-            }
-        }
-        catch (Exception e)
-        {
-            //2025-01-18 01:55:20.log
-            var fileName = $"{DateTime.Now:yyyy-MM-dd HH:MM:ss}.log";
-            File.WriteAllText(fileName, e.ToString());
-        }
+        _coreConfig = _host.Services.GetRequiredService<ICoreConfig>();
+        _configuration = _host.Services.GetRequiredService<IConfiguration>();
     }
 
 
@@ -139,5 +120,21 @@ public partial class App : IApplication
     /// </summary>
     private readonly IHost _host;
 
+    /// <summary>
+    /// 
+    /// </summary>
     private readonly ICoreConfig _coreConfig;
+
+    private readonly IConfiguration _configuration;
+}
+
+
+file class ApplicationConfig : IApplicationConfig
+{
+    public required string DirectoryBase { get; init; }
+    public required string DirectoryDatabase { get; init; }
+    public required string DirectoryCache { get; init; }
+
+    public required string UpdateVersionListUrl { get; init; }
+    public required string UpdateDownloadHost { get; init; }
 }

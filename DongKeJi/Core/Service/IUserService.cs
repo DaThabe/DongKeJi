@@ -8,7 +8,6 @@ using DongKeJi.Inject;
 using DongKeJi.Validation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using UserViewModel = DongKeJi.Core.ViewModel.User.UserViewModel;
 
 namespace DongKeJi.Core.Service;
 

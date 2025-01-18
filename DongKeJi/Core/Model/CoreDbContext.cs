@@ -14,7 +14,7 @@ internal class CoreDbContext(string dbFolder) : LocalDbContext(dbFolder, "Core")
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<ConfigEntity> Config { get; set; }
 
-    public CoreDbContext(IApplication application) : this(application.DatabaseDirectory)
+    public CoreDbContext(IApplication application) : this(application.DirectoryDatabase)
     {
 
     }

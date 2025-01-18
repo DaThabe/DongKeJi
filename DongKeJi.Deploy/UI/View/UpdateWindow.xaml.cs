@@ -3,18 +3,18 @@ using System.Windows;
 
 namespace DongKeJi.Deploy.UI.View;
 
-public partial class MainFrame : Window
+/// <summary>
+/// 更新窗口
+/// </summary>
+public partial class UpdateWindow
 {
     private readonly IUpdateService _updateService;
 
-    public MainFrame(IUpdateService updateService)
+    public UpdateWindow(IUpdateService updateService)
     {
         _updateService = updateService;
         InitializeComponent();
     }
 
-    public async ValueTask LazyInitAsync()
-    {
-        await _updateService.UpdateAsync();
-    }
+    public async ValueTask LazyInitAsync() => await _updateService.UpdateAsync();
 }

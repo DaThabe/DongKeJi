@@ -57,11 +57,6 @@
         <Separator Margin="0,5" />
 
         <!--  版本  -->
-        <ui:CardControl Header="版本" Icon="{ui:SymbolIcon Symbol=Bug24}">
-            <TextBlock Text="{Binding Application.Version}" />
-        </ui:CardControl>
-
-        <!--  版本  -->
         <ui:CardControl Header="项目地址" Icon="{ui:SymbolIcon Symbol=CodeBlock20}">
             <StackPanel Orientation="Horizontal">
 
@@ -71,6 +66,21 @@
             </StackPanel>
         </ui:CardControl>
 
+        <!--  版本  -->
+        <ui:CardControl Header="版本" Icon="{ui:SymbolIcon Symbol=Bug24}">
+            <StackPanel Orientation="Horizontal">
+                <ui:TextBlock
+                    VerticalAlignment="Center"
+                    d:Text="0.0.0"
+                    Text="{Binding Application.Version}" />
+                <ui:Button
+                    Margin="10,0,0,0"
+                    Appearance="Primary"
+                    Command="{Binding CheckUpdateCommand}"
+                    Content="检查更新"
+                    Icon="{ui:SymbolIcon Symbol=ArrowRepeatAll16}" />
+            </StackPanel>
+        </ui:CardControl>
 
     </ItemsControl>
 

@@ -40,6 +40,9 @@ internal class HostedService(
 
         try
         {
+            await InitStaffAccount(cancellationToken);
+            await InitStaffPosition(cancellationToken);
+
             //var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");
 
             var menu = mainFrameService.AddMenu<CustomerPage>(SymbolRegular.BuildingPeople24, "机构");
@@ -47,9 +50,6 @@ internal class HostedService(
             menu.AddChildMenu<WagesPage>(SymbolRegular.ArrowTrendingLines24, "提成");
             menu.AddChildMenu<StaffPage>(SymbolRegular.People24, "员工");
             menu.AddChildMenu<StaffPositionPage>(SymbolRegular.VideoPerson16, "职位");
-
-            await InitStaffAccount(cancellationToken);
-            await InitStaffPosition(cancellationToken);
         }
         catch (Exception e)
         {
