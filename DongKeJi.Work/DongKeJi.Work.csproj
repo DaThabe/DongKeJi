@@ -21,13 +21,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="UI\View\Order\OrderTypeSelector.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UI\View\Staff\StaffSelector.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UI\View\Staff\StaffEditView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UI\View\Staff\StaffPositionView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UI\View\Staff\StaffPositionTypeComboBox.xaml.cs">
+    <Compile Update="UI\View\Staff\StaffPositionTypeSelector.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UI\View\Staff\StaffPositionEditView.xaml.cs">

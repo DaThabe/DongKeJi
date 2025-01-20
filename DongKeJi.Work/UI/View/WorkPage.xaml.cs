@@ -2,6 +2,8 @@
 using System.Windows.Controls;
 using DongKeJi.Extensions;
 using DongKeJi.Inject;
+using DongKeJi.UI.Control.State;
+using DongKeJi.Work.ViewModel;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
 using LiveCharts;
@@ -11,12 +13,14 @@ using Separator = LiveCharts.Wpf.Separator;
 namespace DongKeJi.Work.UI.View;
 
 
-[Inject(ServiceLifetime.Singleton)]
-public partial class WorkPage : UserControl
+[Inject(ServiceLifetime.Transient)]
+public partial class WorkPage
 {
-    public WorkPage()
+    public WorkPage(WorkPageViewModel vm)
     {
         InitializeComponent();
+        DataContext = vm;
+        this.OnLoading(async () => await vm.InitializeAsync());
 
         var date = new DateTime(2025, 1, 15);
         List<MonthlyHeatmapItem> list = [];

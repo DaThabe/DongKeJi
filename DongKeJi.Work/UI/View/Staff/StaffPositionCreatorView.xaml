@@ -20,7 +20,7 @@
                 <StackPanel Orientation="Horizontal">
 
                     <!--  类型选择器  -->
-                    <staff:StaffPositionTypeComboBox DataContext="{Binding Position}" />
+                    <staff:StaffPositionTypeSelector SelectedItem="{Binding Position.Type}" />
 
                 </StackPanel>
             </ui:CardControl.Content>

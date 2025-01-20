@@ -1,57 +1,46 @@
-﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
-using DongKeJi.Extensions;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.Inject;
-using DongKeJi.ViewModel;
 using DongKeJi.Work.Model.Entity.Order;
 using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
 
 namespace DongKeJi.Work.ViewModel.Order;
 
 
 [Inject(ServiceLifetime.Transient)]
-public partial class OrderCreatorViewModel : ObservableViewModel
+public partial class OrderCreatorViewModel : OrderEditViewModel
 {
     /// <summary>
-    ///     订单信息
+    /// 创建
     /// </summary>
-    [ObservableProperty] private OrderViewModel _order;
+    /// <param name="salespersons"></param>
+    /// <returns></returns>
+    public new static OrderCreatorViewModel Create(ObservableCollection<StaffViewModel> salespersons)
+    {
+        var creator = new OrderCreatorViewModel
+        {
+            SalespersonSelector = new StaffSelectorViewModel()
+            {
+                ItemsSource = salespersons,
+                Selected = salespersons.FirstOrDefault()
+            },
+            CurrentType = OrderType.Timing
+        };
 
-    /// <summary>
-    ///     当前选择的销售
-    /// </summary>
-    [ObservableProperty] private StaffViewModel? _selectedSalesperson;
+        creator.SalespersonSelector.Selected = creator.SalespersonSelector.ItemsSource.FirstOrDefault();
+        //creator.OnCurrentTypeChanged(OrderType.Timing);
 
-    /// <summary>
-    ///     销售列表
-    /// </summary>
-    [ObservableProperty] private ObservableCollection<StaffViewModel> _salespersonCollection;
+        return creator;
+    }
+
 
     /// <summary>
     ///     当前订单类型
     /// </summary>
-    [ObservableProperty] private OrderType _currentType;
+    [ObservableProperty] 
+    private OrderType _currentType = OrderType.Unknown;
 
-
-    public OrderCreatorViewModel(IEnumerable<StaffViewModel> salespersonViewModels)
-    {
-        SalespersonCollection = salespersonViewModels.ToObservableCollection();
-        SelectedSalesperson = SalespersonCollection.FirstOrDefault();
-
-        _order = new OrderTimingViewModel
-        {
-            Name = "设计包月",
-            Describe = "",
-            Price = 3999,
-            State = OrderState.Ready,
-            SubscribeTime = DateTime.Now,
-            InitDays = 0,
-            TotalDays = 30
-        };
-
-        _currentType = OrderType.Timing;
-    }
 
     partial void OnCurrentTypeChanged(OrderType value)
     {
@@ -62,7 +51,7 @@ public partial class OrderCreatorViewModel : ObservableViewModel
                 Name = "设计包月",
                 Describe = Order.Describe,
                 Price = 3999,
-                State = OrderState.Ready,
+                State = OrderState.Active,
                 SubscribeTime = DateTime.Now,
                 InitDays = 0,
                 TotalDays = 30
@@ -72,7 +61,7 @@ public partial class OrderCreatorViewModel : ObservableViewModel
                 Name = "散单海报",
                 Describe = Order.Describe,
                 Price = 199,
-                State = OrderState.Ready,
+                State = OrderState.Active,
                 SubscribeTime = DateTime.Now,
                 InitCounts = 0,
                 TotalCounts = 1
@@ -82,7 +71,7 @@ public partial class OrderCreatorViewModel : ObservableViewModel
                 Name = "30天20张",
                 Describe = Order.Describe,
                 Price = 1999,
-                State = OrderState.Ready,
+                State = OrderState.Active,
                 SubscribeTime = DateTime.Now,
                 InitDays = 0,
                 TotalDays = 30,

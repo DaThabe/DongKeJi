@@ -44,8 +44,9 @@ internal class HostedService(
             await InitStaffPosition(cancellationToken);
 
 
-            mainFrameService.AddMenu<CustomerPage>(SymbolRegular.BuildingPeople24, "机构", builder =>
+            mainFrameService.AddMenu<WorkPage>(SymbolRegular.Briefcase20, "办公", builder =>
             {
+                builder.AddChild<CustomerPage>(SymbolRegular.BuildingPeople24, "机构");
                 builder.AddChild<ConsumePage>(SymbolRegular.NotepadEdit16, "划扣");
                 builder.AddChild<WagesPage>(SymbolRegular.ArrowTrendingLines24, "提成");
                 builder.AddChild<StaffPage>(SymbolRegular.People24, "员工");

@@ -1,8 +1,6 @@
 ﻿using System.Windows;
-using System.Windows.Media.Imaging;
 using DongKeJi.Tool.Model;
 using DongKeJi.Tool.ViewModel.Design006;
-using Wpf.Ui.Controls;
 
 namespace DongKeJi.Tool.UI.View.Design006;
 

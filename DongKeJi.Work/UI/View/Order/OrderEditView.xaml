@@ -6,9 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:order="clr-namespace:DongKeJi.Work.UI.View.Order"
     xmlns:orderVm="clr-namespace:DongKeJi.Work.ViewModel.Order"
+    xmlns:staff="clr-namespace:DongKeJi.Work.UI.View.Staff"
     xmlns:templateSelector="clr-namespace:DongKeJi.Work.UI.TemplateSelector"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    d:DataContext="{d:DesignInstance orderVm:OrderViewModel,
+    d:DataContext="{d:DesignInstance orderVm:OrderEditViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
 
@@ -142,14 +143,14 @@
     <StackPanel>
 
 
-        <ItemsControl ItemsSource="{Binding Errors}">
+        <ItemsControl ItemsSource="{Binding Order.Errors}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
 
                     <ui:InfoBar
                         Title="参数错误"
                         IsOpen="True"
-                        Message="{Binding ErrorMessage}"
+                        Message="{Binding Order.ErrorMessage}"
                         Severity="Error" />
 
                 </DataTemplate>
@@ -157,96 +158,51 @@
         </ItemsControl>
 
 
+        <!--  不同类型的其他选项  -->
+        <ContentPresenter Content="{Binding Order, Mode=TwoWay}" ContentTemplateSelector="{StaticResource OrderDataTemplateSelector}" />
+
+        <Separator Margin="0,5" />
+
         <!--  基础信息  -->
-        <Grid>
-
-            <Grid.ColumnDefinitions>
-
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-
-            </Grid.ColumnDefinitions>
-
-            <Grid.RowDefinitions>
-
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-
-            </Grid.RowDefinitions>
-
+        <UniformGrid Columns="2">
 
             <!--  名称  -->
-            <ui:CardControl
-                Grid.Row="0"
-                Grid.Column="0"
-                Header="名称">
-
-                <ui:CardControl.Content>
-                    <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Name, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-                </ui:CardControl.Content>
-
-            </ui:CardControl>
-
-            <!--  状态  -->
-            <ui:CardControl
-                Grid.Row="0"
-                Grid.Column="1"
-                Header="状态">
-                <ui:CardControl.Content>
-
-                    <order:OrderStateComboBox DataContext="{Binding}" />
-
-                </ui:CardControl.Content>
+            <ui:CardControl Header="名称">
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Order.Name, Mode=TwoWay}" />
             </ui:CardControl>
 
             <!--  描述  -->
-            <ui:CardControl
-                Grid.Row="1"
-                Grid.Column="0"
-                Grid.ColumnSpan="2"
-                Header="备注">
-
-                <ui:CardControl.Content>
-                    <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Describe, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-                </ui:CardControl.Content>
-
+            <ui:CardControl Header="备注">
+                <ui:TextBox PlaceholderText="点击输入..." Text="{Binding Order.Describe, Mode=TwoWay}" />
             </ui:CardControl>
 
+            <!--  状态  -->
+            <ui:CardControl Header="状态">
+                <order:OrderStateSelector SelectedItem="{Binding Order.State, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!--  销售  -->
+            <ui:CardControl Header="销售">
+                <staff:StaffSelector DataContext="{Binding SalespersonSelector, Mode=TwoWay}" />
+            </ui:CardControl>
+
+
             <!--  创建时间  -->
-            <ui:CardControl
-                Grid.Row="2"
-                Grid.Column="0"
-                MinWidth="200"
-                Header="时间">
-
-                <ui:CardControl.Content>
-                    <DatePicker SelectedDate="{Binding SubscribeTime, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" ToolTip="创建的时间" />
-                </ui:CardControl.Content>
-
+            <ui:CardControl MinWidth="200" Header="时间">
+                <DatePicker SelectedDate="{Binding Order.SubscribeTime, Mode=TwoWay}" ToolTip="创建的时间" />
             </ui:CardControl>
 
             <!--  价格  -->
-            <ui:CardControl
-                Grid.Row="2"
-                Grid.Column="1"
-                Header="价格">
-
-                <ui:CardControl.Content>
-                    <ui:NumberBox
-                        ClearButtonEnabled="False"
-                        Maximum="99999"
-                        Minimum="0"
-                        PlaceholderText="点击输入..."
-                        Text="{Binding Price, ValidatesOnNotifyDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-                </ui:CardControl.Content>
-
+            <ui:CardControl Header="价格">
+                <ui:NumberBox
+                    ClearButtonEnabled="False"
+                    Maximum="99999"
+                    Minimum="0"
+                    PlaceholderText="点击输入..."
+                    Text="{Binding Order.Price, Mode=TwoWay}" />
             </ui:CardControl>
 
-        </Grid>
-
-        <!--  不同类型的其他选项  -->
-        <ContentPresenter Content="{Binding}" ContentTemplateSelector="{StaticResource OrderDataTemplateSelector}" />
+        </UniformGrid>
 
     </StackPanel>
 

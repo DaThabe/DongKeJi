@@ -82,6 +82,7 @@
                     Command="{Binding AddPositionCommand}"
                     DockPanel.Dock="Right"
                     Icon="{ui:SymbolIcon Symbol=Add32}"
+                    IsEnabled="False"
                     ToolTip="新增职位" />
 
                 <ui:AutoSuggestBox

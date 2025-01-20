@@ -16,6 +16,7 @@ using DongKeJi.Work.ViewModel.Compose;
 using DongKeJi.Work.ViewModel.Customer;
 using DongKeJi.Work.ViewModel.Order;
 using DongKeJi.Work.ViewModel.Staff;
+using Markdig.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui;
@@ -315,11 +316,12 @@ public partial class CustomerPageViewModel(
         try
         {
             ArgumentNullException.ThrowIfNull(SelectedCustomer);
+            if (SalespersonCollection.Count <= 0)
+            {
+                throw new InvalidOperationException("当前没有销售, 请先添加销售");
+            }
 
-            var salespersonList = await staffService
-                .GetAllByUserAndPositionTypeAsync(CurrentUser, StaffPositionType.Salesperson);
-
-            var creatorVm = new OrderCreatorViewModel(salespersonList);
+            var creatorVm = OrderCreatorViewModel.Create(SalespersonCollection);
 
             var content = new SimpleContentDialogCreateOptions
             {
@@ -335,14 +337,14 @@ public partial class CustomerPageViewModel(
             //等待确认
             if (dialogResult != ContentDialogResult.Primary) return;
 
-            if (creatorVm.SelectedSalesperson is null)
+            if (creatorVm.SalespersonSelector.Selected is null)
             {
                 throw new Exception("订单新增失败, 未设置订单关联销售");
             }
 
             //更新数据库
-            await orderService.AddAsync(creatorVm.Order, creatorVm.SelectedSalesperson, SelectedCustomer);
-            var orderSalesperson = new SalespersonOrderViewModel(creatorVm.SelectedSalesperson, creatorVm.Order);
+            await orderService.AddAsync(creatorVm.Order, creatorVm.SalespersonSelector.Selected, SelectedCustomer);
+            var orderSalesperson = new SalespersonOrderViewModel(creatorVm.SalespersonSelector.Selected, creatorVm.Order);
             dbService.AutoUpdate(creatorVm.Order);
 
             //更新界面

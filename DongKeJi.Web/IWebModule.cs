@@ -4,6 +4,8 @@ using DongKeJi.ViewModel;
 using DongKeJi.Web.Model;
 using DongKeJi.Web.Service;
 using DongKeJi.Web.ViewModel;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DongKeJi.Web;
 
@@ -11,7 +13,7 @@ namespace DongKeJi.Web;
 /// <summary>
 /// 办公模块
 /// </summary>
-public interface IWebViewModule : IModule
+public interface IWebModule : IModule
 {
     /// <summary>
     /// 当前页面
@@ -22,8 +24,8 @@ public interface IWebViewModule : IModule
 /// <summary>
 /// 网页视图模块
 /// </summary>
-[Inject(ServiceLifetime.Singleton, typeof(IWebViewModule))]
-public class WebModule : ObservableViewModel, IWebViewModule
+[Inject(ServiceLifetime.Singleton, typeof(IWebModule))]
+public class WebModule : ObservableViewModel, IWebModule
 {
     public static IModuleInfo Info { get; } = ModuleInfo.CreateFromAssembly<WebModule>(config =>
     {

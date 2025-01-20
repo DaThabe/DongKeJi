@@ -1,15 +1,13 @@
-﻿using System.Windows;
-using DongKeJi.Inject;
+﻿using DongKeJi.Inject;
 using DongKeJi.Tool.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
-using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.Tool.UI.View;
 
 
 [Inject(ServiceLifetime.Singleton)]
-public partial class ToolPage
+public partial class ToolPage : INavigationAware
 {
     public ToolPage(ToolPageViewModel vm)
     {
@@ -17,14 +15,17 @@ public partial class ToolPage
         DataContext = vm;
     }
 
-    
-    protected override ValueTask InternalNavigateFromAsync(CancellationToken cancellation = default)
+    public void OnNavigatedTo()
+    {
+        
+    }
+
+    public void OnNavigatedFrom()
     {
         if (DataContext is ToolPageViewModel vm)
         {
             vm.SelectedToolItem = null;
         }
-        return base.InternalNavigateFromAsync(cancellation);
     }
 
 

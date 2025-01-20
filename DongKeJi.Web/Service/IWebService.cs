@@ -36,7 +36,7 @@ public interface IWebService
 
 [Inject(ServiceLifetime.Singleton, typeof(IWebService))]
 internal class WebService(
-    IWebViewModule module, 
+    IWebModule module, 
     WebViewDbContext dbContext,
     IMapper mapper) : IWebService
 {

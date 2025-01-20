@@ -1,5 +1,21 @@
 ﻿namespace DongKeJi.ViewModel;
 
+public interface ILazyInitialize
+{
+    /// <summary>
+    /// 是否已经初始化
+    /// </summary>
+    bool IsInitialized { get; set; }
+
+    /// <summary>
+    /// 开始初始化
+    /// </summary>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    ValueTask InitializeAsync(CancellationToken cancellation = default);
+}
+
+
 /// <summary>
 ///     延迟初始化视图模型
 /// </summary>
