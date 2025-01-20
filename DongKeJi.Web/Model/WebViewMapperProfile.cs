@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using DongKeJi.WebView.Model.Entity;
-using DongKeJi.WebView.ViewModel;
+using DongKeJi.Web.Model.Entity;
+using DongKeJi.Web.ViewModel;
 
-namespace DongKeJi.WebView.Model;
+namespace DongKeJi.Web.Model;
 
 internal class WebViewMapperProfile : Profile
 {

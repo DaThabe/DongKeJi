@@ -1,8 +1,11 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using DongKeJi.Inject;
 using DongKeJi.UI;
+using DongKeJi.UI.Control.State;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
@@ -12,7 +15,7 @@ using TextBox = System.Windows.Controls.TextBox;
 namespace DongKeJi.Launcher.UI.View.Color;
 
 
-[Inject(ServiceLifetime.Singleton)]
+[Inject(ServiceLifetime.Transient)]
 public partial class ColorView 
 {
     // 注册依赖属性
@@ -58,34 +61,40 @@ public partial class ColorView
         _application = application;
         _snackbarService = snackbarService;
         InitializeComponent();
+
+        this.OnLoading(async () =>
+        {
+             
+        });
+
+
+        Application.Current.Dispatcher.InvokeAsync(async () =>
+        {
+            var colors = await Task.Run(() =>
+            {
+
+                ColorItemList colors = [];
+                GetAllResources(ref colors, _application.Resources);
+                return colors;
+            });
+
+            SystemColors = new ColorItemList();
+            SystemColors.Clear();
+            foreach (var color in colors)
+            {
+                SystemColors.Add(new ColorItem() { Key = color.Key, Brush = color.Brush });
+            }
+        });
     }
 
-
-    protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
-    {
-        ColorItemList colors = [];
-        GetAllResources(ref colors, _application.Resources);
-        _allColorItemList = colors;
-
-        SystemColors = colors;
-
-        await base.OnNavigatedToAsync(cancellation);
-    }
-
-    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
-    {
-        SystemColors.Clear();
-        return ValueTask.CompletedTask;
-    }
-
-    private void GetAllResources(ref ColorItemList list, ResourceDictionary resourceDictionary)
+    private static void GetAllResources(ref ColorItemList list, ResourceDictionary resourceDictionary)
     {
         // 遍历当前字典的资源
         foreach (var key in resourceDictionary.Keys)
         {
             try
             {
-                if (SystemColors.Find(x => x.Key == key) != null) continue;
+                if (list.FirstOrDefault(x => x.Key == key) != null) continue;
 
                 var value = resourceDictionary[key];
                 if (value is not Brush brush) continue;
@@ -162,4 +171,4 @@ public class ColorItem
     }
 }
 
-public class ColorItemList : List<ColorItem>;
+public class ColorItemList : ObservableCollection<ColorItem>;

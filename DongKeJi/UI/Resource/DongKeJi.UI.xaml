@@ -1,15 +1,15 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:control="clr-namespace:DongKeJi.UI.Control">
     <ResourceDictionary.MergedDictionaries>
 
         <!--  样式  -->
         <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/ItemsControlStyle.xaml" />
         <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/ListViewStyle.xaml" />
         <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/TextBlockStyle.xaml" />
-        <!--<ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Resource/CardControlStyle.xaml" />-->
 
         <!--  控件  -->
         <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Control/NavigationPage.xaml" />
         <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Control/CardBorder.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/DongKeJi;component/UI/Control/State/StateView.xaml" />
 
 
     </ResourceDictionary.MergedDictionaries>

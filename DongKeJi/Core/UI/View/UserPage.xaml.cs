@@ -1,39 +1,23 @@
 ﻿using DongKeJi.Core.ViewModel;
+using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
+using DongKeJi.UI.Control.State;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui.Controls;
-using UserViewModel = DongKeJi.Core.ViewModel.User.UserViewModel;
 
 namespace DongKeJi.Core.UI.View;
 
 
-[Inject(ServiceLifetime.Transient)]
+[Inject(ServiceLifetime.Singleton)]
 public partial class UserPage
 {
-    private readonly IServiceProvider _services;
-
-    public UserPage(IServiceProvider services)
+    public UserPage(UserPageViewModel vm)
     {
-        _services = services;
         InitializeComponent();
-    }
-
-    protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
-    {
-        var vm = _services.GetRequiredService<UserPageViewModel>();
-        await vm.InitializeAsync(cancellation);
 
         DataContext = vm;
-        await base.OnNavigatedToAsync(cancellation);
+        this.OnLoading(async() => await vm.InitializeAsync());
     }
-
-    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
-    {
-        DataContext = null;
-        return base.OnNavigatedFromAsync(cancellation);
-    }
-
-
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
@@ -41,5 +25,4 @@ public partial class UserPage
 
         if (args.SelectedItem is UserViewModel user) vm.SelectedUser = user;
     }
-
 }

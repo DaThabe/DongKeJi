@@ -1,16 +1,16 @@
 using DongKeJi.Core.Service;
-using DongKeJi.WebView.UI.View;
+using DongKeJi.Web.UI.View;
 using Microsoft.Extensions.Hosting;
 using Wpf.Ui.Controls;
 
-namespace DongKeJi.WebView.Service;
+namespace DongKeJi.Web.Service;
 
 internal class HostedService(IMainFrameService mainFrameService) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        //Ìí¼Ó²Ëµ¥
-        mainFrameService.AddMenu<WebPage>(SymbolRegular.Globe20, "ÍøÒ³");
+        //ï¿½ï¿½Ó²Ëµï¿½
+        mainFrameService.AddMenu<WebPage>(SymbolRegular.Globe20, "ï¿½ï¿½Ò³");
         return Task.CompletedTask;
     }
 

@@ -1,6 +1,6 @@
 ﻿using DongKeJi.Core;
 using DongKeJi.Core.Service;
-using DongKeJi.Core.UI.View;
+using DongKeJi.Core.UI.View.Frame;
 using DongKeJi.Launcher.UI.View.Color;
 using DongKeJi.Work.UI.View;
 using Microsoft.Extensions.Hosting;
@@ -27,10 +27,10 @@ internal class HostedService(
         }
 
 #if DEBUG
-        mainFrameService.InsertFooterMenu<ColorView>(0, SymbolRegular.Color16, "颜色");
+        mainFrameService.AddFooterMenu<ColorView>(SymbolRegular.Color16, "颜色");
 #endif
-        mainFrameService.ShowWindow();
-        mainFrameService.Navigate(typeof(CustomerPage));
+        mainFrameService.Show();
+        await mainFrameService.NavigationAsync(typeof(CustomerPage));
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

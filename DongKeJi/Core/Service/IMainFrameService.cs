@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using DongKeJi.Core.UI.View;
 using DongKeJi.Core.UI.View.Frame;
+using DongKeJi.Extensions;
 using DongKeJi.Inject;
+using DongKeJi.UI;
 using Microsoft.Extensions.DependencyInjection;
-using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.Core.Service;
@@ -11,7 +11,7 @@ namespace DongKeJi.Core.Service;
 /// <summary>
 ///     主窗口服务
 /// </summary>
-public interface IMainFrameService : INavigationWindow
+public interface IMainFrameService : INavigationService
 {
     /// <summary>
     ///     标题
@@ -21,12 +21,22 @@ public interface IMainFrameService : INavigationWindow
     /// <summary>
     ///     菜单
     /// </summary>
-    ObservableCollection<NavigationViewItem> MenuItems { get; }
+    ObservableCollection<NavigationViewItem> MenuItems { get; set; }
 
     /// <summary>
     ///     页脚菜单
     /// </summary>
-    ObservableCollection<NavigationViewItem> FooterMenuItems { get; }
+    ObservableCollection<NavigationViewItem> FooterMenuItems { get; set; }
+
+    /// <summary>
+    /// 显示窗口
+    /// </summary>
+    void Show();
+
+    /// <summary>
+    /// 关闭窗口
+    /// </summary>
+    void Close();
 }
 
 
@@ -51,68 +61,135 @@ internal class MainFrameService(MainFrame mainFrame, ICoreModule coreModule) : I
         set => coreModule.MainFrame.FooterMenuItems = value;
     }
 
+    public void Show() => mainFrame.Show();
 
-    public INavigationView GetNavigation() => mainFrame.GetNavigation();
+    public void Close() => mainFrame.Close();
 
-    public bool Navigate(Type pageType) => mainFrame.Navigate(pageType);
 
-    public void SetServiceProvider(IServiceProvider serviceProvider) => mainFrame.SetServiceProvider(serviceProvider);
+    public ValueTask NavigationAsync(object key)
+    {
+        if (key is Type pageType)
+        {
+            mainFrame.RootNavigation.Navigate(pageType);
+        }
 
-    public void SetPageService(IPageService pageService) => mainFrame.SetPageService(pageService);
+        return ValueTask.CompletedTask;
+    }
 
-    public void ShowWindow() => mainFrame.ShowWindow();
-
-    public void CloseWindow() => mainFrame.CloseWindow();
+    public ValueTask BackAsync()
+    {
+        mainFrame.RootNavigation.GoBack();
+        return ValueTask.CompletedTask;
+    }
 }
 
 public static class MainFrameServiceExtensions
 {
     /// <summary>
-    ///     添加菜单
+    /// 添加菜单
     /// </summary>
-    /// <typeparam name="TPage"></typeparam>
-    /// <param name="vm"></param>
-    /// <param name="icon"></param>
-    /// <param name="title"></param>
-    /// <returns></returns>
-    public static NavigationViewItem AddMenu<TPage>(this IMainFrameService vm, SymbolRegular icon, string title)
+    /// <param name="mainFrameService"></param>
+    public static void AddMenu(this IMainFrameService mainFrameService, NavigationViewItem item)
     {
-        NavigationViewItem menu = new(title, icon, typeof(TPage));
-        vm.MenuItems.Add(menu);
-
-        return menu;
+        mainFrameService.MenuItems.Add(item);
     }
 
     /// <summary>
-    ///     添加页脚菜单
+    /// 添加页脚菜单
+    /// </summary>
+    /// <param name="mainFrameService"></param>
+    /// <param name="item"></param>
+    public static void AddFooterMenu(this IMainFrameService mainFrameService, NavigationViewItem item)
+    {
+        mainFrameService.FooterMenuItems.Add(item);
+    }
+
+
+
+    /// <summary>
+    /// 添加菜单
     /// </summary>
     /// <typeparam name="TPage"></typeparam>
-    /// <param name="vm"></param>
+    /// <param name="mainFrameService"></param>
     /// <param name="icon"></param>
     /// <param name="title"></param>
-    /// <returns></returns>
-    public static NavigationViewItem AddFooterMenu<TPage>(this IMainFrameService vm, SymbolRegular icon, string title)
+    public static void AddMenu<TPage>(this IMainFrameService mainFrameService, SymbolRegular icon, string title)
     {
-        NavigationViewItem menu = new(title, icon, typeof(TPage));
-        vm.FooterMenuItems.Add(menu);
-
-        return menu;
+        var item = new NavigationViewItem(title, icon, typeof(TPage));
+        mainFrameService.AddMenu(item);
     }
 
     /// <summary>
-    ///     添加子菜单 (但是好像最多只能一层子菜单
+    /// 添加页脚菜单
     /// </summary>
     /// <typeparam name="TPage"></typeparam>
+    /// <param name="mainFrameService"></param>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    public static void AddFooterMenu<TPage>(this IMainFrameService mainFrameService, SymbolRegular icon, string title)
+    {
+        mainFrameService.AddFooterMenu(new NavigationViewItem(title, icon, typeof(TPage)));
+    }
+
+    /// <summary>
+    /// 添加菜单
+    /// </summary>
+    /// <typeparam name="TPage"></typeparam>
+    /// <param name="mainFrameService"></param>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    /// <param name="builderAction"></param>
+    public static void AddMenu<TPage>(this IMainFrameService mainFrameService, SymbolRegular icon, string title, Action<NavigationViewItemBuilder> builderAction)
+    {
+        var builder = NavigationViewItemBuilder.Create<TPage>(icon, title);
+        builderAction.Invoke(builder);
+
+        mainFrameService.AddMenu(builder.Build());
+    }
+
+    /// <summary>
+    /// 添加页脚菜单
+    /// </summary>
+    /// <typeparam name="TPage"></typeparam>
+    /// <param name="mainFrameService"></param>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    /// <param name="builderAction"></param>
+    public static void AddFooterMenu<TPage>(this IMainFrameService mainFrameService, SymbolRegular icon, string title, Action<NavigationViewItemBuilder> builderAction)
+    {
+        var builder = NavigationViewItemBuilder.Create<TPage>(icon, title);
+        builderAction.Invoke(builder);
+
+        mainFrameService.AddFooterMenu(builder.Build());
+    }
+
+
+
+    /// <summary>
+    ///     刷新菜单
+    /// </summary>
+    /// <param name="mainFrameService"></param>
     /// <param name="menu"></param>
-    /// <param name="icon"></param>
-    /// <param name="title"></param>
     /// <returns></returns>
-    public static NavigationViewItem AddChildMenu<TPage>(this NavigationViewItem menu, SymbolRegular icon, string title)
+    public static NavigationViewItem ReloadMenu(this IMainFrameService mainFrameService, NavigationViewItem menu)
     {
-        NavigationViewItem childMenu = new(title, icon, typeof(TPage));
-        menu.MenuItems.Add(childMenu);
+        if (mainFrameService.MenuItems.Contains(menu))
+        {
+            var menus = mainFrameService.MenuItems.ToArray();
+            mainFrameService.MenuItems.Clear();
+            menus.ForEach(mainFrameService.MenuItems.Add);
+            return menu;
+        }
 
-        return childMenu;
+        if (mainFrameService.FooterMenuItems.Contains(menu))
+        {
+            var menus = mainFrameService.FooterMenuItems.ToArray();
+            mainFrameService.MenuItems.Clear();
+            menus.ForEach(mainFrameService.MenuItems.Add);
+            return menu;
+        }
+
+        return menu;
     }
 
 
@@ -150,9 +227,6 @@ public static class MainFrameServiceExtensions
         return menu;
     }
 
-
-
-
     /// <summary>
     ///     根据标题查询菜单
     /// </summary>
@@ -174,4 +248,79 @@ public static class MainFrameServiceExtensions
     {
         return vm.FooterMenuItems.FirstOrDefault(x => x.Content.ToString() == title);
     }
+}
+
+
+public class NavigationViewItemBuilder
+{
+    /// <summary>
+    /// 构建方法
+    /// </summary>
+    /// <typeparam name="TPage"></typeparam>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public static NavigationViewItemBuilder Create<TPage>(SymbolRegular icon, string title)
+    {
+        var item = new NavigationViewItem(title, icon, typeof(TPage));
+
+        return new NavigationViewItemBuilder(item);
+    }
+
+   
+
+    ///// <summary>
+    ///// 设置缓存模式
+    ///// </summary>
+    ///// <param name="mode"></param>
+    ///// <returns></returns>
+    //public NavigationViewItemBuilder SetCacheMode(NavigationCacheMode mode)
+    //{
+    //    _self.NavigationCacheMode = mode;
+    //    return this;
+    //}
+
+
+
+
+    /// <summary>
+    /// 添加子菜单
+    /// </summary>
+    /// <typeparam name="TPage"></typeparam>
+    /// <param name="icon"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public NavigationViewItemBuilder AddChild<TPage>(SymbolRegular icon, string title)
+    {
+        var item = new NavigationViewItem(title, icon, typeof(TPage));
+        _self.MenuItems.Add(item);
+
+        return new NavigationViewItemBuilder(item, this);
+    }
+
+    /// <summary>
+    /// 返回父级构建器,如果是顶级则返回自己
+    /// </summary>
+    /// <returns></returns>
+    public NavigationViewItemBuilder Parent() => _parent;
+
+    /// <summary>
+    /// 构建完成
+    /// </summary>
+    /// <returns></returns>
+    public NavigationViewItem Build()
+    {
+        return _parent == this ? _self : _parent.Build();
+    }
+
+
+
+    private NavigationViewItemBuilder(NavigationViewItem item, NavigationViewItemBuilder? parent = null)
+    {
+        _self = item;
+        _parent = parent ?? this;
+    }
+
+    private readonly NavigationViewItem _self;
+    private readonly NavigationViewItemBuilder _parent;
 }

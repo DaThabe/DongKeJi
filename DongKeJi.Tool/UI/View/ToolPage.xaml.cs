@@ -1,6 +1,8 @@
-﻿using DongKeJi.Inject;
+﻿using System.Windows;
+using DongKeJi.Inject;
 using DongKeJi.Tool.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
+using Wpf.Ui;
 using Wpf.Ui.Controls;
 
 namespace DongKeJi.Tool.UI.View;
@@ -9,32 +11,20 @@ namespace DongKeJi.Tool.UI.View;
 [Inject(ServiceLifetime.Singleton)]
 public partial class ToolPage
 {
-    private readonly IServiceProvider _services;
-
-    public ToolPage(IServiceProvider services)
+    public ToolPage(ToolPageViewModel vm)
     {
-        _services = services;
         InitializeComponent();
-
-        LostFocus += async (_, _) =>
-        {
-            await OnNavigatedFromAsync();
-        };
-    }
-
-
-    protected override ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
-    {
-        var vm = _services.GetRequiredService<ToolPageViewModel>();
         DataContext = vm;
-
-        return base.OnNavigatedToAsync(cancellation);
     }
 
-    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
+    
+    protected override ValueTask InternalNavigateFromAsync(CancellationToken cancellation = default)
     {
-        DataContext = null;
-        return base.OnNavigatedFromAsync(cancellation);
+        if (DataContext is ToolPageViewModel vm)
+        {
+            vm.SelectedToolItem = null;
+        }
+        return base.InternalNavigateFromAsync(cancellation);
     }
 
 

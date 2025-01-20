@@ -4,10 +4,10 @@ using Wpf.Ui.Controls;
 
 namespace DongKeJi.UI.Control;
 
-
 /// <summary>
 /// 导航页面
 /// </summary>
+[Obsolete]
 public class NavigationPage : ContentControl, INavigationAware
 {
     /// <summary>
@@ -66,7 +66,6 @@ public class NavigationPage : ContentControl, INavigationAware
     }
 
 
-
     /// <summary>
     ///     导航进入此控件
     /// </summary>
@@ -74,15 +73,10 @@ public class NavigationPage : ContentControl, INavigationAware
     {
         try
         {
-            State = NavigationState.Entering;
-
             if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            await OnNavigatedToAsync(_cancellationTokenSource.Token);
-            
-            State = NavigationState.Entered;
-            Error = null;
+            await InternalNavigateToAsync(_cancellationTokenSource.Token);
         }
         catch (Exception ex)
         {
@@ -98,15 +92,10 @@ public class NavigationPage : ContentControl, INavigationAware
     {
         try
         {
-            State = NavigationState.Leaving;
-
             if (_cancellationTokenSource is not null) await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource = new CancellationTokenSource();
 
-            await OnNavigatedFromAsync(_cancellationTokenSource.Token);
-            
-            State = NavigationState.Leaved;
-            Error = null;
+            await InternalNavigateFromAsync(_cancellationTokenSource.Token);
         }
         catch (Exception ex)
         {
@@ -119,7 +108,7 @@ public class NavigationPage : ContentControl, INavigationAware
     /// <summary>
     ///     导航进入此控件
     /// </summary>
-    protected virtual ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
+    protected virtual ValueTask InternalNavigateToAsync(CancellationToken cancellation = default)
     {
         return ValueTask.CompletedTask;
     }
@@ -127,10 +116,12 @@ public class NavigationPage : ContentControl, INavigationAware
     /// <summary>
     ///     导航离开此控件
     /// </summary>
-    protected virtual ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
+    protected virtual  ValueTask InternalNavigateFromAsync(CancellationToken cancellation = default)
     {
         return ValueTask.CompletedTask;
     }
+
+
 
 
     /// <summary>

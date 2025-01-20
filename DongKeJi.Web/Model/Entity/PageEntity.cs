@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using DongKeJi.Entity;
 
-namespace DongKeJi.WebView.Model.Entity;
+namespace DongKeJi.Web.Model.Entity;
 
 
 [Table("PageItem")]

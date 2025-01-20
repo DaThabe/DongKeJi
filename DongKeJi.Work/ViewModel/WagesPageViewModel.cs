@@ -11,18 +11,15 @@ using Microsoft.Extensions.Logging;
 using Wpf.Ui;
 using DongKeJi.UI;
 using DongKeJi.Work.ViewModel.Staff;
-using System.Windows.Controls;
 using DongKeJi.Work.UI.View.Consume;
-using DongKeJi.Work.UI.View.Staff;
 using DongKeJi.Work.ViewModel.Consume;
-using Wpf.Ui.Controls;
 using Wpf.Ui.Extensions;
 
 namespace DongKeJi.Work.ViewModel;
 
 
 [Inject(ServiceLifetime.Transient)]
-internal partial class WagesPageViewModel(
+public partial class WagesPageViewModel(
     IServiceProvider services,
     ILogger<WagesPageViewModel> logger,
     ISnackbarService snackbarService,
@@ -78,20 +75,20 @@ internal partial class WagesPageViewModel(
 
         try
         {
-            _底薪 = await workConfig.BasicSalary.GetAsync(cancellation: cancellation);
+            底薪 = await workConfig.BasicSalary.GetAsync(cancellation: cancellation);
         }
         catch
         {
-            _底薪 = 3000;
+            底薪 = 3000;
         }
 
         try
         {
-            _提成百分比 = await workConfig.CommissionPercentage.GetAsync(cancellation: cancellation);
+            提成百分比 = await workConfig.CommissionPercentage.GetAsync(cancellation: cancellation);
         }
         catch
         {
-            _提成百分比 = 10;
+            提成百分比 = 10;
         }
 
         await ReloadCommand.ExecuteAsync(null);

@@ -4,7 +4,7 @@ using DongKeJi.Inject;
 using DongKeJi.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DongKeJi.WebView.ViewModel;
+namespace DongKeJi.Web.ViewModel;
 
 
 [Inject(ServiceLifetime.Transient)]

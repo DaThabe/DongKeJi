@@ -39,8 +39,9 @@ public class ToolItemAttribute(string title, IconElement icon, ServiceLifetime l
     /// </summary>
     /// <param name="icon"></param>
     /// <param name="title"></param>
-    public ToolItemAttribute(string title, SymbolRegular icon) : 
-        this(title, new SymbolIcon(icon))
+    /// <param name="lifeTime"></param>
+    public ToolItemAttribute(string title, SymbolRegular icon, ServiceLifetime lifeTime = ServiceLifetime.Transient) : 
+        this(title, new SymbolIcon(icon), lifeTime)
     {
 
     }
@@ -50,8 +51,9 @@ public class ToolItemAttribute(string title, IconElement icon, ServiceLifetime l
     /// </summary>
     /// <param name="title"></param>
     /// <param name="imageIconSourceUri"></param>
-    public ToolItemAttribute(string title, string imageIconSourceUri) : 
-        this(title, new ImageIcon { Source = new BitmapImage(new Uri(imageIconSourceUri)) })
+    /// <param name="lifeTime"></param>
+    public ToolItemAttribute(string title, string imageIconSourceUri, ServiceLifetime lifeTime = ServiceLifetime.Transient) : 
+        this(title, new ImageIcon { Source = new BitmapImage(new Uri(imageIconSourceUri)) }, lifeTime)
     {
 
     }

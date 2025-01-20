@@ -5,7 +5,7 @@ using DongKeJi.Core;
 using DongKeJi.Launcher.Service;
 using DongKeJi.Module;
 using DongKeJi.Tool;
-using DongKeJi.WebView;
+using DongKeJi.Web;
 using DongKeJi.Work;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,7 +62,7 @@ public partial class App : IApplication
             .RegisterModule<CoreModule>()
             .RegisterModule<WorkModule>()
             .RegisterModule<ToolModule>()
-            .RegisterModule<WebViewModule>()
+            .RegisterModule<WebModule>()
             .RegisterModule<LauncherModule>()
             .ConfigureAppConfiguration(x =>
             {

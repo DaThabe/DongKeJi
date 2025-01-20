@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
 using DongKeJi.Exceptions;
 using DongKeJi.Inject;
-using DongKeJi.WebView.Model;
-using DongKeJi.WebView.ViewModel;
+using DongKeJi.Web.Model;
+using DongKeJi.Web.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DongKeJi.WebView.Service;
+namespace DongKeJi.Web.Service;
 
 /// <summary>
 /// 工具服务
 /// </summary>
-public interface IWebViewService
+public interface IWebService
 {
     /// <summary>
     /// 导航到网址
@@ -34,11 +34,11 @@ public interface IWebViewService
 }
 
 
-[Inject(ServiceLifetime.Singleton, typeof(IWebViewService))]
-internal class WebViewService(
+[Inject(ServiceLifetime.Singleton, typeof(IWebService))]
+internal class WebService(
     IWebViewModule module, 
     WebViewDbContext dbContext,
-    IMapper mapper) : IWebViewService
+    IMapper mapper) : IWebService
 {
     public async ValueTask NavigationAsync(Uri uri)
     {

@@ -1,4 +1,4 @@
-﻿namespace DongKeJi.WebView.Model;
+﻿namespace DongKeJi.Web.Model;
 
 
 /// <summary>

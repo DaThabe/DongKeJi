@@ -1,6 +1,5 @@
-﻿using DongKeJi.Core.ViewModel;
-using DongKeJi.Core.ViewModel.User;
-using DongKeJi.Inject;
+﻿using DongKeJi.Inject;
+using DongKeJi.UI.Control.State;
 using DongKeJi.Work.ViewModel;
 using DongKeJi.Work.ViewModel.Staff;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,28 +11,12 @@ namespace DongKeJi.Work.UI.View;
 [Inject(ServiceLifetime.Transient)]
 public partial class StaffPage
 {
-    private readonly IServiceProvider _services;
-
-    public StaffPage(IServiceProvider services)
+    public StaffPage(StaffPageViewModel vm)
     {
-        _services = services;
         InitializeComponent();
-    }
-
-    protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
-    {
-        var vm = _services.GetRequiredService<StaffPageViewModel>();
-        await vm.InitializeAsync(cancellation);
-
         DataContext = vm;
 
-        await base.OnNavigatedToAsync(cancellation);
-    }
-
-    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
-    {
-        DataContext = null;
-        return base.OnNavigatedFromAsync(cancellation);
+        this.OnLoading(async () => await vm.InitializeAsync());
     }
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)

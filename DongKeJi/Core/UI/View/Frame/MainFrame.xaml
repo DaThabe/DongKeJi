@@ -34,9 +34,7 @@
             FooterMenuItemsSource="{Binding FooterMenuItems}"
             IsPaneToggleVisible="True"
             MenuItemsSource="{Binding MenuItems}"
-            Navigated="RootNavigation_OnNavigated"
             OpenPaneLength="150"
-            SelectionChanged="RootNavigation_OnSelectionChanged"
             Transition="FadeInWithSlide">
 
             <ui:NavigationView.Header>

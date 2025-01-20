@@ -1,37 +1,20 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using DongKeJi.Tool.Model;
 using DongKeJi.Tool.ViewModel.Design006;
-using Microsoft.Extensions.DependencyInjection;
+using Wpf.Ui.Controls;
 
 namespace DongKeJi.Tool.UI.View.Design006;
 
 
 [ToolItem("享设计", "pack://application:,,,/DongKeJi.Tool;component/UI/Resource/Icon/designer006.png")]
-public partial class Design006ToolView 
+public partial class Design006ToolView
 {
-    private readonly IServiceProvider _services;
-
-    public Design006ToolView(IServiceProvider services)
+    public Design006ToolView(Design006ViewModel vm)
     {
-        _services = services;
         InitializeComponent();
-    }
-
-    protected override ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
-    {
-        var vm = _services.GetRequiredService<Design006ViewModel>();
         DataContext = vm;
-
-        return base.OnNavigatedToAsync(cancellation);
     }
-
-    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
-    {
-        DataContext = null;
-        return base.OnNavigatedFromAsync(cancellation);
-    }
-
 
     private void UIElement_OnDrop(object sender, DragEventArgs e)
     {

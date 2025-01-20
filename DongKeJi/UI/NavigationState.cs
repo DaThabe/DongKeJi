@@ -1,4 +1,4 @@
-﻿namespace DongKeJi.UI.Control;
+﻿namespace DongKeJi.UI;
 
 /// <summary>
 /// 导航状态

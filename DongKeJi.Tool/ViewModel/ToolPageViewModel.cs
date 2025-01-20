@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Inject;
 using DongKeJi.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +34,11 @@ public partial class ToolPageViewModel(IPageService pageService) : ObservableVie
 
     partial void OnSelectedToolItemChanged(ToolItemViewModel? value)
     {
-        if (value is null) return;
+        if (value is null)
+        {
+            CurrentToolView = null;
+            return;
+        }
 
         (CurrentToolView as INavigationAware)?.OnNavigatedFrom();
 

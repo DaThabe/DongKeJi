@@ -1,11 +1,11 @@
 using DongKeJi.Core.Model;
 using DongKeJi.Core.UI.View;
+using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Wpf.Ui.Controls;
-using UserViewModel = DongKeJi.Core.ViewModel.User.UserViewModel;
 
 namespace DongKeJi.Core.Service;
 
@@ -32,12 +32,12 @@ internal class HostedService(
             logger.LogError(e, "核心数据库迁移失败, 已回滚");
         }
 
-
-        mainFrameService.ShowWindow();
+        mainFrameService.Show();
 
         mainFrameService.AddFooterMenu<ModulePage>(SymbolRegular.DeveloperBoard16, "模块");
         mainFrameService.AddFooterMenu<UserPage>(SymbolRegular.People20, "用户");
         mainFrameService.AddFooterMenu<SettingPage>(SymbolRegular.Settings28, "设置");
+
 
         await InitUser(cancellationToken);
     }

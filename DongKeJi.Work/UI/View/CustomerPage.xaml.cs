@@ -1,7 +1,6 @@
 ﻿using System.Windows;
-using DongKeJi.Core.ViewModel;
-using DongKeJi.Core.ViewModel.User;
 using DongKeJi.Inject;
+using DongKeJi.UI.Control.State;
 using DongKeJi.Work.ViewModel;
 using DongKeJi.Work.ViewModel.Customer;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,32 +11,13 @@ namespace DongKeJi.Work.UI.View;
 [Inject(ServiceLifetime.Transient)]
 public partial class CustomerPage
 {
-    private readonly IServiceProvider _services;
-
-    public CustomerPage(IServiceProvider services)
+    public CustomerPage(CustomerPageViewModel vm)
     {
-        _services = services;
         InitializeComponent();
-    }
-
-    protected override async ValueTask OnNavigatedToAsync(CancellationToken cancellation = default)
-    {
-        var vm = _services.GetRequiredService<CustomerPageViewModel>();
-        await vm.InitializeAsync(cancellation);
-
         DataContext = vm;
-        while (!IsLoaded) await Task.Delay(10, cancellation);
 
-        await base.OnNavigatedToAsync(cancellation);
+        this.OnLoading(async () => await vm.InitializeAsync());
     }
-
-    protected override ValueTask OnNavigatedFromAsync(CancellationToken cancellation = default)
-    {
-        DataContext = null;
-        return base.OnNavigatedFromAsync(cancellation);
-    }
-
-
 
     private void AutoSuggestBox_OnSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {

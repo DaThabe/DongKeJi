@@ -1,13 +1,11 @@
 using DongKeJi.Inject;
 using DongKeJi.Module;
 using DongKeJi.ViewModel;
-using DongKeJi.WebView.Model;
-using DongKeJi.WebView.Service;
-using DongKeJi.WebView.ViewModel;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using DongKeJi.Web.Model;
+using DongKeJi.Web.Service;
+using DongKeJi.Web.ViewModel;
 
-namespace DongKeJi.WebView;
+namespace DongKeJi.Web;
 
 
 /// <summary>
@@ -25,30 +23,23 @@ public interface IWebViewModule : IModule
 /// 网页视图模块
 /// </summary>
 [Inject(ServiceLifetime.Singleton, typeof(IWebViewModule))]
-public class WebViewModule : ObservableViewModel, IWebViewModule
+public class WebModule : ObservableViewModel, IWebViewModule
 {
-    public static IModuleInfo Info { get; }= new ModuleInfo
+    public static IModuleInfo Info { get; } = ModuleInfo.CreateFromAssembly<WebModule>(config =>
     {
-        Id = Guid.NewGuid(),
-        Name = "DongKeJi.WebView",
-        Version = new Version(0, 0, 1),
-        Title = "网页",
-        Developers = ["DaThabe"],
-        Describe = """
-                   ### 网页模块
-                   - 提供网页收藏和浏览功能
-                   """,
-        CreatedAt = new DateTime(2025, 1, 18),
-        ReleaseDate = new DateTime(2025, 1, 18),
-        Dependencies = typeof(WebViewModule).Assembly.GetReferencedAssemblies()
-    };
+        config.Name = "DongKeJi.Web";
+        config.Title = "网页";
+        config.Developers = ["DaThabe"];
+        config.CreatedAt = new DateTime(2025, 1, 18);
+        config.ReleaseDate = new DateTime(2025, 1, 18);
+    });
 
     public static void Configure(IHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
             //反射注入
-            services.AddAutoInject<WebViewModule>();
+            services.AddAutoInject<WebModule>();
             //启动后业务
             services.AddHostedService<HostedService>();
             

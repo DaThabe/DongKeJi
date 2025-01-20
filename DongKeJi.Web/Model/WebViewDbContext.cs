@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using DongKeJi.Database;
-using DongKeJi.WebView.Model.Entity;
+using DongKeJi.Web.Model.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace DongKeJi.WebView.Model;
+namespace DongKeJi.Web.Model;
 
 internal class WebViewDbContext(string dbFolder) : LocalDbContext(dbFolder, "Web")
 {

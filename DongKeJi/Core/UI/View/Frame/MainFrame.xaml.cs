@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.DirectoryServices.ActiveDirectory;
+using System.Windows;
 using DongKeJi.Inject;
 using Microsoft.Extensions.DependencyInjection;
 using Wpf.Ui;
@@ -11,6 +12,63 @@ namespace DongKeJi.Core.UI.View.Frame;
 [Inject(ServiceLifetime.Singleton)]
 partial class MainFrame : INavigationWindow
 {
+    // 定义依赖属性
+    public static readonly DependencyProperty SelectedNavigationViewItemProperty =
+        DependencyProperty.Register(
+            nameof(SelectedNavigationViewItem),
+            typeof(INavigationViewItem), 
+            typeof(TitleBar),
+            new PropertyMetadata(null, (o, args) =>
+            {
+                if (o is not MainFrame mf) return;
+
+                var s = args.NewValue;
+
+                const bool isSelectedChildMenu = true;
+                var fuck = mf.RootNavigation.MenuItems;
+                foreach (var i in fuck)
+                {
+                    if (i is not NavigationViewItem item) continue;
+                    var name = item.Content;
+                    var f = item.IsFocused;
+                    var a = item.IsActive;
+                }
+
+                foreach (var i in GetTopMenus())
+                {
+                    if (!i.IsActive) continue;
+
+                    mf._isSelectedChildNavigationView = false;
+                    break;
+                }
+
+                mf._isSelectedChildNavigationView = isSelectedChildMenu;
+                mf.RootNavigation.IsPaneToggleVisible = !mf._isSelectedChildNavigationView;
+                return;
+
+                IEnumerable<NavigationViewItem> GetTopMenus()
+                {
+                    foreach (var i in mf.RootNavigation.MenuItems)
+                    {
+                        if (i is not NavigationViewItem nav) continue;
+                        yield return nav;
+                    }
+
+                    foreach (var i in mf.RootNavigation.FooterMenuItems)
+                    {
+                        if (i is not NavigationViewItem nav) continue;
+                        yield return nav;
+                    }
+                }
+            }));
+
+    // 封装的 CLR 属性
+    public string SelectedNavigationViewItem
+    {
+        get => (string)GetValue(TitleProperty);
+        set => SetValue(TitleProperty, value);
+    }
+
     public MainFrame(IServiceProvider services, ICoreModule module)
     {
         InitializeComponent();
@@ -60,53 +118,6 @@ partial class MainFrame : INavigationWindow
         RootNavigation.IsPaneOpen = e.NewSize.Width > 800;
     }
 
-    /// <summary>
-    /// 选中顶级导航会触发
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="args"></param>
-    private void RootNavigation_OnSelectionChanged(NavigationView sender, RoutedEventArgs args)
-    {
-        RootNavigation.IsPaneToggleVisible = true;
-        _isSelectedChildNavigationView = false;
-    }
-
-    /// <summary>
-    /// 选中所有导航都会触发
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="args"></param>
-    private void RootNavigation_OnNavigated(NavigationView sender, NavigatedEventArgs args)
-    {
-        var isSelectedChildMenu = true;
-
-        foreach (var i in GetTopMenus())
-        {
-            if (!i.IsActive) continue;
-
-            _isSelectedChildNavigationView = false;
-            break;
-        }
-
-        _isSelectedChildNavigationView = isSelectedChildMenu;
-        RootNavigation.IsPaneToggleVisible = !_isSelectedChildNavigationView;
-        return;
-
-        IEnumerable<NavigationViewItem> GetTopMenus()
-        {
-            foreach (var i in sender.MenuItems)
-            {
-                if (i is not NavigationViewItem nav) continue;
-                yield return nav;
-            }
-
-            foreach (var i in sender.FooterMenuItems)
-            {
-                if (i is not NavigationViewItem nav) continue;
-                yield return nav;
-            }
-        }
-    }
 
     #endregion
 
@@ -119,7 +130,20 @@ partial class MainFrame : INavigationWindow
 
     public bool Navigate(Type pageType)
     {
-        return RootNavigation.Navigate(pageType);
+        var result =  RootNavigation.Navigate(pageType);
+        if (!result) return false;
+
+        foreach (var i in RootNavigation.MenuItems)
+        {
+            if (i is not INavigationViewItem item) continue;
+            if (item.TargetPageType != pageType) continue;
+
+            _isSelectedChildNavigationView = false;
+            return true;
+        }
+
+        _isSelectedChildNavigationView = true;
+        return true;
     }
 
     INavigationView INavigationWindow.GetNavigation()
@@ -163,6 +187,4 @@ partial class MainFrame : INavigationWindow
     }
 
     #endregion
-
-    
 }

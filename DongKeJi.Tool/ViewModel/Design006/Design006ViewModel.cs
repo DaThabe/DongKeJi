@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DongKeJi.Extensions;
 using DongKeJi.Inject;
+using DongKeJi.Tool.Model;
 using DongKeJi.UI;
 using DongKeJi.ViewModel;
 using Flurl.Http;
@@ -25,26 +26,49 @@ public partial class Design006ViewModel(
     #region --数据上下文--
 
     /// <summary>
+    /// 工具元素
+    /// </summary>
+    [ObservableProperty]
+    private IToolItem? _toolItem;
+
+    /// <summary>
+    /// 自动保存
+    /// </summary>
+    [ObservableProperty]
+    private bool _autoSave;
+
+    /// <summary>
     /// 拖入的Url
     /// </summary>
-    [ObservableProperty] 
+    [ObservableProperty]
     private Uri? _dropUrl;
 
+    /// <summary>
+    /// 下载网址
+    /// </summary>
+    [ObservableProperty] 
+    private string? _downloadUrl;
 
-    partial void OnDropUrlChanged(Uri? value)
+
+    async partial void OnDropUrlChanged(Uri? value)
     {
         try
         {
             if (value is null) return;
-            
+
             var match = Regex.Match(value.AbsoluteUri);
             if (!match.Success) throw new Exception("并非支持的享设计链接");
 
-            DropUrl = new Uri(match.Value);
+            DownloadUrl = match.Value;
+
+            if (!AutoSave) return;
+
+            await DownloadPicture();
+            snackbarService.ShowSuccess("已保存至本地");
         }
         catch (Exception e)
         {
-            DropUrl = null;
+            DownloadUrl = null;
             snackbarService.ShowError(e);
         }
     }
@@ -62,14 +86,14 @@ public partial class Design006ViewModel(
     {
         try
         {
-            var uri = await DownloadPicture();
+            var (path, _) = await DownloadPicture();
 
-            BitmapImage image = new(new Uri(uri));
+            BitmapImage image = new(new Uri(path));
             Clipboard.SetImage(image);
 
             snackbarService.ShowSuccess("已复制到剪切板");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             snackbarService.ShowError(ex);
         }
@@ -85,15 +109,18 @@ public partial class Design006ViewModel(
     {
         try
         {
-            var uri = await DownloadPicture();
-            if (!File.Exists(uri))
+            var (path, isDownload) = await DownloadPicture();
+            if (!File.Exists(path))
             {
-                throw new FileNotFoundException("文件不存在", uri);
+                throw new FileNotFoundException("文件不存在", path);
             }
 
-            await Task.Delay(100);
+            if (isDownload)
+            {
+                await Task.Delay(50);
+            }
 
-            Process.Start("explorer.exe", $"/select,\"{uri}\"");
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
         }
         catch (Exception ex)
         {
@@ -108,6 +135,7 @@ public partial class Design006ViewModel(
     private void Clear()
     {
         DropUrl = null;
+        DownloadUrl = null;
     }
 
     #endregion
@@ -118,14 +146,9 @@ public partial class Design006ViewModel(
     /// </summary>
     /// <param name="useLocalFile">是否使用本地文件, 如果下载的存在则跳过</param>
     /// <returns></returns>
-    private async ValueTask<string> DownloadPicture(bool useLocalFile = true)
+    private async ValueTask<(string Path, bool IsDownload)> DownloadPicture(bool useLocalFile = true)
     {
-        ArgumentNullException.ThrowIfNull(DropUrl);
-
-        var fileId = DropUrl.AbsoluteUri.ToMd5();
-        var fileType = Path.GetExtension(DropUrl.AbsoluteUri);
-
-        var fileName = $"{fileId}{fileType}";
+        var fileName = GetFileName();
         var filePath = Path.Combine(application.DirectoryCache, fileName);
 
         if (!Directory.Exists(application.DirectoryCache))
@@ -135,10 +158,26 @@ public partial class Design006ViewModel(
 
         if (useLocalFile && File.Exists(filePath))
         {
-            return filePath;
+            return (filePath, false);
         }
 
-        return await DropUrl.DownloadFileAsync(application.DirectoryCache, fileName);
+        var path = await DownloadUrl.DownloadFileAsync(application.DirectoryCache, fileName);
+        return (path, true);
+    }
+
+
+    /// <summary>
+    /// 获取保存图片名称
+    /// </summary>
+    /// <returns></returns>
+    private string GetFileName()
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(DownloadUrl);
+
+        var fileId = DownloadUrl.ToMd5();
+        var fileType = Path.GetExtension(DownloadUrl);
+
+        return $"{fileId}{fileType}";
     }
 
 

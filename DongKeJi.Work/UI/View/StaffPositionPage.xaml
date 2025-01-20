@@ -1,4 +1,4 @@
-﻿<dui:NavigationPage
+﻿<state:StateView
     x:Class="DongKeJi.Work.UI.View.StaffPositionPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,16 +8,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:staff="clr-namespace:DongKeJi.Work.UI.View.Staff"
     xmlns:staffVm="clr-namespace:DongKeJi.Work.ViewModel.Staff"
+    xmlns:state="clr-namespace:DongKeJi.UI.Control.State;assembly=DongKeJi"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:ui1="clr-namespace:DongKeJi.UI;assembly=DongKeJi"
     xmlns:vm="clr-namespace:DongKeJi.Work.ViewModel"
     d:DataContext="{d:DesignInstance vm:StaffPositionPageViewModel,
                                      IsDesignTimeCreatable=False}"
-    d:State="Focused"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <dui:NavigationPage.Resources>
+    <state:StateView.Resources>
 
         <ui1:BindingProxy x:Key="BindingProxy" Data="{Binding}" />
         <converter:StaffPositionTypeToSymbolConverter x:Key="StaffPositionTypeToSymbolConverter" />
@@ -58,7 +58,7 @@
 
         </DataTemplate>
 
-    </dui:NavigationPage.Resources>
+    </state:StateView.Resources>
 
 
     <DockPanel>
@@ -173,4 +173,4 @@
 
     </DockPanel>
 
-</dui:NavigationPage>
+</state:StateView>

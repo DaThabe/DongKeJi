@@ -43,13 +43,14 @@ internal class HostedService(
             await InitStaffAccount(cancellationToken);
             await InitStaffPosition(cancellationToken);
 
-            //var menu = mainFrameService.AddMenu<WorkDashboardView>(SymbolRegular.Briefcase28, "办公");
 
-            var menu = mainFrameService.AddMenu<CustomerPage>(SymbolRegular.BuildingPeople24, "机构");
-            menu.AddChildMenu<ConsumePage>(SymbolRegular.NotepadEdit16, "划扣");
-            menu.AddChildMenu<WagesPage>(SymbolRegular.ArrowTrendingLines24, "提成");
-            menu.AddChildMenu<StaffPage>(SymbolRegular.People24, "员工");
-            menu.AddChildMenu<StaffPositionPage>(SymbolRegular.VideoPerson16, "职位");
+            mainFrameService.AddMenu<CustomerPage>(SymbolRegular.BuildingPeople24, "机构", builder =>
+            {
+                builder.AddChild<ConsumePage>(SymbolRegular.NotepadEdit16, "划扣");
+                builder.AddChild<WagesPage>(SymbolRegular.ArrowTrendingLines24, "提成");
+                builder.AddChild<StaffPage>(SymbolRegular.People24, "员工");
+                builder.AddChild<StaffPositionPage>(SymbolRegular.VideoPerson16, "职位");
+            });
         }
         catch (Exception e)
         {

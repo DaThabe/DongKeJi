@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Security.Policy;
 
 namespace DongKeJi.Module;
 
@@ -72,4 +73,24 @@ public class ModuleInfo : IModuleInfo
     public required DateTime CreatedAt { get; set; } 
     public required DateTime ReleaseDate { get; set; }
     public string[] Tags { get; set; } = [];
+
+
+
+    public static ModuleInfo CreateFromAssembly<T>(Action<ModuleInfo> builder)
+    {
+        var info = new ModuleInfo
+        {
+            Id = Guid.NewGuid(),
+            Name = "None",
+            Version = typeof(T).Assembly.GetName().Version ?? new Version(1, 0, 0),
+            Title = "None",
+            Developers = [],
+            Describe = "None",
+            CreatedAt = DateTime.MinValue,
+            ReleaseDate = DateTime.MinValue,
+            Dependencies = typeof(T).Assembly.GetReferencedAssemblies()
+        };
+        builder(info);
+        return info;
+    }
 }

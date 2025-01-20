@@ -1,26 +1,25 @@
-﻿<control:NavigationPage
+﻿<state:StateView
     x:Class="DongKeJi.Core.UI.View.SettingPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:control="clr-namespace:DongKeJi.UI.Control"
     xmlns:converter1="clr-namespace:DongKeJi.Core.UI.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:state="clr-namespace:DongKeJi.UI.Control.State"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:viewModel="clr-namespace:DongKeJi.Core.ViewModel"
     d:DataContext="{d:DesignInstance viewModel:SettingPageViewModel,
                                      IsDesignTimeCreatable=False}"
-    d:State="Focused"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
     mc:Ignorable="d">
 
-    <control:NavigationPage.Resources>
+    <state:StateView.Resources>
 
         <converter1:ApplicationThemeEnumToBooleanConverter x:Key="ApplicationThemeEnumToBooleanConverter" />
 
-    </control:NavigationPage.Resources>
+    </state:StateView.Resources>
 
 
 
@@ -84,4 +83,4 @@
 
     </ItemsControl>
 
-</control:NavigationPage>
+</state:StateView>

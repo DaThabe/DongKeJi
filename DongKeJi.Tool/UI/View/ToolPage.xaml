@@ -138,22 +138,11 @@
             VerticalAlignment="Stretch"
             Background="{DynamicResource StripedBackgroundBrush}" />
 
-        <!--  右侧  -->
-        <DockPanel Grid.Column="2">
-
-            <ui:CardControl Height="60" DockPanel.Dock="Top">
-
-                <ui:TextBlock
-                    Appearance="Primary"
-                    FontTypography="BodyStrong"
-                    Text="{Binding SelectedToolItem.Title}" />
-
-            </ui:CardControl>
-
-            <!--  内容  -->
-            <ContentPresenter Margin="10" Content="{Binding CurrentToolView}" />
-
-        </DockPanel>
+        <!--  内容  -->
+        <ContentPresenter
+            Grid.Column="2"
+            Margin="10,0,10,10"
+            Content="{Binding CurrentToolView}" />
 
     </Grid>
 

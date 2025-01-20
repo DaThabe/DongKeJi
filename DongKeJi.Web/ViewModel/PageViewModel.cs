@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DongKeJi.ViewModel;
-using DongKeJi.WebView.Model;
+using DongKeJi.Web.Model;
 using Wpf.Ui.Controls;
 
-namespace DongKeJi.WebView.ViewModel;
+namespace DongKeJi.Web.ViewModel;
 
 public partial class PageViewModel(IconElement icon, string title, Uri source) : EntityViewModel, IPage
 {
